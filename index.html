@@ -1,0 +1,3311 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ComparaEVs — Comparador de carros elétricos do Brasil</title>
+<meta name="description" content="Compare dados oficiais de autonomia, consumo e classificação energética (INMETRO PBEV) dos veículos elétricos vendidos no Brasil. Filtre por preço, autonomia e categoria.">
+<link rel="canonical" href="https://comparaevs.com.br/">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ComparaEVs">
+<meta property="og:url" content="https://comparaevs.com.br/">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="ComparaEVs — Comparador de carros elétricos do Brasil">
+<meta property="og:description" content="Compare autonomia, consumo e preço dos elétricos vendidos no Brasil, com dados oficiais INMETRO PBE, lado a lado.">
+<meta property="og:image" content="https://comparaevs.com.br/img/banner/logo.png">
+<meta property="og:image:alt" content="ComparaEVs">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ComparaEVs — Comparador de carros elétricos do Brasil">
+<meta name="twitter:description" content="Compare autonomia, consumo e preço dos elétricos vendidos no Brasil, com dados oficiais INMETRO PBE, lado a lado.">
+<meta name="twitter:image" content="https://comparaevs.com.br/img/banner/logo.png">
+
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#0B0D10">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='90'>⚡</text></svg>">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "ComparaEVs",
+  "url": "https://comparaevs.com.br/",
+  "logo": "https://comparaevs.com.br/img/banner/logo.png",
+  "sameAs": [
+    "https://www.instagram.com/comparaevs"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "ComparaEVs",
+  "url": "https://comparaevs.com.br/",
+  "inLanguage": "pt-BR",
+  "description": "Comparador de carros elétricos vendidos no Brasil, com dados oficiais de autonomia, consumo e classificação energética (INMETRO PBE)."
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          void: '#0B0D10',
+          panel: '#14171C',
+          panel2: '#1C2026',
+          panel3: '#262B33',
+          ink: '#E8EAED',
+          inkmuted: '#8B92A0',
+          volt: '#C8FF4D',
+          voltdim: '#9FD93A'
+        },
+        fontFamily: {
+          display: ['"Space Grotesk"', 'sans-serif'],
+          body: ['Inter', 'sans-serif'],
+          data: ['"JetBrains Mono"', 'monospace']
+        }
+      }
+    }
+  };
+</script>
+
+<style>
+  * { scrollbar-color: #262B33 #14171C; }
+  body { font-family: 'Inter', system-ui, sans-serif; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .reveal { animation: fadeUp .4s cubic-bezier(.4,0,.2,1) both; }
+
+  @keyframes pulseBg {
+    0%, 100% { opacity: .5; }
+    50% { opacity: .9; }
+  }
+  .skeleton { animation: pulseBg 1.4s ease-in-out infinite; }
+
+  *:focus-visible {
+    outline: 2px solid #C8FF4D;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button { opacity: .6; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+  }
+
+  .toast {
+    transition: opacity .25s ease, transform .25s ease;
+  }
+
+  /* Controla exibição por resultado (vazio/preenchido) sem interferir
+     na visibilidade responsiva (hidden / md:block / md:hidden) */
+  .force-hidden { display: none !important; }
+
+  /* ============ ONBOARDING / TOUR GUIADO ============ */
+  #tour-spot {
+    box-shadow: 0 0 0 9999px rgba(11,13,16,.80), 0 0 0 2px #C8FF4D, 0 0 22px 4px rgba(200,255,77,.35);
+    transition: top .3s cubic-bezier(.4,0,.2,1), left .3s cubic-bezier(.4,0,.2,1),
+                width .3s cubic-bezier(.4,0,.2,1), height .3s cubic-bezier(.4,0,.2,1);
+  }
+  #tour-card { transition: top .3s cubic-bezier(.4,0,.2,1), left .3s cubic-bezier(.4,0,.2,1); }
+
+  @keyframes tourPulse {
+    0%, 100% { transform: scale(1);   opacity: .55; }
+    50%      { transform: scale(1.6); opacity: 0;   }
+  }
+  #tour-ping {
+    animation: tourPulse 1.6s ease-out infinite;
+    background: rgba(200,255,77,.45);
+  }
+
+  @keyframes barPop {
+    0%   { transform: translateY(14px) scale(.94); opacity: 0; }
+    60%  { transform: translateY(-3px) scale(1.02); opacity: 1; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+  }
+  .bar-pop { animation: barPop .45s cubic-bezier(.34,1.4,.64,1) both; }
+
+  @keyframes ctaGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(200,255,77,.55); }
+    50%      { box-shadow: 0 0 0 7px rgba(200,255,77,0); }
+  }
+  .cta-glow { animation: ctaGlow 1.8s ease-out infinite; }
+</style>
+<style>
+  /* Celular: um respiro só. Antes eram 20px de margem do site + 20-24px dentro de cada
+     seção com borda (conteúdo a 41-45px da borda da tela, tudo espremido). */
+  @media (max-width: 639px) {
+    .max-w-screen-2xl.mx-auto { padding-left: 12px !important; padding-right: 12px !important; }
+    .max-w-screen-2xl.mx-auto [class~="p-5"],
+    .max-w-screen-2xl.mx-auto [class~="p-6"],
+    .max-w-screen-2xl.mx-auto [class~="p-8"] { padding: 16px !important; }
+  }
+</style>
+</head>
+
+<body class="bg-void text-ink min-h-screen">
+
+  <!-- ===================== PRELOADER (painel de instrumentos) ===================== -->
+  <style>
+    #ev-loader{
+      position:fixed; inset:0; z-index:9999;
+      background:radial-gradient(ellipse at 50% 40%, #14171C 0%, #0B0D10 70%);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      transition:opacity .6s ease, visibility .6s ease;
+    }
+    #ev-loader.hide{ opacity:0; visibility:hidden; pointer-events:none; }
+    #ev-loader .grid-lines{
+      position:absolute; inset:0;
+      background-image:
+        linear-gradient(rgba(200,255,77,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(200,255,77,0.035) 1px, transparent 1px);
+      background-size:38px 38px;
+      mask-image:radial-gradient(ellipse at 50% 45%, black 0%, transparent 72%);
+      -webkit-mask-image:radial-gradient(ellipse at 50% 45%, black 0%, transparent 72%);
+    }
+    #ev-loader .cluster{ position:relative; width:300px; height:300px; display:flex; align-items:center; justify-content:center; }
+    #ev-loader .cluster svg{ position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg); }
+    #ev-loader .tick{ stroke:#3A4048; stroke-width:1.5; opacity:.6; }
+    #ev-loader .tick.on{ stroke:#C8FF4D; opacity:1; }
+    #ev-loader .ring-track{ fill:none; stroke:rgba(255,255,255,0.06); stroke-width:3; }
+    #ev-loader .ring-fill{
+      fill:none; stroke:#C8FF4D; stroke-width:3; stroke-linecap:round;
+      filter:drop-shadow(0 0 6px rgba(200,255,77,0.6));
+      transition:stroke-dashoffset .2s ease-out;
+    }
+    #ev-loader .needle-wrap{
+      position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+      transition:transform .25s cubic-bezier(.4,0,.2,1);
+    }
+    #ev-loader .needle{
+      position:absolute; top:50%; left:50%; width:3px; height:104px;
+      background:linear-gradient(to top, transparent 0%, #8FB8FF 35%, #8FB8FF 100%);
+      transform-origin:50% 100%; transform:translate(-50%,-100%);
+      box-shadow:0 0 8px rgba(143,184,255,.7); border-radius:2px;
+    }
+    #ev-loader .needle-hub{
+      position:absolute; top:50%; left:50%; width:13px; height:13px; border-radius:50%;
+      background:#8FB8FF; transform:translate(-50%,-50%); box-shadow:0 0 10px rgba(143,184,255,.8);
+    }
+    #ev-loader .core{
+      position:relative; width:116px; height:116px; border-radius:50%;
+      background:#14171C; border:1px solid rgba(200,255,77,0.18);
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    }
+    #ev-loader .core img{
+      width:38px; height:38px; object-fit:contain; opacity:0; transform:scale(.85);
+      transition:opacity .5s ease, transform .5s ease;
+    }
+    #ev-loader .core img.show{ opacity:1; transform:scale(1); }
+    #ev-loader .pct{ font-family:'JetBrains Mono',monospace; font-weight:600; font-size:26px; color:#E8EAED; line-height:1; }
+    #ev-loader .pct span{ font-size:13px; color:#C8FF4D; }
+    #ev-loader .core-label{ font-family:'Space Grotesk',sans-serif; font-size:8px; letter-spacing:2.5px; color:#8B92A0; text-transform:uppercase; margin-top:2px; }
+    #ev-loader .status-row{ margin-top:30px; display:flex; align-items:center; gap:10px; height:16px; }
+    #ev-loader .status-dot{ width:6px; height:6px; border-radius:50%; background:#C8FF4D; box-shadow:0 0 6px rgba(200,255,77,.9); animation:evblink 1s ease-in-out infinite; }
+    @keyframes evblink{ 0%,100%{opacity:1;} 50%{opacity:.25;} }
+    #ev-loader .status-text{ font-family:'Space Grotesk',sans-serif; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:#8B92A0; }
+    #ev-loader .status-text b{ color:#E8EAED; font-weight:500; }
+    #ev-loader .brand-row{ position:absolute; bottom:38px; display:flex; flex-direction:column; align-items:center; gap:4px; }
+    #ev-loader .brand-name{ font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:14px; letter-spacing:3px; color:#E8EAED; text-transform:uppercase; }
+    #ev-loader .brand-name span{ color:#C8FF4D; }
+    #ev-loader .brand-sub{ font-size:9px; letter-spacing:1.5px; color:#8B92A0; text-transform:uppercase; }
+    @media (prefers-reduced-motion: reduce){
+      #ev-loader *{ animation-duration:.001ms !important; transition-duration:.2s !important; }
+    }
+  </style>
+
+  <div id="ev-loader">
+    <div class="grid-lines"></div>
+    <div class="cluster">
+      <svg viewBox="0 0 200 200" id="ev-gauge-svg"></svg>
+      <div class="needle-wrap" id="ev-needle-wrap">
+        <div class="needle"></div>
+        <div class="needle-hub"></div>
+      </div>
+      <div class="core">
+        <img id="ev-logo-img" src="./img/banner/logo.png" alt="ComparaEVs" />
+        <div class="pct" id="ev-pct-readout">0<span>%</span></div>
+        <div class="core-label">carregando</div>
+      </div>
+    </div>
+    <div class="status-row">
+      <div class="status-dot"></div>
+      <div class="status-text" id="ev-status-text">Ligando o painel<b>...</b></div>
+    </div>
+    <div class="brand-row">
+      <div class="brand-name">Compara<span>EVs</span></div>
+      <div class="brand-sub">comparador de elétricos</div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    var svg = document.getElementById('ev-gauge-svg');
+    var ns = 'http://www.w3.org/2000/svg';
+    var cx = 100, cy = 100, r = 88;
+    var totalTicks = 40;
+    var ticks = [];
+    for (var i = 0; i < totalTicks; i++){
+      var angle = (i / totalTicks) * Math.PI * 2;
+      var x1 = cx + (r - 7) * Math.cos(angle), y1 = cy + (r - 7) * Math.sin(angle);
+      var x2 = cx + r * Math.cos(angle), y2 = cy + r * Math.sin(angle);
+      var line = document.createElementNS(ns, 'line');
+      line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+      line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+      line.setAttribute('class', 'tick');
+      svg.appendChild(line);
+      ticks.push(line);
+    }
+    var circumference = 2 * Math.PI * (r - 16);
+    var track = document.createElementNS(ns, 'circle');
+    track.setAttribute('cx', cx); track.setAttribute('cy', cy); track.setAttribute('r', r - 16);
+    track.setAttribute('class', 'ring-track');
+    svg.appendChild(track);
+    var fillRing = document.createElementNS(ns, 'circle');
+    fillRing.setAttribute('cx', cx); fillRing.setAttribute('cy', cy); fillRing.setAttribute('r', r - 16);
+    fillRing.setAttribute('class', 'ring-fill');
+    fillRing.setAttribute('stroke-dasharray', circumference);
+    fillRing.setAttribute('stroke-dashoffset', circumference);
+    svg.appendChild(fillRing);
+
+    var needleWrap = document.getElementById('ev-needle-wrap');
+    var pctReadout = document.getElementById('ev-pct-readout');
+    var statusText = document.getElementById('ev-status-text');
+    var logoImg = document.getElementById('ev-logo-img');
+    var loader = document.getElementById('ev-loader');
+
+    var current = 0, target = 12, raf = null, startedAt = Date.now();
+
+    function paint(){
+      current += (target - current) * 0.12;
+      if (Math.abs(target - current) < 0.15) current = target;
+      var offset = circumference - (current / 100) * circumference;
+      fillRing.setAttribute('stroke-dashoffset', offset);
+      needleWrap.style.transform = 'rotate(' + (current / 100 * 360) + 'deg)';
+      var onCount = Math.floor((current / 100) * totalTicks);
+      for (var i = 0; i < ticks.length; i++) ticks[i].classList.toggle('on', i < onCount);
+      pctReadout.innerHTML = Math.floor(current) + '<span>%</span>';
+      if (current !== target || current < 100){
+        raf = requestAnimationFrame(paint);
+      } else {
+        raf = null;
+      }
+    }
+    function goTo(pct, msg){
+      target = pct;
+      if (msg) statusText.innerHTML = msg + '<b>...</b>';
+      if (!raf) raf = requestAnimationFrame(paint);
+    }
+
+    // API pública usada pelo fluxo real de carregamento (ver fim do arquivo)
+    window.__evLoader = {
+      stageBoot: function(){ goTo(20, 'Ligando o painel'); },
+      stageData: function(){ goTo(65, 'Comparando modelos elétricos'); },
+      stageImages: function(){ goTo(90, 'Carregando imagens'); },
+      finish: function(){
+        var minVisible = 700; // evita "flash" quando tudo carrega rápido demais
+        var elapsed = Date.now() - startedAt;
+        var wait = Math.max(0, minVisible - elapsed);
+        setTimeout(function(){
+          goTo(100, 'Pronto');
+          setTimeout(function(){
+            logoImg.classList.add('show');
+            setTimeout(function(){ loader.classList.add('hide'); }, 450);
+          }, 250);
+        }, wait);
+      }
+    };
+    goTo(12);
+    logoImg.classList.add('show');
+  })();
+  </script>
+  <!-- =================== FIM DO PRELOADER =================== -->
+
+  <div class="max-w-screen-2xl mx-auto px-5 sm:px-6 py-8">
+
+    <!-- ===================== HEADER ===================== -->
+    <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8">
+      <div class="flex items-center justify-between sm:justify-start gap-2.5 w-full sm:w-auto">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <img
+      src="./img/banner/logo.png"
+      alt="ComparaEVs"
+      class="w-12 h-12 object-contain shrink-0"
+    >
+          <div class="min-w-0">
+            <h1 class="font-display font-semibold text-lg sm:text-xl tracking-tight leading-none">ComparaEVs</h1>
+            <p class="text-[11px] text-inkmuted tracking-wide">A central de comparação de carros elétricos do Brasil</p>
+          </div>
+        </div>
+
+        <button id="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Abrir menu" aria-expanded="false"
+          class="sm:hidden relative z-[80] w-10 h-10 shrink-0 rounded-lg border border-panel2 bg-void flex flex-col items-center justify-center gap-[5px]">
+          <span class="menu-line"></span>
+          <span class="menu-line"></span>
+          <span class="menu-line"></span>
+        </button>
+      </div>
+
+      <nav class="hidden sm:flex items-center justify-end gap-3 w-full sm:w-auto text-xs text-inkmuted">
+        <button onclick="iniciarTour(true)" title="Ver como comparar veículos" class="px-2.5 py-1 rounded-full bg-white text-void font-semibold hover:bg-volt transition-colors shadow-sm shadow-black/30"><i class="fa-solid fa-circle-question mr-1"></i>Como funciona</button>
+        <a href="carregadores.html" onclick="trackEvento('nav_carregadores')" class="hover:text-ink transition-colors"><i class="fa-solid fa-plug-circle-bolt mr-1"></i>Carregadores</a>
+        <span class="opacity-30">·</span>
+        <a href="motos.html" onclick="trackEvento('nav_motos')" class="hover:text-ink transition-colors"><i class="fa-solid fa-motorcycle mr-1"></i>Motos</a>
+        <span class="opacity-30">·</span>
+        <a href="sobre.html" class="hover:text-ink transition-colors">Sobre nós</a>
+        <span class="opacity-30">·</span>
+        <a href="contato.html" class="hover:text-ink transition-colors">Contato</a>
+        <span class="opacity-30">·</span>
+        <a href="loja.html" class="hover:text-ink transition-colors">Loja</a>
+      </nav>
+    </header>
+
+    <!-- ===================== MENU MOBILE (tela cheia) ===================== -->
+    <style>
+      .menu-line{
+        width:20px; height:2px; background:#E8EAED; border-radius:2px;
+        transition:transform .35s cubic-bezier(.4,0,.2,1), opacity .2s ease, background-color .3s ease;
+      }
+      #mobile-menu-btn.open .menu-line:nth-child(1){ transform:translateY(7px) rotate(45deg); background:#C8FF4D; }
+      #mobile-menu-btn.open .menu-line:nth-child(2){ opacity:0; transform:scaleX(0); }
+      #mobile-menu-btn.open .menu-line:nth-child(3){ transform:translateY(-7px) rotate(-45deg); background:#C8FF4D; }
+
+      #mobile-menu-overlay{
+        position:fixed; inset:0; z-index:70;
+        background:radial-gradient(ellipse at top right, #171B21 0%, #0B0D10 65%);
+        clip-path:circle(0% at calc(100% - 38px) 38px);
+        transition:clip-path .6s cubic-bezier(.65,0,.35,1);
+        pointer-events:none;
+      }
+      #mobile-menu-overlay.open{
+        clip-path:circle(150% at calc(100% - 38px) 38px);
+        pointer-events:auto;
+      }
+      #mobile-menu-overlay .mm-grid{
+        position:absolute; inset:0;
+        background-image:
+          linear-gradient(rgba(200,255,77,0.035) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(200,255,77,0.035) 1px, transparent 1px);
+        background-size:32px 32px;
+        mask-image:radial-gradient(ellipse at 100% 0%, black 0%, transparent 70%);
+        -webkit-mask-image:radial-gradient(ellipse at 100% 0%, black 0%, transparent 70%);
+      }
+      .mm-item{
+        opacity:0; transform:translateY(20px);
+        transition:opacity .5s ease, transform .5s cubic-bezier(.4,0,.2,1);
+      }
+      #mobile-menu-overlay.open .mm-item{ opacity:1; transform:translateY(0); }
+      @media (prefers-reduced-motion: reduce){
+        #mobile-menu-overlay, .mm-item, .menu-line{ transition-duration:.15s !important; }
+      }
+    </style>
+
+    <div id="mobile-menu-overlay" class="sm:hidden">
+      <div class="mm-grid"></div>
+
+      <button onclick="closeMobileMenu()" aria-label="Fechar menu"
+        class="mm-item absolute top-5 right-5 w-10 h-10 rounded-lg border border-panel2 flex items-center justify-center text-inkmuted" style="transition-delay:40ms">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <nav class="relative h-full flex flex-col items-center justify-center gap-1 px-8">
+        <a href="carregadores.html" onclick="trackEvento('nav_carregadores'); closeMobileMenu()" class="mm-item w-full max-w-xs flex items-center gap-4 py-4 border-b border-panel2" style="transition-delay:70ms">
+          <span class="font-data text-[11px] text-inkmuted">01</span>
+          <i class="fa-solid fa-plug-circle-bolt text-volt w-5 text-center"></i>
+          <span class="font-display text-lg">Carregadores</span>
+        </a>
+        <a href="motos.html" onclick="trackEvento('nav_motos'); closeMobileMenu()" class="mm-item w-full max-w-xs flex items-center gap-4 py-4 border-b border-panel2" style="transition-delay:130ms">
+          <span class="font-data text-[11px] text-inkmuted">02</span>
+          <i class="fa-solid fa-motorcycle text-volt w-5 text-center"></i>
+          <span class="font-display text-lg">Motos</span>
+        </a>
+        <a href="sobre.html" onclick="closeMobileMenu()" class="mm-item w-full max-w-xs flex items-center gap-4 py-4 border-b border-panel2" style="transition-delay:190ms">
+          <span class="font-data text-[11px] text-inkmuted">03</span>
+          <i class="fa-solid fa-circle-info text-volt w-5 text-center"></i>
+          <span class="font-display text-lg">Sobre nós</span>
+        </a>
+        <a href="contato.html" onclick="closeMobileMenu()" class="mm-item w-full max-w-xs flex items-center gap-4 py-4 border-b border-panel2" style="transition-delay:250ms">
+          <span class="font-data text-[11px] text-inkmuted">04</span>
+          <i class="fa-solid fa-envelope text-volt w-5 text-center"></i>
+          <span class="font-display text-lg">Contato</span>
+        </a>
+        <a href="loja.html" onclick="closeMobileMenu()" class="mm-item w-full max-w-xs flex items-center gap-4 py-4 border-b border-panel2" style="transition-delay:310ms">
+          <span class="font-data text-[11px] text-inkmuted">05</span>
+          <i class="fa-solid fa-bag-shopping text-volt w-5 text-center"></i>
+          <span class="font-display text-lg">Loja</span>
+        </a>
+        <a href="https://www.instagram.com/comparaevs" target="_blank" rel="noopener" onclick="trackEvento('nav_instagram'); closeMobileMenu()" class="mm-item w-full max-w-xs flex items-center gap-4 py-4 border-b border-panel2" style="transition-delay:370ms">
+          <span class="font-data text-[11px] text-inkmuted">06</span>
+          <i class="fa-brands fa-instagram text-volt w-5 text-center"></i>
+          <span class="font-display text-lg">Instagram</span>
+        </a>
+        <button onclick="closeMobileMenu(); setTimeout(function(){ iniciarTour(true); }, 450)" class="mm-item w-full max-w-xs flex items-center gap-4 py-4 text-left" style="transition-delay:400ms">
+          <span class="font-data text-[11px] text-inkmuted">07</span>
+          <i class="fa-solid fa-circle-question text-volt w-5 text-center"></i>
+          <span class="font-display text-lg">Como funciona</span>
+        </button>
+
+        <p class="mm-item text-[11px] text-inkmuted tracking-wide mt-8" style="transition-delay:430ms">comparaevs.com.br</p>
+      </nav>
+    </div>
+
+    <script>
+      var mobileMenuAberto = false;
+      function toggleMobileMenu(){
+        mobileMenuAberto = !mobileMenuAberto;
+        var btn = document.getElementById('mobile-menu-btn');
+        var overlay = document.getElementById('mobile-menu-overlay');
+        btn.classList.toggle('open', mobileMenuAberto);
+        btn.setAttribute('aria-expanded', mobileMenuAberto ? 'true' : 'false');
+        overlay.classList.toggle('open', mobileMenuAberto);
+        document.body.style.overflow = mobileMenuAberto ? 'hidden' : '';
+      }
+      function closeMobileMenu(){
+        if (mobileMenuAberto) toggleMobileMenu();
+      }
+      document.addEventListener('keydown', function(e){
+        if (e.key === 'Escape') closeMobileMenu();
+      });
+    </script>
+
+
+    <!-- ===================== BANNERS CARREGADORES + MOTOS ===================== -->
+    <div class="hidden  grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+      <a href="carregadores.html" onclick="trackEvento('cta_banner_carregadores')"
+        class="group flex items-center justify-between gap-4 rounded-2xl border border-panel2 bg-panel hover:border-volt/40 px-5 sm:px-6 py-4 transition-colors">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-xl bg-volt/10 border border-volt/20 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-plug-circle-bolt text-volt"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="font-display font-semibold text-sm sm:text-base leading-tight">Já escolheu o carro? Agora compare os carregadores</p>
+            <p class="text-[11px] sm:text-xs text-inkmuted truncate">Potência, preço, app, Wi-Fi e mais — lado a lado</p>
+          </div>
+        </div>
+        <span class="shrink-0 inline-flex items-center gap-1.5 text-volt text-xs sm:text-sm font-medium group-hover:gap-2.5 transition-all">
+          Comparar <i class="fa-solid fa-arrow-right text-xs"></i>
+        </span>
+      </a>
+
+      <a href="motos.html" onclick="trackEvento('cta_banner_motos')"
+        class="group flex items-center justify-between gap-4 rounded-2xl border border-panel2 bg-panel hover:border-volt/40 px-5 sm:px-6 py-4 transition-colors">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-xl bg-volt/10 border border-volt/20 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-motorcycle text-volt"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="font-display font-semibold text-sm sm:text-base leading-tight">Prefere duas rodas? Compare motos elétricas</p>
+            <p class="text-[11px] sm:text-xs text-inkmuted truncate">Autonomia, potência, recarga e preço — lado a lado</p>
+          </div>
+        </div>
+        <span class="shrink-0 inline-flex items-center gap-1.5 text-volt text-xs sm:text-sm font-medium group-hover:gap-2.5 transition-all">
+          Comparar <i class="fa-solid fa-arrow-right text-xs"></i>
+        </span>
+      </a>
+    </div>
+
+    <!-- ===================== HERO ===================== -->
+    <section id="hero" class="rounded-2xl border border-panel2 bg-panel mb-8 overflow-hidden hidden">
+      <div id="anuncio-hero-master"></div>
+
+
+      <div class="p-6 sm:p-8">
+        <p class="text-[11px] uppercase tracking-widest text-volt font-medium mb-3">Simule seu financiamento</p>
+
+        <div class="grid sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
+          <div>
+            <label class="block text-[11px] text-inkmuted mb-1.5">Marca</label>
+            <select id="sim-marca" onchange="preencherSimuladorModelos()" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors"></select>
+          </div>
+          <div>
+            <label class="block text-[11px] text-inkmuted mb-1.5">Modelo</label>
+            <select id="sim-modelo" onchange="preencherSimuladorPreco()" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors"></select>
+          </div>
+          <div>
+            <label class="block text-[11px] text-inkmuted mb-1.5">Valor do veículo (R$)</label>
+            <input id="sim-preco" type="text" inputmode="decimal" placeholder="0,00"
+              class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+          </div>
+          <div>
+            <label class="block text-[11px] text-inkmuted mb-1.5">Entrada (R$)</label>
+            <input id="sim-entrada" type="text" inputmode="decimal" placeholder="0,00"
+              class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+          </div>
+          <div>
+            <label class="block text-[11px] text-inkmuted mb-1.5">Prazo</label>
+            <select id="sim-prazo" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+              <option value="12">12x</option>
+              <option value="24">24x</option>
+              <option value="36">36x</option>
+              <option value="48" selected>48x</option>
+              <option value="60">60x</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button onclick="calcularFinanciamento()" class="px-5 py-2.5 rounded-lg bg-volt text-void text-sm font-medium hover:bg-voltdim transition-colors">
+            Calcular financiamento
+          </button>
+          <button onclick="limparSimulacao()" class="px-5 py-2.5 rounded-lg border border-panel3 text-inkmuted hover:text-ink hover:border-ink/30 text-sm font-medium transition-colors">
+            Limpar
+          </button>
+        </div>
+
+        <div id="sim-resultado" class="hidden mt-6">
+          <div id="sim-card" class="rounded-xl border border-panel3 bg-panel2 p-6 max-w-md">
+            <div class="flex items-center gap-2 mb-4">
+              <img src="./img/banner/logo.png" alt="ComparaEVs" class="w-6 h-6 object-contain">
+              <span class="font-display font-semibold text-sm">ComparaEVs</span>
+            </div>
+            <p id="sim-card-veiculo" class="font-display font-medium text-ink text-base mb-4">—</p>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between"><span class="text-inkmuted">Valor do veículo</span><span id="sim-card-preco" class="font-data">—</span></div>
+              <div class="flex justify-between"><span class="text-inkmuted">Entrada</span><span id="sim-card-entrada" class="font-data">—</span></div>
+              <div class="flex justify-between"><span class="text-inkmuted">Valor financiado</span><span id="sim-card-financiado" class="font-data">—</span></div>
+              <div class="flex justify-between"><span class="text-inkmuted">Prazo</span><span id="sim-card-prazo" class="font-data">—</span></div>
+              <div class="flex justify-between"><span class="text-inkmuted">Taxa estimada</span><span id="sim-card-taxa" class="font-data">—</span></div>
+            </div>
+            <div class="border-t border-panel3 mt-4 pt-4">
+              <p class="text-[11px] text-inkmuted uppercase tracking-wide mb-1">Parcela estimada</p>
+              <p id="sim-card-parcela" class="font-data font-bold text-3xl text-volt">—</p>
+            </div>
+            <p class="text-[10px] text-inkmuted/70 mt-4 leading-relaxed">Estimativa com base em taxa média de mercado para financiamento de veículos elétricos. Sujeito a aprovação de crédito e condições da instituição financeira.</p>
+          </div>
+          <button onclick="baixarSimulacaoComoImagem()" class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-volt/40 text-volt hover:bg-volt hover:text-void text-xs font-medium transition-colors">
+            <i class="fa-solid fa-download"></i> Baixar como imagem
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== FILTROS ===================== -->
+    <section class="rounded-2xl border border-panel2 bg-panel p-5 sm:p-6 mb-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+        <div class="col-span-full">
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Buscar</label>
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-inkmuted text-xs"></i>
+            <input id="filter-busca" type="text" maxlength="200" placeholder="Busque ou pergunte: “SUV até 200 mil com maior autonomia” ou “como funciona o selo PBEV?”"
+              class="w-full bg-panel2 border border-panel3 rounded-lg pl-9 pr-24 py-2.5 text-sm placeholder:text-inkmuted/60 focus:border-volt/60 transition-colors">
+            <button id="btn-busca-ia" type="button" onclick="buscarComIA()" title="Buscar com IA (Enter)"
+              class="absolute right-1.5 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-md bg-[#1a2b0e] border border-volt/30 text-volt text-xs font-medium hover:bg-volt hover:text-black transition-colors">
+              <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i> IA
+            </button>
+          </div>
+          <p id="busca-ia-msg" class="hidden mt-1.5 text-xs text-inkmuted"></p>
+        </div>
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Marca</label>
+          <select id="filter-marca" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors"></select>
+        </div>
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Categoria</label>
+          <select id="filter-categoria" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors"></select>
+        </div>
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Propulsão</label>
+          <select id="filter-propulsao" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors"></select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 items-end">
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Autonomia ≥ (km)</label>
+          <input id="filter-autonomia" type="number" value="0" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm font-data focus:border-volt/60 transition-colors">
+        </div>
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Consumo ≤ (MJ/km)</label>
+          <input id="filter-consumo" type="number" step="0.01" value="2" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm font-data focus:border-volt/60 transition-colors">
+        </div>
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Preço até (R$)</label>
+          <input id="filter-preco" type="number" step="1000" placeholder="sem limite" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm font-data placeholder:text-inkmuted/50 focus:border-volt/60 transition-colors">
+        </div>
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">
+            Tarifa energia <i class="fa-regular fa-circle-question text-[10px]" title="Estimativa editável — ajuste para sua tarifa real"></i>
+          </label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-inkmuted text-sm">R$</span>
+            <input id="filter-tarifa" type="number" step="0.01" value="0.85" class="w-full bg-panel2 border border-panel3 rounded-lg pl-9 pr-3 py-2.5 text-sm font-data focus:border-volt/60 transition-colors">
+          </div>
+        </div>
+        <button onclick="limparFiltros()" class="h-[42px] rounded-lg border border-panel3 text-sm text-inkmuted hover:text-ink hover:border-ink/30 transition-colors">
+          Limpar filtros
+        </button>
+      </div>
+
+      <div class="mt-4 pt-4 border-t border-panel2">
+        <label class="inline-flex items-center gap-3 cursor-pointer select-none group">
+          <div class="relative">
+            <input type="checkbox" id="filter-uber" class="sr-only peer" onchange="if(this.checked) trackEvento('cta_filtro_uber'); aplicarFiltros()">
+            <div class="w-10 h-5 bg-panel3 rounded-full transition-colors peer-checked:bg-[#1a2b0e]"></div>
+            <div class="absolute left-0.5 top-0.5 w-4 h-4 bg-inkmuted rounded-full transition-all peer-checked:translate-x-5 peer-checked:bg-volt"></div>
+          </div>
+          <span class="text-sm text-inkmuted group-has-[:checked]:text-ink transition-colors">
+            Aceitos pela Uber
+            <span class="ml-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#1a2b0e] border border-volt/30 text-volt text-[10px] font-medium">
+              <i class="fa-brands fa-uber text-[9px]"></i> Uber
+            </span>
+          </span>
+          <span class="text-[11px] text-inkmuted/60">· verificar elegibilidade no app da Uber</span>
+        </label>
+      </div>
+    </section>
+
+    <div id="busca-ia-escolhidos" class="hidden relative rounded-2xl border border-volt/30 bg-panel p-5 mb-8"></div>
+
+    <!-- ===================== SKELETON (loading) ===================== -->
+    <div id="skeleton" class="space-y-3 mb-8">
+      <div class="h-14 bg-panel rounded-xl skeleton"></div>
+      <div class="h-14 bg-panel rounded-xl skeleton" style="animation-delay:.1s"></div>
+      <div class="h-14 bg-panel rounded-xl skeleton" style="animation-delay:.2s"></div>
+    </div>
+
+    <!-- ===================== ONBOARDING: COMO COMPARAR ===================== -->
+    <div id="como-funciona" class="hidden mb-4 rounded-2xl bg-white px-4 py-3.5 sm:px-5 shadow-lg shadow-black/40 ring-1 ring-black/5">
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <div class="flex items-center gap-2.5 sm:gap-3 flex-wrap">
+          <span class="text-[10px] uppercase tracking-widest text-void font-bold shrink-0">Como comparar</span>
+          <div class="flex items-center gap-2 sm:gap-2.5 flex-wrap text-[12px] sm:text-[13px] text-void/75 font-medium">
+            <span class="inline-flex items-center gap-1.5">
+              <span class="w-[18px] h-[18px] rounded-full bg-void text-volt font-data font-bold text-[9px] flex items-center justify-center shrink-0">1</span>
+              Marque um veículo
+            </span>
+            <i class="fa-solid fa-chevron-right text-[8px] text-void/25"></i>
+            <span class="inline-flex items-center gap-1.5">
+              <span class="w-[18px] h-[18px] rounded-full bg-void text-volt font-data font-bold text-[9px] flex items-center justify-center shrink-0">2</span>
+              Marque o segundo
+            </span>
+            <i class="fa-solid fa-chevron-right text-[8px] text-void/25"></i>
+            <span class="inline-flex items-center gap-1.5">
+              <span class="w-[18px] h-[18px] rounded-full bg-void text-volt font-data font-bold text-[9px] flex items-center justify-center shrink-0">3</span>
+              Clique em <span class="px-1.5 py-0.5 rounded bg-volt text-void font-semibold">Comparar</span>
+            </span>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button onclick="iniciarTour(true)" class="px-3 py-1.5 rounded-lg bg-void text-volt hover:bg-panel2 text-[11px] font-medium transition-colors inline-flex items-center gap-1.5">
+            <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i> Ver na prática
+          </button>
+          <button onclick="fecharComoFunciona()" title="Ocultar" class="w-7 h-7 rounded-lg flex items-center justify-center text-void/40 hover:text-void hover:bg-void/5 transition-colors">
+            <i class="fa-solid fa-xmark text-xs"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== RESULTADOS: contagem ===================== -->
+    <div id="contagem" class="hidden text-xs text-inkmuted mb-3 font-data"></div>
+
+    <!-- ===================== TABELA (desktop) ===================== -->
+    <div id="tabela-wrap" class="hidden md:block rounded-2xl border border-panel2 overflow-hidden mb-24">
+      <table class="w-full text-sm">
+        <thead class="bg-panel text-[11px] uppercase tracking-wide text-inkmuted">
+          <tr>
+            <th class="p-3 w-[76px] text-center leading-tight">
+              <span class="block text-[9px] text-inkmuted/80">comparar</span>
+            </th>
+            <th class="p-3 text-left">Veículo</th>
+            <th class="p-3 text-left">Categoria</th>
+            <th class="p-3 text-right cursor-pointer select-none" onclick="ordenarPor('Autonomia_km')">
+              Autonomia <i class="fa-solid fa-sort ml-1 text-[10px]" id="sort-icon-Autonomia_km"></i>
+            </th>
+            <th class="p-3 text-right cursor-pointer select-none" onclick="ordenarPor('Consumo_MJkm')">
+              Consumo <i class="fa-solid fa-sort ml-1 text-[10px]" id="sort-icon-Consumo_MJkm"></i>
+            </th>
+            <th class="p-3 text-right cursor-pointer select-none" onclick="ordenarPor('preco')">
+              Preço <i class="fa-solid fa-sort ml-1 text-[10px]" id="sort-icon-preco"></i>
+            </th>
+            <th class="p-3 text-right cursor-pointer select-none" onclick="ordenarPor('custo')">
+              Custo /100km <i class="fa-solid fa-sort ml-1 text-[10px]" id="sort-icon-custo"></i>
+            </th>
+            <th class="p-3 text-center w-[140px]">Selo</th>
+          </tr>
+        </thead>
+        <tbody id="tbody" class="divide-y divide-panel2"></tbody>
+      </table>
+    </div>
+
+    <!-- ===================== CARDS (mobile) ===================== -->
+    <div id="cards-wrap" class="grid md:hidden mb-24 gap-3"></div>
+
+    <!-- ===================== EMPTY STATE ===================== -->
+    <div id="empty-state" class="hidden text-center py-16 rounded-2xl border border-dashed border-panel2 mb-24">
+      <p class="text-3xl mb-3">🔍</p>
+      <p class="text-ink font-medium mb-1">Nenhum veículo encontrado</p>
+      <p class="text-inkmuted text-sm mb-5">Tente afrouxar os filtros de autonomia ou consumo.</p>
+      <button onclick="limparFiltros()" class="px-4 py-2 rounded-lg bg-volt text-void text-sm font-medium hover:bg-voltdim transition-colors">
+        Limpar filtros
+      </button>
+    </div>
+
+    <div id="anuncio-banner" class="mb-6"></div>
+
+    <!-- ===================== CONTEÚDO EDITORIAL ===================== -->
+    <section id="guia-escolha" class="rounded-2xl border border-panel2 bg-panel p-6 sm:p-8 mb-6">
+      <h2 class="font-display font-semibold text-xl sm:text-2xl mb-5">Como escolher um carro elétrico</h2>
+      <div class="space-y-5 text-sm sm:text-[15px] text-inkmuted leading-relaxed">
+        <p>Comprar um carro elétrico é diferente de comprar um carro a combustão: além do preço e do design, alguns números passam a importar muito mais. Veja os pontos que mais pesam na decisão.</p>
+
+        <div>
+          <h3 class="font-display font-medium text-ink mb-1">1. Autonomia real, não só a anunciada</h3>
+          <p>A autonomia que aparece na etiqueta é medida em ciclo de testes controlado (PBEV/INMETRO). No dia a dia, fatores como uso de ar-condicionado, peso da carga, velocidade na estrada e temperatura externa reduzem esse número. Use a autonomia oficial como referência comparativa entre modelos, não como garantia exata de quilometragem.</p>
+        </div>
+
+        <div>
+          <h3 class="font-display font-medium text-ink mb-1">2. Onde e como você vai recarregar</h3>
+          <p>Antes de pensar em autonomia máxima, pense na sua rotina: você tem garagem com tomada disponível? O prédio permite instalar um carregador? Você depende de pontos públicos no trajeto? Quem recarrega em casa todas as noites sofre muito menos com autonomia "curta" do que quem depende de carregadores públicos.</p>
+          <button onclick="abrirOrcamentoModal()" class="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-lg border border-volt/40 text-volt hover:bg-volt hover:text-void text-xs font-medium transition-colors">
+            <i class="fa-solid fa-plug-circle-bolt"></i> Quero um orçamento de instalação na minha casa
+          </button>
+        </div>
+
+        <div>
+          <h3 class="font-display font-medium text-ink mb-1">3. Consumo energético (kWh/100km)</h3>
+          <p>Assim como o consumo de combustível em km/l, o consumo elétrico (kWh/100km) indica quanta energia o carro gasta para rodar. Quanto menor esse número, mais eficiente é o veículo — e menor o custo de recarga por quilômetro rodado, independentemente do tamanho da bateria.</p>
+        </div>
+
+        <div>
+          <h3 class="font-display font-medium text-ink mb-1">4. Classificação energética PBEV/INMETRO</h3>
+          <p>O selo do Programa Brasileiro de Etiquetagem Veicular classifica os modelos de A+ (mais eficiente) a G, considerando consumo energético e autonomia testados oficialmente. É o equivalente, no elétrico, ao selo de eficiência que você já vê em geladeiras e ar-condicionados.</p>
+        </div>
+
+        <div>
+          <h3 class="font-display font-medium text-ink mb-1">5. Custo total de propriedade, não só o preço de tabela</h3>
+          <p>Carros elétricos costumam custar mais na compra, mas menos para manter: sem troca de óleo, menos peças de desgaste no motor, e custo de "combustível" (energia) normalmente mais baixo que gasolina por km rodado. Ao comparar modelos, vale somar preço + consumo estimado + manutenção projetada ao longo de alguns anos, não só o valor de entrada.</p>
+        </div>
+
+        <div>
+          <h3 class="font-display font-medium text-ink mb-1">6. Garantia da bateria</h3>
+          <p>A bateria é o componente mais caro do carro elétrico, e perde capacidade gradualmente com o tempo e os ciclos de recarga. Verifique o prazo e a cobertura de garantia específica da bateria oferecida pela marca — geralmente é mais longa que a garantia geral do veículo.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq-autonomia" class="rounded-2xl border border-panel2 bg-panel p-6 sm:p-8 mb-6">
+      <h2 class="font-display font-semibold text-xl sm:text-2xl mb-5">FAQ — Autonomia e recarga</h2>
+      <div class="space-y-3">
+        <details class="group border border-panel2 rounded-xl bg-panel2/30 p-4">
+          <summary class="cursor-pointer list-none font-medium text-ink flex items-center justify-between gap-3">
+            A autonomia anunciada pela marca é a autonomia real?
+            <i class="fa-solid fa-chevron-down text-xs text-inkmuted shrink-0 transition-transform group-open:rotate-180"></i>
+          </summary>
+          <p class="text-sm text-inkmuted mt-3 leading-relaxed">Não exatamente. A autonomia oficial (PBEV/INMETRO) é medida em condições padronizadas de teste, que servem para comparar modelos de forma justa entre si — mas no uso real, autonomia tende a variar para baixo ou para cima dependendo de clima, estilo de condução, peso e uso de ar-condicionado.</p>
+        </details>
+
+        <details class="group border border-panel2 rounded-xl bg-panel2/30 p-4">
+          <summary class="cursor-pointer list-none font-medium text-ink flex items-center justify-between gap-3">
+            Quanto tempo demora para carregar um carro elétrico?
+            <i class="fa-solid fa-chevron-down text-xs text-inkmuted shrink-0 transition-transform group-open:rotate-180"></i>
+          </summary>
+          <p class="text-sm text-inkmuted mt-3 leading-relaxed">Depende do tipo de carregador. Em tomada residencial comum, pode levar de 8 a 20 horas para carga completa. Em carregador residencial dedicado (wallbox), de 4 a 8 horas. Já em carregadores rápidos públicos (DC), é possível chegar a 80% da carga em 20 a 40 minutos, dependendo do modelo do carro e da potência do carregador.</p>
+        </details>
+
+        <details class="group border border-panel2 rounded-xl bg-panel2/30 p-4">
+          <summary class="cursor-pointer list-none font-medium text-ink flex items-center justify-between gap-3">
+            Posso carregar em uma tomada comum de 110V/220V?
+            <i class="fa-solid fa-chevron-down text-xs text-inkmuted shrink-0 transition-transform group-open:rotate-180"></i>
+          </summary>
+          <p class="text-sm text-inkmuted mt-3 leading-relaxed">Sim, a maioria dos elétricos vem com um cabo para tomada residencial — mas é a forma mais lenta de recarregar, recomendada apenas como solução ocasional. Para uso diário, o ideal é instalar um carregador dedicado (wallbox), que recarrega bem mais rápido e com mais segurança elétrica.</p>
+        </details>
+
+        <details class="group border border-panel2 rounded-xl bg-panel2/30 p-4">
+          <summary class="cursor-pointer list-none font-medium text-ink flex items-center justify-between gap-3">
+            A autonomia cai no frio ou no calor extremo?
+            <i class="fa-solid fa-chevron-down text-xs text-inkmuted shrink-0 transition-transform group-open:rotate-180"></i>
+          </summary>
+          <p class="text-sm text-inkmuted mt-3 leading-relaxed">Sim. Temperaturas muito baixas reduzem a eficiência química da bateria, e o uso do ar-condicionado (tanto para esquentar quanto para refrigerar) consome energia que sairia da mesma bateria que move o carro. No Brasil, esse efeito costuma ser menos extremo do que em países com inverno rigoroso, mas ainda é perceptível em dias muito quentes com ar-condicionado ligado o tempo todo.</p>
+        </details>
+
+        <details class="group border border-panel2 rounded-xl bg-panel2/30 p-4">
+          <summary class="cursor-pointer list-none font-medium text-ink flex items-center justify-between gap-3">
+            O que exatamente é o selo do PBEV/INMETRO?
+            <i class="fa-solid fa-chevron-down text-xs text-inkmuted shrink-0 transition-transform group-open:rotate-180"></i>
+          </summary>
+          <p class="text-sm text-inkmuted mt-3 leading-relaxed">É a Etiqueta Nacional de Conservação de Energia aplicada a veículos, emitida pelo Programa Brasileiro de Etiquetagem Veicular sob coordenação do INMETRO. Ela classifica os modelos de A+ (mais eficiente) a G, com base em testes oficiais e padronizados de consumo energético e autonomia — é a mesma lógica das etiquetas de eficiência de eletrodomésticos, aplicada a veículos.</p>
+        </details>
+
+        <details class="group border border-panel2 rounded-xl bg-panel2/30 p-4">
+          <summary class="cursor-pointer list-none font-medium text-ink flex items-center justify-between gap-3">
+            A bateria perde autonomia com o tempo de uso?
+            <i class="fa-solid fa-chevron-down text-xs text-inkmuted shrink-0 transition-transform group-open:rotate-180"></i>
+          </summary>
+          <p class="text-sm text-inkmuted mt-3 leading-relaxed">Sim, é normal e esperado — todas as baterias de íon-lítio degradam gradualmente com os ciclos de carga/descarga ao longo dos anos, reduzindo um pouco a autonomia máxima disponível. É por isso que as marcas oferecem garantias específicas (geralmente de 8 anos ou mais) cobrindo perda de capacidade da bateria além de um limite mínimo aceitável.</p>
+        </details>
+      </div>
+    </section>
+
+
+    <!-- ===================== SUGERIR CORREÇÃO ===================== -->
+    <section class="rounded-2xl border border-panel2 bg-panel p-5 sm:p-6 mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
+      <div class="flex items-center gap-3 flex-1 min-w-0">
+        <div class="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-triangle-exclamation text-amber-400 text-sm"></i>
+        </div>
+        <div class="min-w-0">
+          <p class="text-sm font-medium text-ink">Encontrou um erro ou tem uma informação mais atualizada?</p>
+          <p class="text-[11px] text-inkmuted">Clique aqui para sugerir uma correção e ajude o ComparaEVs a manter os dados precisos.</p>
+        </div>
+      </div>
+      <button onclick="abrirCorrecaoModal()" class="shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-amber-500/30 text-amber-400 hover:bg-amber-500/10 text-sm font-medium transition-colors">
+        <i class="fa-solid fa-pen-to-square text-xs"></i> Sugerir correção
+      </button>
+    </section>
+    <footer class="text-center text-[11px] text-inkmuted pb-6">
+      <div class="flex items-center justify-center gap-3 mb-3 flex-wrap">
+        <a href="carregadores.html" class="hover:text-ink transition-colors">Carregadores</a>
+        <span class="opacity-30">·</span>
+        <a href="motos.html" class="hover:text-ink transition-colors">Motos</a>
+        <span class="opacity-30">·</span>
+        <a href="sobre.html" class="hover:text-ink transition-colors">Sobre nós</a>
+        <span class="opacity-30">·</span>
+        <a href="contato.html" class="hover:text-ink transition-colors">Contato</a>
+        <span class="opacity-30">·</span>
+        <a href="privacidade.html" class="hover:text-ink transition-colors">Política de Privacidade</a>
+        <span class="opacity-30">·</span>
+        <a href="loja.html" class="hover:text-ink transition-colors">Loja</a>
+      </div>
+      Fonte: Programa Brasileiro de Etiquetagem Veicular (PBEV) — INMETRO. Valores de custo são estimativas editáveis.
+    </footer>
+  </div>
+
+  <!-- ===================== FAIXAS DA CASA (CARROSSEL) ===================== -->
+<div class="faixa-carrossel"
+     data-origem="comparaevs"
+     data-tema="claro"
+     data-intervalo="6000"
+     role="region"
+     aria-roledescription="carrossel"
+     aria-label="Outros apps da Seckler Digital">
+
+  <a class="faixa" data-destino="travelia"
+     href="https://clima-seckler.vercel.app/"
+     target="_blank" rel="noopener noreferrer">
+    <span class="faixa-icone" aria-hidden="true">⛅</span>
+    <span class="faixa-texto"><span class="faixa-nome">TravelIA</span><span class="faixa-frase">o tempo da cidade e o roteiro do que fazer nela hoje</span></span>
+    <span class="faixa-pilula">Ver a previsão <span aria-hidden="true">&rarr;</span></span>
+  </a>
+
+  <a class="faixa" data-destino="mochila"
+     href="https://mochila-seckler.vercel.app/"
+     target="_blank" rel="noopener noreferrer">
+    <span class="faixa-icone" aria-hidden="true">🎒</span>
+    <span class="faixa-texto"><span class="faixa-nome">Mochila de Emergência</span><span class="faixa-frase">seu kit tem item vencido — o app avisa 30 dias antes</span></span>
+    <span class="faixa-pilula">Conferir validade <span aria-hidden="true">&rarr;</span></span>
+  </a>
+
+  
+</div>
+
+<style>
+/* Altura fixa desde o primeiro pixel: o rodape nao pode pular quando o JS
+   entra. As faixas ficam empilhadas no mesmo espaco. */
+.faixa-carrossel{
+  position:relative; width:100%; min-height:56px; overflow:hidden;
+  font-family:inherit; font-size:15px;
+  border-top:1px solid rgba(0,0,0,.08);
+}
+.faixa-carrossel[data-tema="claro"]{ background:#F5F6F8; color:#14171C; }
+.faixa-carrossel[data-tema="escuro"]{
+  background:#14171C; color:#E8EAED; border-top-color:rgba(255,255,255,.10);
+}
+
+.faixa{
+  position:absolute; inset:0;
+  display:flex; align-items:center; gap:12px;
+  box-sizing:border-box; padding:0 48px;
+  color:inherit; text-decoration:none;
+}
+
+/* ANTES do JS: so a primeira, parada. Se o script nunca rodar, o rodape mostra
+   uma faixa valida em vez de cinco empilhadas — por isso o bloco do proprio
+   site precisa sair do HTML na instalacao. */
+.faixa-carrossel:not(.pronto) .faixa:not(:first-child){ display:none; }
+
+/* DEPOIS do JS: quem manda e a classe .is-ativa. */
+.faixa-carrossel.pronto .faixa{
+  opacity:0; transform:translateY(100%); pointer-events:none;
+  transition:opacity .45s ease, transform .45s ease;
+}
+.faixa-carrossel.pronto .faixa.is-ativa{
+  opacity:1; transform:none; pointer-events:auto;
+}
+
+.faixa-texto{ display:contents; }
+.faixa-icone{ flex:none; font-size:20px; line-height:1; }
+.faixa-nome{ flex:none; font-weight:700; letter-spacing:-.01em; }
+.faixa-frase{
+  flex:1 1 auto; min-width:0; font-size:14px; opacity:.7;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+
+/* Pilula NEUTRA: a propria tinta, invertida. Assim ela nunca colide com a cor
+   de conversao do site anfitriao. */
+.faixa-pilula{
+  flex:none; display:inline-flex; align-items:center; gap:6px;
+  padding:8px 14px; border-radius:999px;
+  font-size:13px; font-weight:600; white-space:nowrap;
+}
+.faixa-carrossel[data-tema="claro"] .faixa-pilula{ background:#14171C; color:#FFF; }
+.faixa-carrossel[data-tema="escuro"] .faixa-pilula{ background:#E8EAED; color:#14171C; }
+
+.faixa:hover{ filter:brightness(.97); }
+.faixa-carrossel[data-tema="escuro"] .faixa:hover{ filter:brightness(1.25); }
+.faixa:focus-visible{ outline:2px solid currentColor; outline-offset:-3px; }
+
+/* Site com bolha de chat flutuante no canto inferior direito (Dify e afins):
+   a pilula tem de sair de baixo dela, senao o clique da faixa nao existe. */
+.faixa-carrossel[data-chat="direita"] .faixa{ padding-right:88px; }
+
+/* CELULAR — o layout de uma linha so nao cabe aqui: com o icone e o botao
+   disputando espaco, sobrava tudo menos o motivo de clicar. Entao tres linhas,
+   sem icone: nome, frase e o botao esticado, facil de acertar com o polegar.
+   A frase quebra em ate duas linhas; o teto existe porque a faixa e absoluta
+   dentro do carrossel e nao empurra a altura dele. */
+@media (max-width:640px){
+  .faixa-carrossel{ min-height:136px; }
+  .faixa{ flex-direction:column; align-items:flex-start; justify-content:center;
+       gap:6px; padding:14px 16px; }
+  .faixa-icone{ display:none; }
+  .faixa-texto{ display:flex; flex-direction:column; align-items:flex-start;
+             gap:3px; width:100%; min-width:0; }
+  .faixa-nome{ flex:none; font-size:15px; }
+  .faixa-frase{ font-size:13px; line-height:1.35; width:100%; min-width:0;
+             white-space:normal; text-overflow:clip;
+             display:-webkit-box; -webkit-box-orient:vertical;
+             -webkit-line-clamp:2; overflow:hidden; }
+  .faixa-carrossel[data-tema] .faixa-pilula{ align-self:stretch; justify-content:center; margin-top:2px; }
+  .faixa-carrossel[data-chat="direita"] .faixa-pilula{ margin-right:56px; }
+}
+@media (min-width:641px){
+  .faixa-carrossel{ min-height:64px; }
+  .faixa{ padding:0 72px; gap:14px; }
+  .faixa-carrossel[data-chat="direita"] .faixa{ padding-right:96px; }
+}
+
+/* Quem pediu menos movimento recebe UMA faixa parada — o JS nem liga o timer.
+   Zerar so a transicao deixaria o conteudo trocando na cara da pessoa, que e
+   exatamente o que ela desligou. */
+@media (prefers-reduced-motion:reduce){
+  .faixa-carrossel.pronto .faixa{ transition:none; }
+}
+</style>
+
+<script>
+(function () {
+  var SUPABASE_URL = "https://pndvbbwkjiuzfptbpfcz.supabase.co";
+  var SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBuZHZiYndraml1emZwdGJwZmN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwMDMyMTUsImV4cCI6MjA5MDU3OTIxNX0.SaWp8Dx0fPHsYdvoSzYfPk8A5xg-qW4FTsgxmM8s1tM";
+
+  function registrarClique(origem, destino) {
+    if (!destino || SUPABASE_URL.indexOf("SEU-PROJETO") !== -1) return;
+    fetch(SUPABASE_URL + "/rest/v1/rpc/registrar_clique_faixa", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: "Bearer " + SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify({ p_origem: origem, p_destino: destino }),
+      keepalive: true
+    }).catch(function () {
+      /* Medicao nunca pode atrapalhar a navegacao. */
+    });
+  }
+
+  function iniciar(car) {
+    var origem = car.getAttribute("data-origem");
+    if (!origem || origem === "ORIGEM") return;  // sem origem nao da para medir
+
+    var intervalo = parseInt(car.getAttribute("data-intervalo"), 10) || 6000;
+    var faixas = Array.prototype.slice.call(car.querySelectorAll(".faixa"));
+
+    // 1. Fora a faixa deste proprio site.
+    faixas = faixas.filter(function (f) {
+      if (f.getAttribute("data-destino") === origem) {
+        f.parentNode.removeChild(f);
+        return false;
+      }
+      return true;
+    });
+    if (!faixas.length) { car.parentNode.removeChild(car); return; }
+
+    // 2. UTM montado aqui, a partir da origem — um lugar so para errar.
+    faixas.forEach(function (f) {
+      var base = f.getAttribute("href").split("?")[0];
+      f.setAttribute("href", base + "?utm_source=" + encodeURIComponent(origem) +
+        "&utm_medium=faixa&utm_content=carrossel");
+    });
+
+    // 3. Embaralha. Sem isso o primeiro da lista leva sempre o primeiro olhar,
+    //    e a troca de trafego entre os apps nasce torta.
+    for (var i = faixas.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = faixas[i]; faixas[i] = faixas[j]; faixas[j] = t;
+    }
+
+    var atual = 0;
+    function mostrar(n) {
+      faixas.forEach(function (f, k) {
+        var ativa = (k === n);
+        f.classList.toggle("is-ativa", ativa);
+        f.setAttribute("aria-hidden", ativa ? "false" : "true");
+        // Link invisivel nao pode ser alcancado por Tab.
+        f.setAttribute("tabindex", ativa ? "0" : "-1");
+      });
+    }
+
+    car.classList.add("pronto");
+    mostrar(0);
+
+    var semMovimento = window.matchMedia("(prefers-reduced-motion: reduce)");
+    var timer = null, sobMouse = false, naTela = true, abaAtiva = true;
+
+    function podeRodar() {
+      return faixas.length > 1 && !semMovimento.matches &&
+             !sobMouse && naTela && abaAtiva;
+    }
+    function parar() { if (timer) { clearInterval(timer); timer = null; } }
+    function ligar() {
+      parar();
+      if (podeRodar()) {
+        timer = setInterval(function () {
+          atual = (atual + 1) % faixas.length;
+          mostrar(atual);
+        }, intervalo);
+      }
+    }
+
+    // Pausar sob o mouse e sob o foco e o que impede o pior bug de carrossel:
+    // a faixa trocar no instante em que a pessoa vai clicar nela.
+    car.addEventListener("mouseenter", function () { sobMouse = true;  parar(); });
+    car.addEventListener("mouseleave", function () { sobMouse = false; ligar(); });
+    car.addEventListener("focusin",    function () { sobMouse = true;  parar(); });
+    car.addEventListener("focusout",   function () { sobMouse = false; ligar(); });
+
+    document.addEventListener("visibilitychange", function () {
+      abaAtiva = !document.hidden;
+      ligar();
+    });
+
+    // A faixa mora no rodape. Rodar enquanto ninguem rolou ate la so gasta
+    // slide a toa — quando a pessoa chega, ja passou metade dos apps.
+    if ("IntersectionObserver" in window) {
+      naTela = false;
+      new IntersectionObserver(function (entradas) {
+        naTela = entradas[0].isIntersecting;
+        ligar();
+      }, { threshold: 0.5 }).observe(car);
+    } else {
+      ligar();
+    }
+
+    if (semMovimento.addEventListener) {
+      semMovimento.addEventListener("change", ligar);
+    }
+
+    car.addEventListener("click", function (e) {
+      var alvo = e.target;
+      while (alvo && alvo !== car && !(alvo.classList && alvo.classList.contains("faixa"))) {
+        alvo = alvo.parentNode;
+      }
+      if (alvo && alvo.classList && alvo.classList.contains("faixa")) {
+        registrarClique(origem, alvo.getAttribute("data-destino"));
+      }
+    });
+  }
+
+  function tudo() {
+    Array.prototype.forEach.call(
+      document.querySelectorAll(".faixa-carrossel"), iniciar
+    );
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", tudo);
+  } else {
+    tudo();
+  }
+})();
+</script>
+
+
+
+  <!-- ===================== BARRA FLUTUANTE DE COMPARAÇÃO ===================== -->
+  <div id="compare-bar" class="fixed left-1/2 -translate-x-1/2 bottom-5 z-40 hidden w-[calc(100%-1.5rem)] sm:w-auto max-w-md sm:max-w-none">
+    <div class="flex items-center gap-3 sm:gap-4 bg-panel2 border border-panel3 rounded-full pl-4 sm:pl-5 pr-2 py-2 shadow-2xl shadow-black/50">
+      <span class="text-xs sm:text-sm leading-tight min-w-0">
+        <span class="block whitespace-nowrap">
+          <span id="compare-count" class="font-data text-volt font-bold">0</span><span id="compare-label"> selecionado</span>
+        </span>
+        <span id="compare-hint" class="block text-[10px] sm:text-[11px] text-inkmuted whitespace-nowrap">escolha mais um</span>
+      </span>
+      <button id="compare-btn" onclick="abrirComparacao()" class="px-4 py-2 rounded-full bg-volt text-void text-sm font-medium hover:bg-voltdim transition-colors shrink-0">
+        Comparar
+      </button>
+      <button onclick="limparComparacao()" class="w-9 h-9 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel3 transition-colors shrink-0" title="Limpar seleção">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+  </div>
+
+
+  <!-- ===================== MODAL NEWSLETTER (EXIT INTENT) ===================== -->
+  <div id="newsletter-modal" class="fixed inset-0 z-[60] hidden">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="fecharNewsletterModal()"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+      <div class="relative bg-panel border border-panel2 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md overflow-hidden">
+        <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-volt/0 via-volt to-volt/0"></div>
+        <button onclick="fecharNewsletterModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel2 transition-colors z-10">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+        <div class="p-6 sm:p-8">
+          <div class="w-12 h-12 rounded-xl bg-volt/10 border border-volt/20 flex items-center justify-center mb-5">
+            <i class="fa-solid fa-bolt text-volt text-xl"></i>
+          </div>
+          <h2 class="font-display font-bold text-xl sm:text-2xl mb-2">Fique por dentro do mundo EV</h2>
+          <p class="text-inkmuted text-sm mb-6 leading-relaxed">Novidades, lançamentos e atualizações de preços direto na sua caixa de entrada. Sem spam.</p>
+          <div class="flex gap-2">
+            <input id="newsletter-email" type="email" placeholder="seu@email.com" class="flex-1 bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink placeholder:text-inkmuted/50 focus:outline-none focus:border-volt/60 transition-colors">
+            <button onclick="enviarNewsletter()" id="newsletter-btn" class="px-4 py-2.5 rounded-lg bg-volt text-void text-sm font-medium hover:bg-voltdim transition-colors whitespace-nowrap disabled:opacity-60">
+              Assinar
+            </button>
+          </div>
+          <button onclick="fecharNewsletterModal()" class="mt-4 w-full text-center text-[11px] text-inkmuted/60 hover:text-inkmuted transition-colors">Não, obrigado</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL SUGERIR CORREÇÃO ===================== -->
+  <div id="correcao-modal" class="fixed inset-0 z-[60] hidden">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="fecharCorrecaoModal()"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+      <div class="bg-panel border border-panel2 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[92vh] overflow-y-auto">
+        <div class="flex items-start justify-between p-5 border-b border-panel2 sticky top-0 bg-panel">
+          <div class="flex items-center gap-2.5">
+            <i class="fa-solid fa-triangle-exclamation text-amber-400"></i>
+            <div>
+              <h2 class="font-display font-semibold text-base">Sugerir Correção</h2>
+              <p class="text-[11px] text-inkmuted">Encontrou algo desatualizado? Ajude-nos a manter os dados precisos.</p>
+            </div>
+          </div>
+          <button onclick="fecharCorrecaoModal()" class="w-8 h-8 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel2 transition-colors shrink-0 mt-0.5">
+            <i class="fa-solid fa-xmark text-sm"></i>
+          </button>
+        </div>
+        <div class="p-5 space-y-4">
+          <div>
+            <label class="block text-xs text-inkmuted mb-2">Categoria do Erro</label>
+            <div class="flex flex-wrap gap-2" id="correcao-categorias">
+              <button onclick="selecionarCategoriaCorrecao(this)" data-cat="Preço" class="correcao-cat px-3 py-1.5 rounded-lg border border-panel3 text-inkmuted text-xs hover:border-amber-500/40 hover:text-amber-400 transition-colors">Preço</button>
+              <button onclick="selecionarCategoriaCorrecao(this)" data-cat="Autonomia / Bateria" class="correcao-cat px-3 py-1.5 rounded-lg border border-panel3 text-inkmuted text-xs hover:border-amber-500/40 hover:text-amber-400 transition-colors">Autonomia / Bateria</button>
+              <button onclick="selecionarCategoriaCorrecao(this)" data-cat="Dados Técnicos" class="correcao-cat px-3 py-1.5 rounded-lg border border-panel3 text-inkmuted text-xs hover:border-amber-500/40 hover:text-amber-400 transition-colors">Dados Técnicos</button>
+              <button onclick="selecionarCategoriaCorrecao(this)" data-cat="Link Quebrado" class="correcao-cat px-3 py-1.5 rounded-lg border border-panel3 text-inkmuted text-xs hover:border-amber-500/40 hover:text-amber-400 transition-colors">Link Quebrado</button>
+              <button onclick="selecionarCategoriaCorrecao(this)" data-cat="Outros" class="correcao-cat px-3 py-1.5 rounded-lg border border-panel3 text-inkmuted text-xs hover:border-amber-500/40 hover:text-amber-400 transition-colors">Outros</button>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">O que está errado e qual a informação correta?</label>
+            <textarea id="correcao-descricao" rows="4" placeholder="Ex: O preço do modelo X está desatualizado. O valor correto é R$ XX.XXX..." class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink placeholder:text-inkmuted/40 focus:outline-none focus:border-amber-500/50 transition-colors resize-none"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">E-mail <span class="text-inkmuted/60">(opcional)</span></label>
+            <input id="correcao-email" type="email" placeholder="Receba um agradecimento quando corrigirmos" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink placeholder:text-inkmuted/40 focus:outline-none focus:border-amber-500/50 transition-colors">
+          </div>
+          <button onclick="enviarCorrecao()" id="correcao-btn" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-amber-500 text-void text-sm font-medium hover:bg-amber-400 transition-colors disabled:opacity-60">
+            <i class="fa-solid fa-paper-plane text-xs"></i> Enviar Sugestão
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ===================== ONBOARDING: TOUR GUIADO ===================== -->
+  <div id="tour" class="fixed inset-0 z-[65] hidden pointer-events-none">
+    <div id="tour-spot" class="absolute rounded-xl"></div>
+    <div id="tour-ping" class="absolute rounded-xl pointer-events-none"></div>
+    <div id="tour-card" class="absolute pointer-events-auto w-[min(320px,calc(100vw-2rem))] rounded-2xl border border-volt/35 bg-panel2 shadow-2xl shadow-black/70 p-4">
+      <div class="flex items-start justify-between gap-3 mb-1.5">
+        <p id="tour-titulo" class="font-display font-semibold text-sm text-volt leading-tight"></p>
+        <button onclick="encerrarTour(true)" aria-label="Fechar tutorial" class="w-6 h-6 -mt-0.5 -mr-1 rounded-md flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel3 transition-colors shrink-0">
+          <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
+      </div>
+      <p id="tour-texto" class="text-[13px] text-ink/85 leading-relaxed mb-3"></p>
+      <div class="flex items-center justify-between gap-3 pt-1">
+        <div id="tour-bolinhas" class="flex items-center gap-1.5"></div>
+        <button onclick="encerrarTour(true)" class="text-[11px] text-inkmuted hover:text-ink transition-colors underline decoration-dotted underline-offset-2">Pular tutorial</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TOAST ===================== -->
+  <div id="toast" class="toast fixed left-1/2 -translate-x-1/2 bottom-24 z-50 opacity-0 pointer-events-none">
+    <div class="bg-panel3 border border-panel3 text-ink text-sm px-4 py-2.5 rounded-lg shadow-xl"></div>
+  </div>
+
+  <!-- ===================== MODAL DE COMPARAÇÃO ===================== -->
+  <div id="compare-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/70" onclick="fecharComparacao()"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+      <div id="compare-panel" class="bg-panel border border-panel2 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-4xl max-h-[88vh] overflow-y-auto">
+        <div class="flex items-center justify-between p-5 border-b border-panel2 sticky top-0 bg-panel">
+          <h2 class="font-display font-semibold text-lg">Comparação</h2>
+          <div class="flex items-center gap-2">
+            <button onclick="baixarImagemComparacao()" id="btn-baixar-imagem"
+              class="hidden inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-panel3 text-inkmuted hover:text-volt hover:border-volt/50 text-xs font-medium transition-colors disabled:opacity-50 disabled:pointer-events-none">
+              <i class="fa-solid fa-image"></i>
+              <span id="btn-baixar-imagem-label">Baixar imagem</span>
+            </button>
+            <button onclick="compartilharComparacao()" id="btn-compartilhar"
+              class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-panel3 text-inkmuted hover:text-volt hover:border-volt/50 text-xs font-medium transition-colors">
+              <i class="fa-solid fa-link"></i>
+              <span id="btn-compartilhar-label">Compartilhar</span>
+            </button>
+            <button onclick="fecharComparacao()" class="w-9 h-9 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel2 transition-colors">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>
+        <div id="compare-content" class="p-5 sm:p-6"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL DE LEAD (PROPOSTA) ===================== -->
+  <div id="lead-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/70" onclick="fecharLeadModal()"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+      <div class="bg-panel border border-panel2 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[92vh] overflow-y-auto">
+        <div class="flex items-center justify-between p-5 border-b border-panel2 sticky top-0 bg-panel">
+          <div>
+            <h2 class="font-display font-semibold text-lg">Quero receber uma proposta</h2>
+            <p id="lead-modal-veiculo" class="text-xs text-inkmuted mt-0.5"></p>
+          </div>
+          <button onclick="fecharLeadModal()" class="w-9 h-9 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel2 transition-colors shrink-0">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <form id="lead-form" onsubmit="enviarLead(event)" class="p-5 sm:p-6 space-y-4">
+          <input type="hidden" id="lead-veiculo-id">
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">Nome completo</label>
+            <input type="text" id="lead-nome" required
+              class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink placeholder:text-inkmuted/60 focus:outline-none focus:border-volt transition-colors"
+              placeholder="Seu nome">
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">WhatsApp</label>
+            <input type="tel" id="lead-whatsapp" required
+              class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink placeholder:text-inkmuted/60 focus:outline-none focus:border-volt transition-colors"
+              placeholder="(54) 99999-9999">
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">E-mail (opcional)</label>
+            <input type="email" id="lead-email"
+              class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink placeholder:text-inkmuted/60 focus:outline-none focus:border-volt transition-colors"
+              placeholder="voce@email.com">
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">Cidade / UF (opcional)</label>
+            <input type="text" id="lead-cidade"
+              class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink placeholder:text-inkmuted/60 focus:outline-none focus:border-volt transition-colors"
+              placeholder="Gramado / RS">
+          </div>
+          <button type="submit" id="lead-submit-btn"
+            class="w-full px-4 py-3 rounded-lg bg-volt text-void text-sm font-medium hover:bg-voltdim transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+            Quero receber a proposta
+          </button>
+          <p class="text-[11px] text-inkmuted/70 text-center leading-relaxed">Seus dados serão compartilhados com uma concessionária parceira pra contato sobre este veículo.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL DE ORÇAMENTO (INSTALAÇÃO WALLBOX) ===================== -->
+  <div id="orcamento-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/70" onclick="fecharOrcamentoModal()"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+      <div class="bg-panel border border-panel2 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[92vh] overflow-y-auto">
+        <div class="flex items-center justify-between p-5 border-b border-panel2 sticky top-0 bg-panel">
+          <div>
+            <h2 class="font-display font-semibold text-lg">Orçamento de instalação</h2>
+            <p class="text-xs text-inkmuted mt-0.5">Sem compromisso · resposta de instalador parceiro</p>
+          </div>
+          <button onclick="fecharOrcamentoModal()" class="w-9 h-9 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel2 transition-colors shrink-0">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <form id="orcamento-form" onsubmit="enviarOrcamento(event)" class="p-5 sm:p-6 space-y-4">
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">Nome completo</label>
+            <input type="text" id="orcamento-nome" required
+              class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink placeholder:text-inkmuted/60 focus:outline-none focus:border-volt transition-colors"
+              placeholder="Seu nome">
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">WhatsApp</label>
+            <input type="tel" id="orcamento-telefone" required
+              class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink placeholder:text-inkmuted/60 focus:outline-none focus:border-volt transition-colors"
+              placeholder="(54) 99999-9999">
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">CEP</label>
+            <input type="text" id="orcamento-cep" required inputmode="numeric" maxlength="9"
+              class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink placeholder:text-inkmuted/60 focus:outline-none focus:border-volt transition-colors"
+              placeholder="95670-000">
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">Tipo de imóvel</label>
+            <select id="orcamento-imovel" required
+              class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-volt transition-colors">
+              <option value="" disabled selected>Selecione</option>
+              <option value="Casa">Casa</option>
+              <option value="Apartamento / Condomínio">Apartamento / Condomínio</option>
+              <option value="Comercial">Comercial</option>
+            </select>
+          </div>
+          <button type="submit" id="orcamento-submit-btn"
+            class="w-full px-4 py-3 rounded-lg bg-volt text-void text-sm font-medium hover:bg-voltdim transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+            Solicitar orçamento
+          </button>
+          <p class="text-[11px] text-inkmuted/70 text-center leading-relaxed">Seus dados serão compartilhados com um instalador parceiro homologado pra contato.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ================== CONFIGURAÇÃO ==================
+    // Banco saiu do Supabase pro Neon em 13/09/2026 — o navegador não fala
+    // Postgres direto, então tudo que era supabaseClient.from(...) agora é
+    // fetch('/api/...') pra uma função serverless que conversa com o Neon
+    // do lado do servidor. Ver ../manifesto/comparaevs.txt.
+    let todosVeiculos = [];
+
+    // Helper pros 4 formulários de lead abaixo — devolve {error} igual o
+    // formato do supabase-js que o código já checava, pra trocar só a
+    // chamada em si e manter o resto (disable de botão, toast) intacto.
+    async function postJSON(url, body) {
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if (!res.ok) {
+          const payload = await res.json().catch(() => ({}));
+          return { error: new Error(payload.error || ('HTTP ' + res.status)) };
+        }
+        return { error: null };
+      } catch (e) {
+        return { error: e };
+      }
+    }
+    let filtrados = [];
+    const selecionados = new Set();
+    const MAX_COMPARACAO = 3;
+
+    let sortState = { coluna: 'Autonomia_km', dir: 'desc' };
+
+    const ORDEM_CLASSES = ['A+', 'A', 'B', 'C', 'D', 'E', 'F', 'G'];
+    let seloCounter = 0;
+
+    // ================== PUBLICIDADE / PATROCÍNIO ==================
+    // true = mostra placeholders nos espaços vazios (útil enquanto não há patrocinador).
+    // Mude para false antes de publicar se quiser que os slots vazios simplesmente não apareçam.
+    const MOSTRAR_PLACEHOLDER_ANUNCIO = true;
+
+    const PUBLICIDADE = {
+
+      heroMaster: [
+        { nome: '', logoUrl: '', headline: 'Onde o lead qualificado encontra a solução premium: destaque sua marca para quem já decidiu evoluir.', imagem: './img/banner/master.png', link: 'https://wa.me/5511981058013' },
+        { nome: '', logoUrl: '', headline: 'Seu produto, nosso público: visibilidade qualificada para quem busca segurança e informação', imagem: './img/banner/master2.png', link: 'https://wa.me/5511981058013' },
+        { nome: '', logoUrl: '', headline: 'A vitrine do sucesso: conecte sua marca ao motorista que busca upgrade de status e rentabilidade máxima.', imagem: './img/banner/master3.png', link: 'https://wa.me/5511981058013' }
+      ],
+
+      banner: { titulo: 'A última marca que ele vê, é a primeira que ele lembra: assegure seu lugar na base da jornada de decisão', subtitulo: 'Zona de Conversão Final', cta: 'Compre agora', link: 'https://wa.me/5511981058013', imagemUrl: '' },
+
+      nativoIntervalo: 12, // a cada N veículos na lista, insere uma linha/card patrocinado
+      nativo: { marca: 'Linha Patrocinada', modelo: 'Garanta visibilidade máxima onde o motorista decide a compra.', cta: 'Ver oferta', link: 'https://wa.me/5511981058013' }
+    };
+
+    // ================== INIT ==================
+    let patrocinadoresDB = { hero_master: [], banner: null, nativo: null };
+
+    async function initSupabase() {
+      trackEvento('pageview');
+      await Promise.all([carregarVeiculos(), carregarPatrocinadores()]);
+      // só monta o carrossel de patrocinadores depois que AMBAS as buscas terminaram —
+      // antes disso, se carregarVeiculos() terminasse primeiro, o carrossel renderizava
+      // vazio (patrocinadoresDB ainda não tinha chegado), daí só aparecia certo no F5
+      renderAnuncioHeroMaster();
+      renderAnuncioBanner();
+    }
+
+    // ================== TRACKING DE EVENTOS ==================
+    function trackEvento(tipo_evento, opcoes) {
+      opcoes = opcoes || {};
+      try {
+        fetch('/api/eventos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tipo_evento,
+            veiculo_id: opcoes.veiculo_id || null,
+            patrocinador_id: opcoes.patrocinador_id || null,
+            detalhe: opcoes.detalhe || null,
+            pagina: window.location.pathname
+          }),
+          keepalive: true
+        }).catch(function (e) { console.warn('track falhou:', e); });
+      } catch (e) {
+        console.warn('track falhou:', e);
+      }
+    }
+
+    // ================== PATROCINADORES ==================
+    async function carregarPatrocinadores() {
+      let lista = [];
+      try {
+        const res = await fetch('/api/patrocinadores');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        lista = await res.json();
+      } catch (error) {
+        console.warn('Erro ao carregar patrocinadores, usando fallback estático.', error);
+        return;
+      }
+
+      patrocinadoresDB.hero_master = lista.filter(p => p.tipo === 'hero_master');
+      patrocinadoresDB.banner = lista.find(p => p.tipo === 'banner') || null;
+      patrocinadoresDB.nativo = lista.find(p => p.tipo === 'nativo') || null;
+    }
+
+    // Data da ultima importacao do PBEV, tirada do proprio dado (a coluna
+    // data_importacao recebe now() a cada carga). Assim a data nunca fica
+    // desatualizada por alguem esquecer de editar uma constante aqui.
+    let dataDosDados = '';
+
+    function calcularDataDosDados(linhas) {
+      const datas = linhas.map(v => v.data_importacao).filter(Boolean).sort();
+      if (!datas.length) return '';
+      const d = new Date(datas[datas.length - 1]);
+      return isNaN(d) ? '' : d.toLocaleDateString('pt-BR');
+    }
+
+    async function carregarVeiculos() {
+      let data = [];
+      try {
+        const res = await fetch('/api/veiculos');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        data = await res.json();
+      } catch (error) {
+        console.error(error);
+        document.getElementById('skeleton').classList.add('hidden');
+        mostrarToast('Erro ao carregar dados. Veja o console.');
+        return;
+      }
+
+      document.getElementById('skeleton').classList.add('hidden');
+
+      dataDosDados = calcularDataDosDados(data || []);
+
+      todosVeiculos = data || [];
+      preencherFiltros();
+      preencherSimuladorVeiculos();
+      renderHero();
+      aplicarFiltros();
+      lerComparacaoURL();
+      injetarSchemaVeiculos();
+    }
+
+    // ================== SEO: DADOS ESTRUTURADOS DINÂMICOS ==================
+    // Monta um schema.org ItemList com os veículos assim que os dados reais chegam do
+    // Supabase — sem isso, o HTML estático não tem nenhuma informação de veículo pros
+    // buscadores lerem (tudo é renderizado via JS depois do carregamento).
+    function injetarSchemaVeiculos() {
+      var antigo = document.getElementById('schema-veiculos');
+      if (antigo) antigo.remove();
+      if (!todosVeiculos.length) return;
+
+      var itens = todosVeiculos.slice(0, 50).map(function(v, i) {
+        return {
+          '@type': 'ListItem',
+          position: i + 1,
+          item: {
+            '@type': 'Vehicle',
+            name: [v.Marca, v.Modelo_Versao].filter(Boolean).join(' '),
+            brand: v.Marca || undefined,
+            vehicleEngine: { '@type': 'EngineSpecification', fuelType: 'Electric' },
+            image: v.imagem || undefined,
+            offers: v.preco ? { '@type': 'Offer', priceCurrency: 'BRL', price: v.preco } : undefined
+          }
+        };
+      });
+
+      var schema = {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        name: 'Carros elétricos comparados no ComparaEVs',
+        itemListElement: itens
+      };
+
+      var script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.id = 'schema-veiculos';
+      script.textContent = JSON.stringify(schema);
+      document.head.appendChild(script);
+    }
+
+    // ================== HELPERS NUMÉRICOS ==================
+    function fmtKm(v) {
+      if (v === null || v === undefined || v === '') return '—';
+      return Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+    }
+    function fmtConsumo(v) {
+      if (v === null || v === undefined || v === '') return '—';
+      return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function fmtMoeda(v) {
+      return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+    function fmtPreco(v) {
+      if (v === null || v === undefined || v === '') return 'Consulte';
+      return fmtMoeda(v);
+    }
+    function tarifaAtual() {
+      return Number(document.getElementById('filter-tarifa').value) || 0;
+    }
+    function custoPor100km(consumoMJkm) {
+      if (consumoMJkm === null || consumoMJkm === undefined) return 0;
+      const consumoKWhKm = Number(consumoMJkm) / 3.6;
+      return consumoKWhKm * tarifaAtual() * 100;
+    }
+
+    // ================== SELO PBE (elemento de assinatura) ==================
+    function renderSelo(classeRaw, tamanho) {
+      const classe = (classeRaw || '').toString().trim().toUpperCase();
+      let idx = ORDEM_CLASSES.indexOf(classe);
+      if (idx === -1) idx = Math.round((ORDEM_CLASSES.length - 1) / 2);
+      const pct = idx / (ORDEM_CLASSES.length - 1);
+
+      const barX = 6, barW = 248, barY = 38, barH = 14;
+      const pointerX = barX + pct * barW;
+      const chipX = Math.min(238, Math.max(22, pointerX));
+      const gradId = 'grad-selo-' + (seloCounter++);
+      const alturaSvg = 74;
+
+      const legenda = tamanho === 'lg'
+        ? `<p class="text-[10px] uppercase tracking-widest text-inkmuted text-center mt-1">Classificação geral PBEV</p>`
+        : '';
+
+      return `
+        <svg viewBox="0 0 260 ${alturaSvg}" class="w-full h-auto" role="img" aria-label="Classificação energética: ${classeRaw || 'não informada'}">
+          <defs>
+            <linearGradient id="${gradId}" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#2E7D32"/>
+              <stop offset="20%" stop-color="#66BB6A"/>
+              <stop offset="40%" stop-color="#C8FF4D"/>
+              <stop offset="60%" stop-color="#FFC107"/>
+              <stop offset="80%" stop-color="#FB8C00"/>
+              <stop offset="100%" stop-color="#E53935"/>
+            </linearGradient>
+          </defs>
+          <rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" rx="7" fill="url(#${gradId})"/>
+          <polygon points="${pointerX - 7},30 ${pointerX + 7},30 ${pointerX},40" fill="#E8EAED"/>
+          <rect x="${chipX - 16}" y="2" width="32" height="22" rx="6" fill="#14171C" stroke="#E8EAED" stroke-width="1"/>
+          <text x="${chipX}" y="18" text-anchor="middle" font-family="'Space Grotesk', sans-serif" font-size="13" font-weight="700" fill="#E8EAED">${(classeRaw || '?').toString()}</text>
+        </svg>
+        ${legenda}
+      `;
+    }
+
+    // ================== HERO ==================
+    function renderHero() {
+      document.getElementById('hero').classList.remove('hidden');
+    }
+
+    // ================== SIMULADOR DE FINANCIAMENTO ==================
+    const TAXA_MENSAL_FINANCIAMENTO = 0.0105; // ~13,4% a.a. — média de mercado p/ financiamento verde de elétricos
+
+    function preencherSimuladorVeiculos() {
+      const selectMarca = document.getElementById('sim-marca');
+      const marcas = [...new Set(todosVeiculos.filter(v => v.preco).map(v => v.Marca))].sort((a, b) => a.localeCompare(b));
+      selectMarca.innerHTML = marcas.map(m => `<option value="${m}">${m}</option>`).join('');
+      preencherSimuladorModelos();
+    }
+
+    function preencherSimuladorModelos() {
+      const marca = document.getElementById('sim-marca').value;
+      const selectModelo = document.getElementById('sim-modelo');
+      const modelos = todosVeiculos
+        .filter(v => v.preco && v.Marca === marca)
+        .sort((a, b) => a.Modelo_Versao.localeCompare(b.Modelo_Versao));
+      selectModelo.innerHTML = modelos.map(v => `<option value="${v.id}">${v.Modelo_Versao}</option>`).join('');
+      preencherSimuladorPreco();
+    }
+
+    function preencherSimuladorPreco() {
+      const id = Number(document.getElementById('sim-modelo').value);
+      const v = todosVeiculos.find(x => x.id === id);
+      document.getElementById('sim-preco').value = v ? Number(v.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '';
+    }
+
+    function parseMoeda(str) {
+      if (!str) return 0;
+      const limpo = String(str).replace(/[^\d,]/g, '').replace(',', '.');
+      return parseFloat(limpo) || 0;
+    }
+
+    function calcularFinanciamento() {
+      trackEvento('cta_financiamento_simular');
+      const id = Number(document.getElementById('sim-modelo').value);
+      const v = todosVeiculos.find(x => x.id === id);
+      const nomeVeiculo = v ? `${v.Marca} ${v.Modelo_Versao}` : (document.getElementById('sim-marca').value || 'Veículo selecionado');
+
+      const preco = parseMoeda(document.getElementById('sim-preco').value);
+      const entrada = parseMoeda(document.getElementById('sim-entrada').value);
+      const prazo = Number(document.getElementById('sim-prazo').value);
+
+      if (!preco) {
+        mostrarToast('Informe o valor do veículo pra continuar.');
+        return;
+      }
+      if (entrada < 0 || entrada >= preco) {
+        mostrarToast('A entrada precisa ser menor que o valor do veículo.');
+        return;
+      }
+
+      const i = TAXA_MENSAL_FINANCIAMENTO;
+      const financiado = preco - entrada;
+      const parcela = financiado * (i / (1 - Math.pow(1 + i, -prazo)));
+
+      document.getElementById('sim-card-veiculo').textContent = nomeVeiculo;
+      document.getElementById('sim-card-preco').textContent = fmtMoeda(preco);
+      document.getElementById('sim-card-entrada').textContent = fmtMoeda(entrada);
+      document.getElementById('sim-card-financiado').textContent = fmtMoeda(financiado);
+      document.getElementById('sim-card-prazo').textContent = `${prazo}x`;
+      document.getElementById('sim-card-taxa').textContent = `${(i * 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}% a.m.`;
+      document.getElementById('sim-card-parcela').textContent = `${fmtMoeda(parcela)} /mês`;
+
+      const resultado = document.getElementById('sim-resultado');
+      resultado.classList.remove('hidden');
+      if (resultado.scrollIntoView) resultado.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function limparSimulacao() {
+      document.getElementById('sim-marca').selectedIndex = 0;
+      preencherSimuladorModelos();
+      document.getElementById('sim-entrada').value = '';
+      document.getElementById('sim-prazo').value = '48';
+
+      const resultado = document.getElementById('sim-resultado');
+      resultado.classList.add('hidden');
+      ['sim-card-veiculo', 'sim-card-preco', 'sim-card-entrada', 'sim-card-financiado', 'sim-card-prazo', 'sim-card-taxa', 'sim-card-parcela']
+        .forEach(id => document.getElementById(id).textContent = '—');
+    }
+
+    function baixarSimulacaoComoImagem() {
+      const veiculo = document.getElementById('sim-card-veiculo').textContent;
+      if (!veiculo || veiculo === '—') {
+        mostrarToast('Calcule uma simulação antes de baixar.');
+        return;
+      }
+
+      const dados = {
+        veiculo,
+        preco: document.getElementById('sim-card-preco').textContent,
+        entrada: document.getElementById('sim-card-entrada').textContent,
+        financiado: document.getElementById('sim-card-financiado').textContent,
+        prazo: document.getElementById('sim-card-prazo').textContent,
+        taxa: document.getElementById('sim-card-taxa').textContent,
+        parcela: document.getElementById('sim-card-parcela').textContent,
+      };
+
+      const desenhar = () => {
+        try {
+          desenharCardSimulacao(dados);
+        } catch (err) {
+          console.error(err);
+          mostrarToast('Erro ao gerar a imagem. Tenta novamente.');
+        }
+      };
+
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(desenhar).catch(desenhar);
+      } else {
+        desenhar();
+      }
+    }
+
+    function desenharCardSimulacao(dados) {
+      const W = 640, H = 560, escala = 2;
+      const canvas = document.createElement('canvas');
+      canvas.width = W * escala;
+      canvas.height = H * escala;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(escala, escala);
+
+      // fundo
+      ctx.fillStyle = '#1C2026';
+      caminhoRetanguloArredondado(ctx, 0, 0, W, H, 20);
+      ctx.fill();
+
+      let y = 56;
+      ctx.textBaseline = 'alphabetic';
+
+      ctx.fillStyle = '#C8FF4D';
+      ctx.font = '600 18px "Space Grotesk", Arial, sans-serif';
+      ctx.fillText('⚡ ComparaEVs', 40, y);
+
+      y += 46;
+      ctx.fillStyle = '#E8EAED';
+      ctx.font = '600 22px "Space Grotesk", Arial, sans-serif';
+      ctx.fillText(dados.veiculo, 40, y);
+
+      y += 44;
+      const linhas = [
+        ['Valor do veículo', dados.preco],
+        ['Entrada', dados.entrada],
+        ['Valor financiado', dados.financiado],
+        ['Prazo', dados.prazo],
+        ['Taxa estimada', dados.taxa],
+      ];
+      linhas.forEach(([label, valor]) => {
+        ctx.fillStyle = '#8B92A0';
+        ctx.font = '400 14px Inter, Arial, sans-serif';
+        ctx.fillText(label, 40, y);
+
+        ctx.fillStyle = '#E8EAED';
+        ctx.font = '600 14px "JetBrains Mono", monospace';
+        const largura = ctx.measureText(valor).width;
+        ctx.fillText(valor, W - 40 - largura, y);
+
+        y += 32;
+      });
+
+      y += 8;
+      ctx.strokeStyle = '#262B33';
+      ctx.beginPath();
+      ctx.moveTo(40, y);
+      ctx.lineTo(W - 40, y);
+      ctx.stroke();
+
+      y += 38;
+      ctx.fillStyle = '#8B92A0';
+      ctx.font = '600 11px Inter, Arial, sans-serif';
+      ctx.fillText('PARCELA ESTIMADA', 40, y);
+
+      y += 44;
+      ctx.fillStyle = '#C8FF4D';
+      ctx.font = '700 34px "JetBrains Mono", monospace';
+      ctx.fillText(dados.parcela, 40, y);
+
+      y += 36;
+      ctx.fillStyle = '#8B92A0';
+      ctx.font = '400 11px Inter, Arial, sans-serif';
+      quebrarTextoCanvas(
+        ctx,
+        'Estimativa com base em taxa média de mercado para financiamento de veículos elétricos. Sujeito a aprovação de crédito e condições da instituição financeira.',
+        40, y, W - 80, 16
+      );
+
+      const link = document.createElement('a');
+      link.download = 'simulacao-financiamento-comparaevs.png';
+      link.href = canvas.toDataURL('image/png');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function caminhoRetanguloArredondado(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    function quebrarTextoCanvas(ctx, texto, x, y, larguraMax, alturaLinha) {
+      const palavras = texto.split(' ');
+      let linha = '';
+      for (let n = 0; n < palavras.length; n++) {
+        const testeLinha = linha + palavras[n] + ' ';
+        if (ctx.measureText(testeLinha).width > larguraMax && n > 0) {
+          ctx.fillText(linha, x, y);
+          linha = palavras[n] + ' ';
+          y += alturaLinha;
+        } else {
+          linha = testeLinha;
+        }
+      }
+      ctx.fillText(linha, x, y);
+    }
+
+    // ================== PUBLICIDADE: RENDER ==================
+    let heroMasterIntervalo = null;
+
+    // Vídeo da casa (carro carregando no wallbox) entra como 1º slide do banner master.
+    // Enquanto ele toca a rotação espera; quando termina, seguem os patrocinadores (5 s cada)
+    // e a volta ao slide 0 reinicia o vídeo. Gerado em remotion-app (CarroBanner.tsx).
+    // Duas versões no formato do quadro: computador 1920×650 (~3:1) e celular 1080×720.
+    const HERO_VIDEO = {
+      desktop: { src: './img/banner/carro-banner.mp4', poster: './img/banner/carro-banner-capa.jpg' },
+      celular: { src: './img/banner/carro-banner-celular.mp4', poster: './img/banner/carro-banner-celular-capa.jpg' }
+    };
+
+    function renderAnuncioHeroMaster() {
+      const slot = document.getElementById('anuncio-hero-master');
+      const lista = patrocinadoresDB.hero_master;
+
+      if (heroMasterIntervalo) {
+        clearTimeout(heroMasterIntervalo);
+        heroMasterIntervalo = null;
+      }
+
+      if (!lista || !lista.length) {
+        slot.innerHTML = MOSTRAR_PLACEHOLDER_ANUNCIO
+          ? `<a href="https://wa.me/5511981058013" target="_blank" rel="noopener sponsored"
+                onclick="trackEvento('cta_anuncie_aqui', {detalhe: 'hero_master'})"
+                class="block bg-white border-b border-dashed border-gray-300 py-5 px-6 text-center hover:bg-gray-50 transition-colors">
+               <i class="fa-solid fa-crown mb-1 block text-base" style="color:#C8FF4D"></i>
+               <p class="text-gray-700 text-sm font-medium">Anuncie aqui — espaço master do topo do site</p>
+               <p class="text-gray-500 text-xs mt-0.5">Sua marca em destaque para quem já decidiu comprar um elétrico. Fale com a gente <i class="fa-solid fa-arrow-right ml-0.5"></i></p>
+             </a>`
+          : '';
+        return;
+      }
+
+      const total = lista.length + 1;
+      const hv = window.matchMedia('(max-width: 767px)').matches ? HERO_VIDEO.celular : HERO_VIDEO.desktop;
+      const classeSlide = (i) => `hero-master-slide absolute inset-0 transition-opacity duration-1000 ease-in-out ${i === 0 ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'}`;
+      const botao = 'w-9 h-9 rounded-full bg-black/55 backdrop-blur-sm border border-white/15 text-white hover:text-void hover:bg-volt transition-colors flex items-center justify-center';
+
+      slot.innerHTML = `
+  <div class="relative border-b border-panel2 overflow-hidden h-[260px] sm:h-[360px] lg:h-[440px]" style="background:#0B0D10">
+    <div class="${classeSlide(0)}" data-hero-video>
+      <video id="hero-video" src="${hv.src}" poster="${hv.poster}" muted autoplay playsinline preload="auto"
+             class="absolute inset-0 w-full h-full object-cover" style="background:#0B0D10"></video>
+    </div>
+    ${lista.map((cfg, j) => `
+      <a href="${cfg.link || '#'}" target="_blank" rel="noopener sponsored"
+         onclick="trackEvento('cta_patrocinador_hero', {patrocinador_id: ${cfg.id}, detalhe: '${(cfg.nome || '').replace(/'/g, "\'")}'})"
+         class="${classeSlide(j + 1)}"
+         style="background-image:url('${window.matchMedia('(max-width: 640px)').matches ? (cfg.imagem_mobile || cfg.imagem || '') : (cfg.imagem || '')}'); background-size:cover; background-position:center;">
+        <div class="absolute bottom-4 left-4 z-10 flex items-center gap-3 px-4 py-2.5 rounded-xl bg-black/55 backdrop-blur-sm">
+          <div>
+            <p class="text-[10px] uppercase tracking-widest text-volt mb-0.5">${cfg.nome || 'Patrocinado'}</p>
+            <p class="font-display font-semibold text-sm sm:text-base text-white">${cfg.headline || ''}</p>
+          </div>
+        </div>
+      </a>
+    `).join('')}
+    <div class="absolute top-3 right-3 z-30 flex gap-2">
+      <button type="button" id="hero-video-som" class="${botao}" title="Ligar o som" aria-label="Ligar o som">
+        <i class="fa-solid fa-volume-xmark text-sm"></i>
+      </button>
+      <button type="button" id="hero-video-replay" class="${botao}" title="Ver o vídeo de novo" aria-label="Ver o vídeo de novo">
+        <i class="fa-solid fa-rotate-right text-sm"></i>
+      </button>
+    </div>
+    <div class="absolute bottom-3 right-4 z-20 flex gap-1.5">
+      ${Array.from({ length: total }, (_, i) => `<span class="hero-master-dot w-1.5 h-1.5 rounded-full transition-colors duration-300 ${i === 0 ? 'bg-volt' : 'bg-white/30'}"></span>`).join('')}
+    </div>
+  </div>
+`;
+
+      const slides = slot.querySelectorAll('.hero-master-slide');
+      const dots = slot.querySelectorAll('.hero-master-dot');
+      const video = slot.querySelector('#hero-video');
+      const btnSom = slot.querySelector('#hero-video-som');
+      const btnReplay = slot.querySelector('#hero-video-replay');
+      let atual = 0;
+
+      function tocarVideo() {
+        // só volta ao início se já tocou (pular antes de carregar pode travar o vídeo)
+        if (video.currentTime > 0) { try { video.currentTime = 0; } catch (e) {} }
+        const vai = () => {
+          const p = video.play();
+          // autoplay bloqueado (economia de bateria etc.): não trava o carrossel
+          if (p && p.catch) p.catch(() => { if (atual === 0) agendar(5000); });
+        };
+        // play() antes do arquivo carregar às vezes é ignorado: espera ficar pronto
+        if (video.readyState >= 2) vai();
+        else video.addEventListener('canplay', vai, { once: true });
+      }
+
+      function agendar(ms) {
+        clearTimeout(heroMasterIntervalo);
+        heroMasterIntervalo = setTimeout(() => mostrar((atual + 1) % slides.length), ms);
+      }
+
+      function mostrar(i) {
+        clearTimeout(heroMasterIntervalo);
+        slides[atual].classList.remove('opacity-100', 'z-10', 'pointer-events-auto');
+        slides[atual].classList.add('opacity-0', 'z-0', 'pointer-events-none');
+        dots[atual]?.classList.remove('bg-volt');
+        dots[atual]?.classList.add('bg-white/30');
+        atual = i;
+        slides[atual].classList.remove('opacity-0', 'z-0', 'pointer-events-none');
+        slides[atual].classList.add('opacity-100', 'z-10', 'pointer-events-auto');
+        dots[atual]?.classList.remove('bg-white/30');
+        dots[atual]?.classList.add('bg-volt');
+        if (atual === 0) {
+          tocarVideo();
+        } else {
+          video.pause();
+          agendar(5000);
+        }
+      }
+
+      function atualizarSom() {
+        btnSom.innerHTML = `<i class="fa-solid ${video.muted ? 'fa-volume-xmark' : 'fa-volume-high'} text-sm"></i>`;
+        btnSom.title = video.muted ? 'Ligar o som' : 'Desligar o som';
+        btnSom.setAttribute('aria-label', btnSom.title);
+      }
+
+      video.addEventListener('ended', () => { if (atual === 0) agendar(400); });
+      // tocou de fato: cancela um "pula em 5 s" deixado por uma tentativa que falhou antes de carregar
+      video.addEventListener('playing', () => { if (atual === 0) clearTimeout(heroMasterIntervalo); });
+      // o Chrome pausa vídeo em aba escondida; ao voltar para a aba, continua de onde parou
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && atual === 0 && video.paused && !video.ended && document.body.contains(video)) video.play().catch(() => {});
+      });
+
+      btnSom.addEventListener('click', () => {
+        video.muted = !video.muted;
+        atualizarSom();
+        trackEvento('hero_video_som', { detalhe: video.muted ? 'mudo' : 'som' });
+        // ligou o som com outro slide na tela: volta para o vídeo
+        if (!video.muted && atual !== 0) mostrar(0);
+      });
+
+      btnReplay.addEventListener('click', () => {
+        trackEvento('hero_video_replay');
+        mostrar(0);
+      });
+
+      tocarVideo();
+    }
+
+    function renderAnuncioBanner() {
+      const slot = document.getElementById('anuncio-banner');
+      const cfg = patrocinadoresDB.banner;
+
+      if (!cfg) {
+        slot.innerHTML = MOSTRAR_PLACEHOLDER_ANUNCIO
+          ? `<a href="https://wa.me/5511981058013" target="_blank" rel="noopener sponsored"
+                onclick="trackEvento('cta_anuncie_aqui', {detalhe: 'banner'})"
+                class="block bg-white rounded-2xl border border-dashed border-gray-300 py-8 px-6 text-center hover:bg-gray-50 transition-colors">
+               <i class="fa-regular fa-rectangle-ad mb-1 text-lg block"></i>
+               <p class="text-gray-700 text-sm font-medium">Anuncie aqui</p>
+               <p class="text-gray-500 text-xs mt-0.5">Financiamento, seguro, wallbox, instalação... coloque sua empresa na frente de quem procura um elétrico. Fale com a gente <i class="fa-solid fa-arrow-right ml-0.5"></i></p>
+             </a>`
+          : '';
+        return;
+      }
+
+      slot.innerHTML = `
+        <a href="${cfg.link || '#'}" target="_blank" rel="noopener sponsored"
+           onclick="trackEvento('cta_patrocinador_banner', {patrocinador_id: ${cfg.id}, detalhe: '${(cfg.nome || '').replace(/'/g, "\\'")}'})"
+           class="relative block rounded-2xl border border-panel2 overflow-hidden hover:border-volt/40 transition-colors"
+           style="${cfg.imagem ? `background-image:url('${cfg.imagem}'); background-size:cover; background-position:center;` : ''}">
+          <div class="absolute inset-0" style="${cfg.imagem
+            ? 'background:linear-gradient(90deg, rgba(11,13,16,.9) 0%, rgba(11,13,16,.45) 60%, rgba(11,13,16,.1) 100%)'
+            : 'background:linear-gradient(90deg, #14171C 0%, #1C2026 100%)'}"></div>
+          <div class="relative z-10 flex flex-wrap items-center justify-between gap-4 p-6 sm:p-7">
+            <div>
+              <p class="text-[10px] uppercase tracking-widest text-volt mb-1">${cfg.nome || 'Patrocinado'}</p>
+              <p class="font-display font-semibold text-lg">${cfg.headline || ''}</p>
+              <p class="text-inkmuted text-sm">${cfg.subtitulo || ''}</p>
+            </div>
+            <span class="px-4 py-2 rounded-lg bg-volt text-void text-sm font-medium whitespace-nowrap">${cfg.cta || 'Saiba mais'}</span>
+          </div>
+        </a>
+      `;
+    }
+
+    function htmlNativoTabela() {
+      const cfg = patrocinadoresDB.nativo;
+      if (!cfg && !MOSTRAR_PLACEHOLDER_ANUNCIO) return '';
+
+      if (!cfg || !cfg.headline) {
+        return `
+          <tr>
+            <td colspan="8" class="p-4">
+              <a href="https://wa.me/5511981058013" target="_blank" rel="noopener sponsored"
+                 onclick="trackEvento('cta_anuncie_aqui', {detalhe: 'nativo_tabela'})"
+                 class="block bg-white rounded-xl border border-dashed border-gray-300 p-3 text-center hover:bg-gray-50 transition-colors">
+                <p class="text-gray-700 text-xs font-medium">Anuncie aqui — linha patrocinada a cada ${PUBLICIDADE.nativoIntervalo} veículos</p>
+                <p class="text-gray-500 text-[11px] mt-0.5">Sua marca aparece aqui para quem está comparando elétricos. Fale com a gente <i class="fa-solid fa-arrow-right ml-0.5"></i></p>
+              </a>
+            </td>
+          </tr>
+        `;
+      }
+
+      return `
+        <tr class="bg-white shadow-sm">
+          <td class="p-3"></td>
+          <td class="p-3" colspan="2">
+            <p class="text-[10px] uppercase tracking-wide text-red-600 font-semibold mb-0.5">${cfg.nome || 'Patrocinado'}</p>
+            <p class="font-medium text-gray-900">${cfg.headline || ''}</p>
+          </td>
+          <td colspan="5" class="p-3 text-right">
+            <a href="${cfg.link || '#'}" target="_blank" rel="noopener sponsored"
+               onclick="trackEvento('cta_patrocinador_nativo', {patrocinador_id: ${cfg.id}, detalhe: '${(cfg.nome || '').replace(/'/g, "\\'")}'})"
+               class="inline-block px-3 py-1.5 rounded-lg bg-red-600 hover:bg-gray-800 text-white text-xs font-medium transition-colors duration-200">${cfg.cta || 'Ver oferta'}</a>
+          </td>
+        </tr>
+      `;
+    }
+
+    function htmlNativoCard() {
+      const cfg = patrocinadoresDB.nativo;
+      if (!cfg && !MOSTRAR_PLACEHOLDER_ANUNCIO) return '';
+
+      if (!cfg || !cfg.headline) {
+        return `
+          <a href="https://wa.me/5511981058013" target="_blank" rel="noopener sponsored"
+             onclick="trackEvento('cta_anuncie_aqui', {detalhe: 'nativo_card'})"
+             class="block bg-white rounded-xl border border-dashed border-gray-300 p-4 text-center hover:bg-gray-50 transition-colors">
+            <p class="text-gray-700 text-xs font-medium">Anuncie aqui — card patrocinado a cada ${PUBLICIDADE.nativoIntervalo} veículos</p>
+            <p class="text-gray-500 text-[11px] mt-0.5">Sua marca aparece aqui para quem está comparando elétricos. Fale com a gente <i class="fa-solid fa-arrow-right ml-0.5"></i></p>
+          </a>
+        `;
+      }
+
+      return `
+        <div class="rounded-xl border border-gray-200 bg-white shadow-sm p-4">
+          <p class="text-[10px] uppercase tracking-wide text-red-600 font-semibold mb-1">${cfg.nome || 'Patrocinado'}</p>
+          <p class="font-medium text-gray-900 mb-3">${cfg.headline || ''}</p>
+          <a href="${cfg.link || '#'}" target="_blank" rel="noopener sponsored"
+             onclick="trackEvento('cta_patrocinador_nativo', {patrocinador_id: ${cfg.id}, detalhe: '${(cfg.nome || '').replace(/'/g, "\\'")}'})"
+             class="inline-block px-4 py-2 rounded-lg bg-red-600 hover:bg-gray-800 text-white text-sm font-medium transition-colors duration-200">${cfg.cta || 'Ver oferta'}</a>
+        </div>
+      `;
+    }
+
+    function inserirAnuncioNativo(itens, htmlAnuncio) {
+      const intervalo = PUBLICIDADE.nativoIntervalo;
+      if (!htmlAnuncio || !intervalo || itens.length < intervalo) return itens.join('');
+      const copia = [...itens];
+      // insere o anúncio a cada N itens, considerando o deslocamento
+      // causado pelas inserções anteriores (cada uma soma +1 ao array)
+      for (let i = intervalo; i < copia.length; i += intervalo + 1) {
+        copia.splice(i, 0, htmlAnuncio);
+      }
+      return copia.join('');
+    }
+
+    // ================== FILTROS ==================
+    function preencherFiltros() {
+      const marcas = [...new Set(todosVeiculos.map(v => v.Marca))].sort();
+      const categorias = [...new Set(todosVeiculos.map(v => v.Categoria))].sort();
+      const propulsoes = [...new Set(todosVeiculos.map(v => v.Propulsao).filter(Boolean))].sort();
+
+      document.getElementById('filter-marca').innerHTML =
+        '<option value="">Todas as marcas</option>' + marcas.map(m => `<option value="${m}">${m}</option>`).join('');
+
+      document.getElementById('filter-categoria').innerHTML =
+        '<option value="">Todas as categorias</option>' + categorias.map(c => `<option value="${c}">${c}</option>`).join('');
+
+      document.getElementById('filter-propulsao').innerHTML =
+        '<option value="">Toda propulsão</option>' + propulsoes.map(p => `<option value="${p}">${p}</option>`).join('');
+
+      document.getElementById('filter-busca').addEventListener('input', debounce(aplicarFiltros, 200));
+      document.getElementById('filter-busca').addEventListener('keydown', e => { if (e.key === 'Enter') buscarComIA(); });
+
+      ['filter-marca', 'filter-categoria', 'filter-propulsao', 'filter-autonomia', 'filter-consumo', 'filter-preco'].forEach(id => {
+        if (id === 'filter-categoria') document.getElementById(id).addEventListener('change', () => { categoriasIA = null; });
+        document.getElementById(id).addEventListener('change', aplicarFiltros);
+        document.getElementById(id).addEventListener('input', debounce(aplicarFiltros, 250));
+      });
+      document.getElementById('filter-tarifa').addEventListener('input', debounce(() => renderResultados(), 200));
+    }
+
+    // ================== BUSCA COM IA ==================
+    // A IA só traduz a frase em filtros (api/busca-ia.js); o filtro em si
+    // continua sendo o aplicarFiltros() de sempre.
+    let categoriasIA = null; // várias categorias vindas da IA (o select só guarda uma)
+    async function buscarComIA() {
+      const input = document.getElementById('filter-busca');
+      const msg = document.getElementById('busca-ia-msg');
+      const btn = document.getElementById('btn-busca-ia');
+      const q = input.value.trim();
+      if (!q) return;
+      const mostrar = (t) => { msg.textContent = t; msg.classList.remove('hidden'); };
+      btn.disabled = true;
+      mostrar('Entendendo o que você procura…');
+      try {
+        trackEvento('busca_ia', { detalhe: q.slice(0, 100) });
+        const catSel = document.getElementById('filter-categoria').value;
+        const atuais = {
+          marca: document.getElementById('filter-marca').value,
+          categorias: categoriasIA || (catSel ? [catSel] : []),
+          propulsao: document.getElementById('filter-propulsao').value,
+          autonomiaMin: Number(document.getElementById('filter-autonomia').value) || 0,
+          consumoMax: Number(document.getElementById('filter-consumo').value) || 0,
+          precoMax: Number(document.getElementById('filter-preco').value) || 0,
+          uber: document.getElementById('filter-uber').checked
+        };
+        const r = await fetch('/api/veiculos?ia=1', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ q, atuais })
+        });
+        const f = await r.json();
+        if (!r.ok) throw new Error(f.error || 'Erro na busca.');
+        if (f.status !== 'APPROVE') { renderEscolhidosIA(q, f.resumo, []); msg.classList.add('hidden'); return; }
+        const x = f.filtros;
+        document.getElementById('filter-busca').value = x.busca;
+        document.getElementById('filter-marca').value = x.marca;
+        categoriasIA = x.categorias.length > 1 ? x.categorias : null;
+        document.getElementById('filter-categoria').value = x.categorias.length === 1 ? x.categorias[0] : '';
+        document.getElementById('filter-propulsao').value = x.propulsao;
+        document.getElementById('filter-autonomia').value = x.autonomiaMin;
+        document.getElementById('filter-preco').value = x.precoMax || '';
+        document.getElementById('filter-uber').checked = x.uber;
+        sortState.coluna = x.ordenarPor;
+        sortState.dir = x.ordem;
+        atualizarIconesOrdenacao();
+        aplicarFiltros();
+        renderEscolhidosIA(q, f.resumo || 'Filtros aplicados.', f.escolhidos);
+        msg.classList.add('hidden');
+      } catch (e) {
+        mostrar(e.message);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // Painel "Escolhidos pela IA": o texto do motivo vem do modelo, então entra
+    // por textContent (nunca innerHTML).
+    function renderEscolhidosIA(pergunta, resumo, escolhidos) {
+      const box = document.getElementById('busca-ia-escolhidos');
+      box.replaceChildren();
+      const itens = (escolhidos || []).map(e => ({ v: todosVeiculos.find(v => v.id === e.id), motivo: e.motivo })).filter(i => i.v);
+      box.classList.toggle('hidden', !resumo);
+      if (!resumo) return;
+      const p = document.createElement('p');
+      p.className = 'text-sm text-inkmuted mb-2';
+      p.textContent = 'Você perguntou: “' + pergunta + '”';
+      const r = document.createElement('p');
+      r.className = 'text-sm mb-3';
+      r.textContent = '✨ ' + resumo;
+      const x = document.createElement('button');
+      x.type = 'button';
+      x.title = 'Apagar resposta da IA';
+      x.setAttribute('aria-label', 'Apagar resposta da IA');
+      x.className = 'absolute top-3 right-3 w-7 h-7 rounded-md text-inkmuted hover:text-ink hover:bg-panel2 transition-colors';
+      x.innerHTML = '<i class="fa-solid fa-xmark text-sm"></i>';
+      x.onclick = limparFiltros; // limpa o campo, os filtros e o painel
+      p.className += ' pr-8';
+      box.append(x, p, r);
+      itens.forEach(({ v, motivo }, i) => {
+        const el = document.createElement('div');
+        el.className = 'flex flex-wrap items-baseline gap-x-3 gap-y-1 py-2 border-t border-panel2 text-sm';
+        const nome = document.createElement('span');
+        nome.className = 'font-medium';
+        nome.textContent = `${i + 1}. ${v.Marca} ${v.Modelo_Versao}`;
+        const dados = document.createElement('span');
+        dados.className = 'font-data text-xs text-inkmuted';
+        dados.textContent = `${v.Autonomia_km} km · ${v.preco ? fmtMoeda(v.preco) : 'preço: consulte'}`;
+        el.append(nome, dados);
+        if (motivo) {
+          const m = document.createElement('span');
+          m.className = 'text-xs text-inkmuted w-full';
+          m.textContent = motivo;
+          el.appendChild(m);
+        }
+        box.appendChild(el);
+      });
+    }
+
+    function debounce(fn, ms) {
+      let t;
+      return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+    }
+
+    function limparFiltros() {
+      document.getElementById('filter-busca').value = '';
+      document.getElementById('busca-ia-msg').classList.add('hidden');
+      renderEscolhidosIA('', '', []);
+      document.getElementById('filter-marca').value = '';
+      document.getElementById('filter-categoria').value = '';
+      categoriasIA = null;
+      document.getElementById('filter-propulsao').value = '';
+      document.getElementById('filter-autonomia').value = 0;
+      document.getElementById('filter-consumo').value = 2;
+      document.getElementById('filter-preco').value = '';
+      document.getElementById('filter-uber').checked = false;
+      aplicarFiltros();
+    }
+
+    function aplicarFiltros() {
+      const busca = document.getElementById('filter-busca').value.trim().toLowerCase();
+      const marca = document.getElementById('filter-marca').value;
+      const categoria = document.getElementById('filter-categoria').value;
+      const propulsao = document.getElementById('filter-propulsao').value;
+      const autonomiaMin = Number(document.getElementById('filter-autonomia').value) || 0;
+      const consumoMax = Number(document.getElementById('filter-consumo').value) || 999;
+      const precoMaxInput = document.getElementById('filter-preco').value;
+      const precoMax = precoMaxInput === '' ? null : Number(precoMaxInput);
+      const apenasUber = document.getElementById('filter-uber').checked;
+
+      filtrados = todosVeiculos.filter(v => {
+        const texto = `${v.Marca} ${v.Modelo_Versao}`.toLowerCase();
+        return (!busca || texto.includes(busca)) &&
+               (!marca || v.Marca === marca) &&
+               (!categoria || v.Categoria === categoria) &&
+               (!categoriasIA || categoriasIA.includes(v.Categoria)) &&
+               (!propulsao || v.Propulsao === propulsao) &&
+               (Number(v.Autonomia_km) >= autonomiaMin) &&
+               (Number(v.Consumo_MJkm) <= consumoMax) &&
+               (precoMax === null || v.preco === null || v.preco === undefined || Number(v.preco) <= precoMax) &&
+               (!apenasUber || v.Uber === true);
+      });
+
+      ordenarLista();
+      renderResultados();
+    }
+
+    // ================== ORDENAÇÃO ==================
+    function ordenarPor(coluna) {
+      if (sortState.coluna === coluna) {
+        sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortState.coluna = coluna;
+        sortState.dir = (coluna === 'custo' || coluna === 'preco') ? 'asc' : 'desc';
+      }
+      ordenarLista();
+      renderResultados();
+    }
+
+    function ordenarLista() {
+      const { coluna, dir } = sortState;
+      filtrados.sort((a, b) => {
+        const va = coluna === 'custo' ? custoPor100km(a.Consumo_MJkm) : Number(a[coluna]);
+        const vb = coluna === 'custo' ? custoPor100km(b.Consumo_MJkm) : Number(b[coluna]);
+        return dir === 'asc' ? va - vb : vb - va;
+      });
+    }
+
+    function atualizarIconesOrdenacao() {
+      ['Autonomia_km', 'Consumo_MJkm', 'preco', 'custo'].forEach(col => {
+        const icon = document.getElementById('sort-icon-' + col);
+        if (!icon) return;
+        if (sortState.coluna === col) {
+          icon.className = `fa-solid fa-sort-${sortState.dir === 'asc' ? 'up' : 'down'} ml-1 text-[10px] text-volt`;
+        } else {
+          icon.className = 'fa-solid fa-sort ml-1 text-[10px] text-inkmuted/50';
+        }
+      });
+    }
+
+    // ================== RENDER RESULTADOS ==================
+    function renderResultados() {
+      const contagem = document.getElementById('contagem');
+      const tabelaWrap = document.getElementById('tabela-wrap');
+      const cardsWrap = document.getElementById('cards-wrap');
+      const emptyState = document.getElementById('empty-state');
+
+      if (!filtrados.length) {
+        tabelaWrap.classList.add('force-hidden');
+        cardsWrap.classList.add('force-hidden');
+        contagem.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        atualizarComoFunciona();
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      contagem.classList.remove('hidden');
+      contagem.textContent = `${filtrados.length} veículo(s) encontrado(s)`
+        + (dataDosDados ? ` · atualizados em ${dataDosDados}` : '');
+      atualizarComoFunciona();
+
+      // --- Tabela (desktop) ---
+      tabelaWrap.classList.remove('force-hidden');
+      const tbody = document.getElementById('tbody');
+      const linhasTabela = filtrados.map((v, i) => linhaTabela(v, i));
+      tbody.innerHTML = inserirAnuncioNativo(linhasTabela, htmlNativoTabela());
+
+      // --- Cards (mobile) ---
+      cardsWrap.classList.remove('force-hidden');
+      const cardsMobile = filtrados.map((v, i) => cardMobile(v, i));
+      cardsWrap.innerHTML = inserirAnuncioNativo(cardsMobile, htmlNativoCard());
+
+      atualizarIconesOrdenacao();
+    }
+
+    function linhaTabela(v, i) {
+      const selecionado = selecionados.has(v.id);
+      const custo = custoPor100km(v.Consumo_MJkm);
+      return `
+        <tr class="hover:bg-panel/60 transition-colors reveal" style="animation-delay:${Math.min(i, 8) * 25}ms">
+          <td class="p-3 text-center">
+            <button onclick="toggleSelecionado(${v.id})"
+              data-tour-check="${selecionado ? '1' : '0'}"
+              title="${selecionado ? 'Remover da comparação' : 'Adicionar à comparação'}"
+              aria-pressed="${selecionado ? 'true' : 'false'}"
+              aria-label="${selecionado ? 'Remover' : 'Adicionar'} ${v.Marca} ${v.Modelo_Versao} da comparação"
+              class="w-6 h-6 mx-auto rounded-md border flex items-center justify-center transition-colors
+                ${selecionado ? 'bg-volt border-volt text-void' : 'border-panel3 text-inkmuted/50 hover:border-volt/60 hover:text-volt'}">
+              <i class="fa-solid ${selecionado ? 'fa-check' : 'fa-plus'} text-[10px]"></i>
+            </button>
+          </td>
+          <td class="p-3">
+            <p class="font-medium">
+              ${v.Marca} ${v.Modelo_Versao}
+              ${v.ano ? `<span class="text-inkmuted text-xs font-data">· ${v.ano}</span>` : ''}
+              ${v.site ? `<a href="${v.site}" target="_blank" rel="noopener" onclick="trackEvento('cta_site_oferta', {veiculo_id: ${v.id}})" class="inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded border border-panel3 text-inkmuted hover:text-volt hover:border-volt/50 text-[10px] transition-colors" title="Ver oferta no site"><i class="fa-solid fa-globe"></i> site</a>` : ''}
+              ${v.Uber ? `<span class="inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded border border-volt/30 bg-[#1a2b0e] text-volt text-[10px] font-medium" title="Modelo aceito pela Uber (verifique critérios no app)"><i class="fa-brands fa-uber text-[9px]"></i> Uber</span>` : ''}
+              <button onclick="trackEvento('cta_proposta', {veiculo_id: ${v.id}}); abrirLeadModal(${v.id})" class="inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded border border-volt/40 text-volt hover:bg-volt hover:text-void text-[10px] transition-colors" title="Quero receber proposta">
+                <i class="fa-solid fa-envelope"></i> proposta
+              </button>
+              <a href="veiculo.html?id=${v.id}" target="_blank" rel="noopener" onclick="trackEvento('cta_ficha_tecnica', {veiculo_id: ${v.id}})" class="inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded border border-panel3 text-inkmuted hover:text-volt hover:border-volt/50 text-[10px] transition-colors" title="Ver ficha técnica completa">
+                <i class="fa-solid fa-circle-info"></i> ficha
+              </a>
+            <p class="text-[11px] text-inkmuted font-data">cid. ${fmtKm(v.Cidade_kmLe)} · estr. ${fmtKm(v.Estrada_kmLe)}</p>
+          </td>
+          <td class="p-3">
+            <span class="inline-block px-2 py-0.5 bg-panel2 text-inkmuted text-[11px] uppercase tracking-wide rounded-full">${v.Categoria || '—'}</span>
+          </td>
+          <td class="p-3 text-right font-data">${fmtKm(v.Autonomia_km)}</td>
+          <td class="p-3 text-right font-data">${fmtConsumo(v.Consumo_MJkm)} <span class="text-inkmuted text-[11px]">MJ/km</span></td>
+          <td class="p-3 text-right font-data">${fmtPreco(v.preco)}</td>
+          <td class="p-3 text-right font-data">${fmtMoeda(custo)}</td>
+          <td class="p-3 w-[140px]">${renderSelo(v.Class_Geral, 'sm')}</td>
+        </tr>
+      `;
+    }
+
+    function cardMobile(v, i) {
+      const selecionado = selecionados.has(v.id);
+      const custo = custoPor100km(v.Consumo_MJkm);
+      return `
+        <div class="rounded-xl border border-panel2 bg-panel p-4 reveal" style="animation-delay:${Math.min(i, 8) * 25}ms">
+          <div class="flex items-start justify-between gap-3 mb-3">
+            <div>
+              <p class="font-medium leading-tight">
+                ${v.Marca} ${v.Modelo_Versao}
+                ${v.ano ? `<span class="text-inkmuted text-xs font-data">· ${v.ano}</span>` : ''}
+                ${v.site ? `<a href="${v.site}" target="_blank" rel="noopener" onclick="trackEvento('cta_site_oferta', {veiculo_id: ${v.id}})" class="inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded border border-panel3 text-inkmuted hover:text-volt hover:border-volt/50 text-[10px] transition-colors" title="Ver oferta no site"><i class="fa-solid fa-globe"></i> site</a>` : ''}
+              </p>
+              <div class="flex items-center gap-2 flex-wrap mt-1">
+                <span class="inline-block px-2 py-0.5 bg-panel2 text-inkmuted text-[11px] uppercase tracking-wide rounded-full">${v.Categoria || '—'}</span>
+                ${v.Uber ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-volt/30 bg-[#1a2b0e] text-volt text-[10px] font-medium"><i class="fa-brands fa-uber text-[9px]"></i> Uber</span>` : ''}
+              </div>
+            </div>
+            <button onclick="toggleSelecionado(${v.id})"
+              data-tour-check="${selecionado ? '1' : '0'}"
+              aria-pressed="${selecionado ? 'true' : 'false'}"
+              class="h-8 px-3 rounded-lg border inline-flex items-center gap-1.5 text-xs font-medium transition-colors shrink-0
+                ${selecionado ? 'bg-volt border-volt text-void' : 'border-volt/40 text-volt hover:bg-volt hover:text-void'}">
+              <i class="fa-solid ${selecionado ? 'fa-check' : 'fa-plus'} text-[10px]"></i>
+              ${selecionado ? 'selecionado' : 'comparar'}
+            </button>
+          </div>
+
+          <div class="flex items-baseline gap-1.5 mb-0.5">
+            <span class="font-data font-bold text-2xl text-volt">${fmtKm(v.Autonomia_km)}</span>
+            <span class="text-inkmuted text-sm">km de autonomia</span>
+          </div>
+          <p class="text-[11px] text-inkmuted font-data mb-3">cidade ${fmtKm(v.Cidade_kmLe)} km · estrada ${fmtKm(v.Estrada_kmLe)} km</p>
+
+          <div class="grid grid-cols-3 gap-3 mb-3 text-sm">
+            <div>
+              <p class="text-[11px] text-inkmuted">Consumo</p>
+              <p class="font-data">${fmtConsumo(v.Consumo_MJkm)} MJ/km</p>
+            </div>
+            <div>
+              <p class="text-[11px] text-inkmuted">Preço</p>
+              <p class="font-data">${fmtPreco(v.preco)}</p>
+            </div>
+            <div>
+              <p class="text-[11px] text-inkmuted">Custo /100km</p>
+              <p class="font-data">${fmtMoeda(custo)}</p>
+            </div>
+          </div>
+
+          <div class="w-32">${renderSelo(v.Class_Geral, 'sm')}</div>
+
+          <button onclick="trackEvento('cta_proposta', {veiculo_id: ${v.id}}); abrirLeadModal(${v.id})" class="w-full mt-3 px-3 py-2.5 rounded-lg border border-volt/40 text-volt hover:bg-volt hover:text-void text-xs font-medium transition-colors flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-envelope"></i> Quero receber proposta
+          </button>
+          <a href="veiculo.html?id=${v.id}" target="_blank" rel="noopener" onclick="trackEvento('cta_ficha_tecnica', {veiculo_id: ${v.id}})" class="w-full mt-2 px-3 py-2.5 rounded-lg border border-panel3 text-inkmuted hover:text-volt hover:border-volt/50 text-xs font-medium transition-colors flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-circle-info"></i> Ver ficha técnica
+          </a>
+        </div>
+      `;
+    }
+
+    // ================== COMPARAÇÃO ==================
+    function toggleSelecionado(id) {
+      if (selecionados.has(id)) {
+        selecionados.delete(id);
+      } else {
+        if (selecionados.size >= MAX_COMPARACAO) {
+          mostrarToast(`Selecione no máximo ${MAX_COMPARACAO} veículos para comparar.`);
+          return;
+        }
+        selecionados.add(id);
+      }
+      renderResultados();
+      atualizarBarraComparacao();
+      tourReavaliar();
+    }
+
+    function limparComparacao() {
+      selecionados.clear();
+      renderResultados();
+      atualizarBarraComparacao();
+      tourReavaliar();
+    }
+
+    function atualizarBarraComparacao() {
+      const bar = document.getElementById('compare-bar');
+      const n = selecionados.size;
+      const estavaOculta = bar.classList.contains('hidden');
+
+      document.getElementById('compare-count').textContent = n;
+      document.getElementById('compare-label').textContent = n === 1 ? ' veículo selecionado' : ' veículos selecionados';
+
+      const hint = document.getElementById('compare-hint');
+      const btn = document.getElementById('compare-btn');
+      if (n < 2) {
+        hint.textContent = 'escolha mais um para comparar';
+        hint.classList.add('text-inkmuted');
+        hint.classList.remove('text-volt');
+        btn.classList.remove('cta-glow');
+      } else {
+        hint.textContent = 'pronto — veja lado a lado';
+        hint.classList.remove('text-inkmuted');
+        hint.classList.add('text-volt');
+        btn.classList.add('cta-glow');
+      }
+
+      bar.classList.toggle('hidden', n === 0);
+
+      // animação de entrada para chamar atenção quando a barra aparece.
+      // Vai no elemento interno: o wrapper usa -translate-x-1/2 para centralizar e
+      // um transform de animação nele quebraria esse alinhamento.
+      if (n > 0 && estavaOculta) {
+        const pilula = bar.firstElementChild;
+        pilula.classList.remove('bar-pop');
+        void pilula.offsetWidth;
+        pilula.classList.add('bar-pop');
+      }
+    }
+
+    // ================== ONBOARDING ==================
+    const TOUR_KEY = 'evs_tour_v1';
+    const COMO_FUNCIONA_KEY = 'evs_como_funciona_v1';
+
+    let tourPasso = -1;
+    let tourAtivo = false;
+
+    // Cada passo espera uma ação real do usuário: o tour só avança quando `pronto()` vira true.
+    const TOUR_PASSOS = [
+      {
+        titulo: 'Passo 1 · Escolha um veículo',
+        texto: 'Toque nesta caixinha para colocar o modelo na comparação. Dá pra marcar até ' + MAX_COMPARACAO + '.',
+        alvo: () => primeiroCheckVisivel(),
+        pronto: () => selecionados.size >= 1
+      },
+      {
+        titulo: 'Passo 2 · Marque o segundo',
+        texto: 'É este que vai aparecer ao lado do primeiro. Escolha outro modelo para continuar.',
+        alvo: () => primeiroCheckVisivel(),
+        pronto: () => selecionados.size >= 2
+      },
+      {
+        titulo: 'Passo 3 · Clique em Comparar',
+        texto: 'Esta barra mostra o que você selecionou. Clique em Comparar para ver autonomia, consumo, preço e selo INMETRO lado a lado.',
+        alvo: () => document.getElementById('compare-bar'),
+        pronto: () => false,
+        semScroll: true
+      }
+    ];
+
+    function primeiroCheckVisivel() {
+      const candidatos = document.querySelectorAll('[data-tour-check="0"]');
+      for (const el of candidatos) {
+        if (el.offsetParent !== null) return el;
+      }
+      return null;
+    }
+
+    function iniciarTour(manual) {
+      if (!filtrados.length) {
+        if (manual) mostrarToast('Carregando os veículos… tente de novo em instantes.');
+        return;
+      }
+      if (manual) {
+        selecionados.clear();
+        renderResultados();
+        atualizarBarraComparacao();
+        trackEvento('onboarding_tour_manual');
+      } else {
+        trackEvento('onboarding_tour_auto');
+      }
+      tourAtivo = true;
+      document.getElementById('tour').classList.remove('hidden');
+      window.addEventListener('resize', tourPosicionar);
+      window.addEventListener('scroll', tourPosicionar, { passive: true });
+      document.addEventListener('keydown', tourTecla);
+      tourIrPara(0);
+    }
+
+    function tourTecla(e) {
+      if (e.key === 'Escape' && tourAtivo) encerrarTour(true);
+    }
+
+    function tourIrPara(idx) {
+      // pula passos já cumpridos (ex.: usuário que já tinha veículos marcados)
+      while (idx < TOUR_PASSOS.length && TOUR_PASSOS[idx].pronto()) idx++;
+      if (idx >= TOUR_PASSOS.length) { encerrarTour(false); return; }
+
+      tourPasso = idx;
+      const passo = TOUR_PASSOS[idx];
+
+      document.getElementById('tour-titulo').textContent = passo.titulo;
+      document.getElementById('tour-texto').textContent = passo.texto;
+
+      document.getElementById('tour-bolinhas').innerHTML = TOUR_PASSOS.map((_, i) =>
+        `<span class="w-1.5 h-1.5 rounded-full ${i === idx ? 'bg-volt' : 'bg-panel3'}"></span>`
+      ).join('');
+
+      const alvo = passo.alvo();
+      if (alvo && !passo.semScroll) {
+        const r = alvo.getBoundingClientRect();
+        if (r.top < 90 || r.bottom > window.innerHeight - 220) {
+          // scroll instantâneo: o holofote tem transição própria e assim nunca
+          // fica desalinhado se o scroll suave for interrompido pelo usuário
+          alvo.scrollIntoView({ block: 'center', behavior: 'auto' });
+        }
+      }
+      tourPosicionar();
+      // reposiciona enquanto o layout se acomoda (fontes, imagens, anúncios nativos)
+      clearInterval(window.__tourTick);
+      let voltas = 0;
+      window.__tourTick = setInterval(function () {
+        tourPosicionar();
+        if (++voltas > 8 || !tourAtivo) clearInterval(window.__tourTick);
+      }, 90);
+    }
+
+    // chamado sempre que a seleção muda: avança o passo e reposiciona o holofote,
+    // já que renderResultados() recria os elementos-alvo a cada clique
+    function tourReavaliar() {
+      if (!tourAtivo) return;
+      const passo = TOUR_PASSOS[tourPasso];
+      if (passo && passo.pronto()) {
+        tourIrPara(tourPasso + 1);
+      } else {
+        setTimeout(tourPosicionar, 40);
+      }
+    }
+
+    function tourPosicionar() {
+      if (!tourAtivo) return;
+      const passo = TOUR_PASSOS[tourPasso];
+      if (!passo) return;
+
+      const alvo = passo.alvo();
+      if (!alvo) { encerrarTour(false); return; }
+
+      const spot = document.getElementById('tour-spot');
+      const ping = document.getElementById('tour-ping');
+      const card = document.getElementById('tour-card');
+
+      const r = alvo.getBoundingClientRect();
+      const pad = 6;
+      const top = r.top - pad, left = r.left - pad;
+      const w = r.width + pad * 2, h = r.height + pad * 2;
+      const raio = (r.height > 44 ? 16 : 10) + 'px';
+
+      [spot, ping].forEach(el => {
+        el.style.top = top + 'px';
+        el.style.left = left + 'px';
+        el.style.width = w + 'px';
+        el.style.height = h + 'px';
+        el.style.borderRadius = raio;
+      });
+
+      // balão abaixo do alvo se couber, senão acima
+      const cardH = card.offsetHeight || 170;
+      const cardW = card.offsetWidth || 320;
+      const margem = 14;
+      let cTop = top + h + margem;
+      if (cTop + cardH > window.innerHeight - 12) cTop = top - cardH - margem;
+      if (cTop < 12) cTop = Math.max(12, window.innerHeight - cardH - 12);
+
+      let cLeft = left + w / 2 - cardW / 2;
+      cLeft = Math.max(12, Math.min(cLeft, window.innerWidth - cardW - 12));
+
+      card.style.top = cTop + 'px';
+      card.style.left = cLeft + 'px';
+    }
+
+    function encerrarTour(pulou) {
+      if (!tourAtivo) return;
+      tourAtivo = false;
+      tourPasso = -1;
+      clearInterval(window.__tourTick);
+      document.getElementById('tour').classList.add('hidden');
+      window.removeEventListener('resize', tourPosicionar);
+      window.removeEventListener('scroll', tourPosicionar);
+      document.removeEventListener('keydown', tourTecla);
+      try { localStorage.setItem(TOUR_KEY, '1'); } catch (e) {}
+      trackEvento(pulou ? 'onboarding_tour_pulado' : 'onboarding_tour_concluido');
+    }
+
+    function fecharComoFunciona() {
+      document.getElementById('como-funciona').classList.add('hidden');
+      try { localStorage.setItem(COMO_FUNCIONA_KEY, '1'); } catch (e) {}
+      trackEvento('onboarding_faixa_dispensada');
+    }
+
+    function atualizarComoFunciona() {
+      let dispensado = false;
+      try { dispensado = !!localStorage.getItem(COMO_FUNCIONA_KEY); } catch (e) {}
+      document.getElementById('como-funciona')
+        .classList.toggle('hidden', dispensado || !filtrados.length);
+    }
+
+    function talvezIniciarTour() {
+      let visto = true;
+      try { visto = !!localStorage.getItem(TOUR_KEY); } catch (e) { visto = true; }
+      if (visto) return;
+      if (new URLSearchParams(window.location.search).get('comparar')) return;
+      if (!filtrados.length) return;
+
+      // o preloader ocupa z-index 9999 e leva ~1,4s + fade para sair depois de finish();
+      // começar antes disso deixaria o tour invisível atrás dele
+      const loader = document.getElementById('ev-loader');
+      let tentativas = 0;
+      const aguardar = setInterval(function () {
+        const livre = !loader || loader.classList.contains('hide');
+        if (!livre && ++tentativas < 60) return;   // desiste após ~6s
+        clearInterval(aguardar);
+        setTimeout(function () {
+          if (!tourAtivo && !selecionados.size) iniciarTour(false);
+        }, 700);   // respiro para o fade-out do preloader terminar
+      }, 100);
+    }
+
+    const CORES_FICHA = [
+      { borda: '#C8FF4D', fundo: '#1A2B0E' }, // volt (marca)
+      { borda: '#5EC8F2', fundo: '#0E222B' }, // azul elétrico
+      { borda: '#C792EA', fundo: '#241A2B' }  // violeta
+    ];
+
+    function linhasFichaTecnica(v) {
+      return [
+        { icon: 'fa-folder', label: 'Categoria', valor: v.Categoria || '—' },
+        { icon: 'fa-tag', label: 'Marca', valor: v.Marca || '—' },
+        { icon: 'fa-car-side', label: 'Modelo / Versão', valor: v.Modelo_Versao || '—' },
+        { icon: 'fa-bolt', label: 'Propulsão', valor: v.Propulsao || '—' },
+        { icon: 'fa-snowflake', label: 'Transmissão', valor: v.Transmissao || '—' },
+        { icon: 'fa-compass', label: 'Direção', valor: v.Direcao || '—' },
+        { icon: 'fa-gas-pump', label: 'Combustível', valor: v.Combustivel || '—' },
+        { icon: 'fa-building', label: 'Cidade (km/L.e)', valor: fmtKm(v.Cidade_kmLe), raw: v.Cidade_kmLe, melhor: 'maior' },
+        { icon: 'fa-road', label: 'Estrada (km/L.e)', valor: fmtKm(v.Estrada_kmLe), raw: v.Estrada_kmLe, melhor: 'maior' },
+        { icon: 'fa-bolt', label: 'Consumo (MJ/km)', valor: fmtConsumo(v.Consumo_MJkm), raw: v.Consumo_MJkm, melhor: 'menor' },
+        { icon: 'fa-route', label: 'Autonomia (km)', valor: fmtKm(v.Autonomia_km), raw: v.Autonomia_km, melhor: 'maior' },
+        { icon: 'fa-sack-dollar', label: 'Preço', valor: fmtPreco(v.preco), raw: v.preco, melhor: 'menor' }
+      ];
+    }
+
+    function fichaTecnicaHTML(v, idx) {
+      const cor = CORES_FICHA[idx % CORES_FICHA.length];
+      const linhasHtml = linhasFichaTecnica(v).map((l, i) => `
+        <div class="flex items-center gap-2.5 px-3 py-2 text-sm ${i % 2 === 0 ? 'bg-panel2/30' : ''}">
+          <i class="fa-solid ${l.icon} w-4 text-center text-[12px]" style="color:${cor.borda}"></i>
+          <span class="text-inkmuted flex-1">${l.label}</span>
+          <span class="font-medium text-right">${l.valor}</span>
+        </div>
+      `).join('');
+
+      return `
+        <div class="rounded-2xl overflow-hidden border-2" style="border-color:${cor.borda}">
+          <div class="px-4 py-3 text-center" style="background:${cor.fundo}">
+            ${v.imagem ? `<img src="${v.imagem}" alt="${v.Modelo_Versao || ''}" class="w-full h-36 object-contain mb-2" loading="lazy" />` : ''}
+            <p class="font-display font-bold text-lg leading-snug" style="color:${cor.borda}">${v.Modelo_Versao || ''}</p>
+          </div>
+          <div class="divide-y divide-panel3/40">${linhasHtml}</div>
+          <div class="grid grid-cols-2 gap-px" style="background:${cor.fundo}">
+            <div class="text-center py-3">
+              <p class="text-[10px] uppercase tracking-wide text-inkmuted mb-1">Class. Cat.</p>
+              <p class="font-display font-bold text-2xl" style="color:${cor.borda}">${v.Class_Cat || '—'}</p>
+            </div>
+            <div class="text-center py-3">
+              <p class="text-[10px] uppercase tracking-wide text-inkmuted mb-1">Class. Geral</p>
+              <p class="font-display font-bold text-2xl" style="color:${cor.borda}">${v.Class_Geral || '—'}</p>
+            </div>
+          </div>
+          <div class="p-3 bg-panel space-y-2">
+            ${v.site ? `<a href="${v.site}" target="_blank" rel="noopener" class="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors" style="background:${cor.borda};color:#0B0D10">
+              <i class="fa-solid fa-globe"></i> Ver oferta no site
+            </a>` : ''}
+            <button onclick="toggleSelecionado(${v.id}); abrirComparacao();" class="w-full text-center text-[11px] text-inkmuted hover:text-ink transition-colors">
+              <i class="fa-solid fa-trash-can mr-1"></i> remover da comparação
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Ficha em formato de tabela única — usada quando são 2 veículos:
+    // rótulo centralizado em badge, valor de cada carro na extremidade correspondente.
+    // Quando o item é comparável (maior/menor melhor), o vencedor fica em laranja.
+    const COR_VENCEDOR = '#F97316';
+
+    function fichaComparativaHTML(v1, v2) {
+      const cor1 = CORES_FICHA[0];
+      const cor2 = CORES_FICHA[1];
+      const linhas1 = linhasFichaTecnica(v1);
+      const linhas2 = linhasFichaTecnica(v2);
+
+      const linhasHtml = linhas1.map((l, i) => {
+        const l2 = linhas2[i];
+        let cor1Valor = cor1.borda;
+        let cor2Valor = cor2.borda;
+        const r1 = Number(l.raw);
+        const r2 = Number(l2.raw);
+        if (l.melhor && !isNaN(r1) && !isNaN(r2) && r1 !== r2) {
+          const v1Vence = l.melhor === 'maior' ? r1 > r2 : r1 < r2;
+          if (v1Vence) cor1Valor = COR_VENCEDOR; else cor2Valor = COR_VENCEDOR;
+        }
+        return `
+        <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-2 px-2 py-1.5 text-sm ${i % 2 === 0 ? 'bg-panel2/30' : ''}">
+          <span class="font-medium text-center truncate" style="color:${cor1Valor}">${l.valor}</span>
+          <span class="text-[10px] uppercase tracking-wide font-medium px-2.5 py-1 rounded-full bg-panel2 border border-panel3 whitespace-nowrap text-inkmuted">${l.label}</span>
+          <span class="font-medium text-center truncate" style="color:${cor2Valor}">${l2.valor}</span>
+        </div>
+      `;
+      }).join('');
+
+      const ctaHtml = (v, cor) => v.site
+        ? `<a href="${v.site}" target="_blank" rel="noopener" onclick="trackEvento('cta_site_oferta', {veiculo_id: ${v.id}})" class="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors" style="background:${cor.borda};color:#0B0D10">
+            <i class="fa-solid fa-globe"></i> Ver oferta
+          </a>`
+        : `<span></span>`;
+
+      return `
+        <div class="rounded-2xl overflow-hidden border border-panel3">
+          <div class="grid grid-cols-[1fr_auto_1fr] items-stretch">
+            <div class="px-3 py-2 text-center" style="background:${cor1.fundo}">
+              ${v1.imagem ? `<img src="${v1.imagem}" alt="${v1.Modelo_Versao || ''}" class="w-full h-28 object-contain mb-1" loading="lazy" />` : ''}
+              <p class="font-display font-bold text-sm leading-snug" style="color:${cor1.borda}">${v1.Modelo_Versao || ''}</p>
+            </div>
+            <div class="flex items-center justify-center px-2 text-inkmuted text-[10px] font-display font-bold" style="background:#14171C">VS</div>
+            <div class="px-3 py-2 text-center" style="background:${cor2.fundo}">
+              ${v2.imagem ? `<img src="${v2.imagem}" alt="${v2.Modelo_Versao || ''}" class="w-full h-28 object-contain mb-1" loading="lazy" />` : ''}
+              <p class="font-display font-bold text-sm leading-snug" style="color:${cor2.borda}">${v2.Modelo_Versao || ''}</p>
+            </div>
+          </div>
+          <div class="divide-y divide-panel3/40">${linhasHtml}</div>
+          <div class="grid grid-cols-[1fr_auto_1fr] items-center px-2 py-2" style="background:#14171C">
+            <p class="font-display font-bold text-lg text-center" style="color:${cor1.borda}">${v1.Class_Cat || '—'}</p>
+            <span class="text-[10px] uppercase tracking-wide font-medium px-2.5 py-1 rounded-full bg-panel2 border border-panel3 whitespace-nowrap text-inkmuted">Class. Cat.</span>
+            <p class="font-display font-bold text-lg text-center" style="color:${cor2.borda}">${v2.Class_Cat || '—'}</p>
+          </div>
+          <div class="grid grid-cols-[1fr_auto_1fr] items-center px-2 py-2 border-t border-panel3/40" style="background:#14171C">
+            <p class="font-display font-bold text-lg text-center" style="color:${cor1.borda}">${v1.Class_Geral || '—'}</p>
+            <span class="text-[10px] uppercase tracking-wide font-medium px-2.5 py-1 rounded-full bg-panel2 border border-panel3 whitespace-nowrap text-inkmuted">Class. Geral</span>
+            <p class="font-display font-bold text-lg text-center" style="color:${cor2.borda}">${v2.Class_Geral || '—'}</p>
+          </div>
+          <div class="grid grid-cols-2 gap-2 p-2 bg-panel">
+            ${ctaHtml(v1, cor1)}
+            ${ctaHtml(v2, cor2)}
+          </div>
+          <div class="grid grid-cols-2 gap-2 px-2 pb-2 bg-panel">
+            <button onclick="toggleSelecionado(${v1.id}); abrirComparacao();" class="text-center text-[11px] text-inkmuted hover:text-ink transition-colors">
+              <i class="fa-solid fa-trash-can mr-1"></i> remover
+            </button>
+            <button onclick="toggleSelecionado(${v2.id}); abrirComparacao();" class="text-center text-[11px] text-inkmuted hover:text-ink transition-colors">
+              <i class="fa-solid fa-trash-can mr-1"></i> remover
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Proxy gratuito (images.weserv.nl) para contornar bloqueio de CORS em imagens
+    // hospedadas fora do nosso domínio — necessário pro html2canvas conseguir "ler" a imagem.
+    function proxyImagemCanvas(url) {
+      if (!url) return '';
+      const semProtocolo = url.replace(/^https?:\/\//i, '');
+      return `https://images.weserv.nl/?url=${encodeURIComponent(semProtocolo)}&w=500`;
+    }
+
+    // Monta o template de imagem estilo Stories (1080x1920 após o scale do html2canvas)
+    function storyComparacaoHTML(v1, v2) {
+      const cor1 = CORES_FICHA[0];
+      const cor2 = CORES_FICHA[1];
+      const linhas1 = linhasFichaTecnica(v1);
+      const linhas2 = linhasFichaTecnica(v2);
+
+      const chavesDesejadas = ['Autonomia (km)', 'Consumo (MJ/km)', 'Cidade (km/L.e)', 'Estrada (km/L.e)', 'Preço'];
+      const pares = linhas1
+        .map((l, i) => ({ l, l2: linhas2[i] }))
+        .filter(({ l }) => chavesDesejadas.includes(l.label));
+
+      const linhasHtml = pares.map(({ l, l2 }, i) => {
+        let cor1Valor = '#EDEDED';
+        let cor2Valor = '#EDEDED';
+        const r1 = Number(l.raw);
+        const r2 = Number(l2.raw);
+        if (l.melhor && !isNaN(r1) && !isNaN(r2) && r1 !== r2) {
+          const v1Vence = l.melhor === 'maior' ? r1 > r2 : r1 < r2;
+          if (v1Vence) cor1Valor = COR_VENCEDOR; else cor2Valor = COR_VENCEDOR;
+        }
+        return `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 4px;${i % 2 === 0 ? 'background:rgba(255,255,255,0.03);' : ''}${i > 0 ? 'border-top:1px solid rgba(255,255,255,0.08);' : ''}">
+            <span style="flex:1;text-align:center;font-weight:700;font-size:23px;color:${cor1Valor};">${l.valor}</span>
+            <span style="flex-shrink:0;font-size:12px;letter-spacing:0.04em;text-transform:uppercase;font-weight:700;color:#8B92A0;background:#1B1F26;border:1px solid #262B33;border-radius:999px;padding:7px 16px;white-space:nowrap;">${l.label}</span>
+            <span style="flex:1;text-align:center;font-weight:700;font-size:23px;color:${cor2Valor};">${l2.valor}</span>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div style="width:540px;background:linear-gradient(180deg,#0B0D10 0%,#14171C 100%);padding:44px 32px;box-sizing:border-box;display:flex;flex-direction:column;font-family:'Inter',system-ui,sans-serif;color:#EDEDED;">
+          <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:26px;">
+            <img src="./img/banner/logo.png" style="width:34px;height:34px;object-fit:contain;" crossorigin="anonymous" />
+            <div style="text-align:left;">
+              <p style="font-size:18px;font-weight:700;letter-spacing:-0.01em;margin:0;line-height:1.1;">ComparaEVs</p>
+              <p style="font-size:11px;color:#8B92A0;margin:2px 0 0;">comparaevs.com.br</p>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:stretch;border-radius:20px;overflow:hidden;margin-bottom:16px;border:1px solid #262B33;">
+            <div style="flex:1;text-align:center;padding:14px 8px;background:${cor1.fundo};">
+              ${v1.imagem ? `<img src="${proxyImagemCanvas(v1.imagem)}" alt="${v1.Modelo_Versao || ''}" crossorigin="anonymous" style="width:100%;height:150px;object-fit:contain;margin-bottom:8px;" />` : ''}
+              <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#8B92A0;margin:0 0 2px;">${v1.Marca || ''}</p>
+              <p style="font-size:19px;font-weight:800;line-height:1.2;margin:0;color:${cor1.borda};">${v1.Modelo_Versao || ''}</p>
+              ${v1.Categoria ? `<span style="display:inline-block;margin-top:7px;font-size:10px;text-transform:uppercase;letter-spacing:0.04em;font-weight:700;color:#8B92A0;background:#1B1F26;border:1px solid #262B33;border-radius:999px;padding:4px 10px;">${v1.Categoria}</span>` : ''}
+            </div>
+            <div style="display:flex;align-items:center;justify-content:center;padding:0 14px;background:#14171C;font-size:14px;font-weight:800;color:#8B92A0;">VS</div>
+            <div style="flex:1;text-align:center;padding:14px 8px;background:${cor2.fundo};">
+              ${v2.imagem ? `<img src="${proxyImagemCanvas(v2.imagem)}" alt="${v2.Modelo_Versao || ''}" crossorigin="anonymous" style="width:100%;height:150px;object-fit:contain;margin-bottom:8px;" />` : ''}
+              <p style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:#8B92A0;margin:0 0 2px;">${v2.Marca || ''}</p>
+              <p style="font-size:19px;font-weight:800;line-height:1.2;margin:0;color:${cor2.borda};">${v2.Modelo_Versao || ''}</p>
+              ${v2.Categoria ? `<span style="display:inline-block;margin-top:7px;font-size:10px;text-transform:uppercase;letter-spacing:0.04em;font-weight:700;color:#8B92A0;background:#1B1F26;border:1px solid #262B33;border-radius:999px;padding:4px 10px;">${v2.Categoria}</span>` : ''}
+            </div>
+          </div>
+
+          <div style="border:1px solid #262B33;border-radius:20px;overflow:hidden;background:#101318;">
+            ${linhasHtml}
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 4px;background:#14171C;border-top:1px solid rgba(255,255,255,0.08);">
+              <p style="flex:1;text-align:center;font-size:30px;font-weight:800;margin:0;color:${cor1.borda};">${v1.Class_Geral || '—'}</p>
+              <span style="flex-shrink:0;font-size:11px;letter-spacing:0.04em;text-transform:uppercase;font-weight:700;color:#8B92A0;padding:0 16px;white-space:nowrap;">Class. Geral</span>
+              <p style="flex:1;text-align:center;font-size:30px;font-weight:800;margin:0;color:${cor2.borda};">${v2.Class_Geral || '—'}</p>
+            </div>
+          </div>
+
+          <div style="height:32px;"></div>
+
+          <div style="text-align:center;background:#C8FF4D;border-radius:14px;padding:18px 12px;">
+            <p style="margin:0;font-size:16px;font-weight:800;color:#0B0D10;">Compare seu próximo elétrico grátis</p>
+            <p style="margin:4px 0 0;font-size:13px;font-weight:600;color:#0B0D10;">comparaevs.com.br</p>
+          </div>
+        </div>
+      `;
+    }
+
+    // Espera todas as <img> dentro do elemento carregarem (ou falharem) antes de continuar.
+    // Sem isso, o html2canvas pode "fotografar" a imagem em branco se ela ainda não carregou.
+    function aguardarImagens(container) {
+      const imgs = Array.from(container.querySelectorAll('img'));
+      return Promise.all(imgs.map(img => {
+        if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+        return new Promise(resolve => {
+          img.addEventListener('load', resolve, { once: true });
+          img.addEventListener('error', resolve, { once: true });
+        });
+      }));
+    }
+
+    async function baixarImagemComparacao() {
+      const veiculos = todosVeiculos.filter(v => selecionados.has(v.id));
+      if (veiculos.length !== 2) return;
+      if (typeof html2canvas === 'undefined') {
+        mostrarToast('Não foi possível gerar a imagem. Tente novamente em instantes.');
+        return;
+      }
+      trackEvento('cta_baixar_imagem_comparacao', { detalhe: [...selecionados].join(',') });
+
+      const btn = document.getElementById('btn-baixar-imagem');
+      const labelEl = document.getElementById('btn-baixar-imagem-label');
+      const labelOriginal = labelEl.textContent;
+      labelEl.textContent = 'Gerando...';
+      btn.disabled = true;
+
+      const wrapper = document.createElement('div');
+      wrapper.style.position = 'fixed';
+      wrapper.style.left = '-9999px';
+      wrapper.style.top = '0';
+      wrapper.innerHTML = storyComparacaoHTML(veiculos[0], veiculos[1]);
+      document.body.appendChild(wrapper);
+
+      try {
+        const alvo = wrapper.firstElementChild;
+        await aguardarImagens(alvo);
+        const canvas = await html2canvas(alvo, { scale: 2, backgroundColor: null, useCORS: true, allowTaint: false });
+        const link = document.createElement('a');
+        const nome1 = (veiculos[0].Marca || 'carro1').toLowerCase().replace(/\s+/g, '-');
+        const nome2 = (veiculos[1].Marca || 'carro2').toLowerCase().replace(/\s+/g, '-');
+        link.download = `comparaevs-${nome1}-vs-${nome2}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      } catch (e) {
+        mostrarToast('Não foi possível gerar a imagem. Tente novamente.');
+      } finally {
+        document.body.removeChild(wrapper);
+        labelEl.textContent = labelOriginal;
+        btn.disabled = false;
+      }
+    }
+
+    function compartilharComparacao() {
+      if (!selecionados.size) return;
+      trackEvento('cta_compartilhar_comparacao', { detalhe: [...selecionados].join(',') });
+      const ids = [...selecionados].join(',');
+      const url = new URL(window.location.href);
+      url.searchParams.set('comparar', ids);
+      navigator.clipboard.writeText(url.toString()).then(() => {
+        const label = document.getElementById('btn-compartilhar-label');
+        const btn = document.getElementById('btn-compartilhar');
+        label.textContent = 'Link copiado!';
+        btn.classList.add('text-volt', 'border-volt/50');
+        btn.classList.remove('text-inkmuted', 'border-panel3');
+        setTimeout(() => {
+          label.textContent = 'Compartilhar';
+          btn.classList.remove('text-volt', 'border-volt/50');
+          btn.classList.add('text-inkmuted', 'border-panel3');
+        }, 2500);
+      }).catch(() => {
+        mostrarToast('Não foi possível copiar. Tente manualmente.');
+      });
+    }
+
+    function lerComparacaoURL() {
+      const params = new URLSearchParams(window.location.search);
+      const comparar = params.get('comparar');
+      if (!comparar) return;
+      const ids = comparar.split(',').map(Number).filter(Boolean);
+      if (!ids.length) return;
+      ids.forEach(id => selecionados.add(id));
+      atualizarBarraComparacao();
+      // aguarda os dados carregarem antes de abrir o modal
+      const tentativa = setInterval(() => {
+        if (todosVeiculos.length) {
+          clearInterval(tentativa);
+          // filtra apenas IDs válidos
+          const validos = ids.filter(id => todosVeiculos.some(v => v.id === id));
+          selecionados.clear();
+          validos.forEach(id => selecionados.add(id));
+          atualizarBarraComparacao();
+          if (selecionados.size) abrirComparacao();
+        }
+      }, 100);
+    }
+
+    function abrirComparacao() {
+      if (!selecionados.size) return;
+      trackEvento('cta_comparar', { detalhe: [...selecionados].join(',') });
+      const veiculos = todosVeiculos.filter(v => selecionados.has(v.id));
+
+      const conteudo = veiculos.length === 2
+        ? fichaComparativaHTML(veiculos[0], veiculos[1])
+        : `<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-${veiculos.length}">${veiculos.map((v, idx) => fichaTecnicaHTML(v, idx)).join('')}</div>`;
+
+      const ctas = (PUBLICIDADE.ctaComparacao || [])
+        .filter(c => c.link || MOSTRAR_PLACEHOLDER_ANUNCIO)
+        .map(c => c.link
+          ? `<a href="${c.link}" target="_blank" rel="noopener sponsored" class="px-4 py-2.5 rounded-lg bg-panel2 border border-panel3 hover:border-volt/50 text-sm transition-colors">${c.label}</a>`
+          : `<span class="px-4 py-2.5 rounded-lg border border-dashed border-panel3 text-sm text-inkmuted">${c.label} (configurar link)</span>`
+        ).join('');
+
+      document.getElementById('compare-content').innerHTML = `
+        <div class="mb-3">${conteudo}</div>
+        ${ctas ? `<div class="flex flex-wrap gap-3 pt-4 border-t border-panel2">${ctas}</div>` : ''}
+      `;
+      const painel = document.getElementById('compare-panel');
+      painel.classList.toggle('sm:max-w-4xl', veiculos.length !== 2);
+      painel.classList.toggle('sm:max-w-lg', veiculos.length === 2);
+      document.getElementById('btn-baixar-imagem').classList.toggle('hidden', veiculos.length !== 2);
+      document.getElementById('compare-modal').classList.remove('hidden');
+      encerrarTour(false);
+    }
+
+    function fecharComparacao() {
+      document.getElementById('compare-modal').classList.add('hidden');
+    }
+
+    // ================== LEAD: PROPOSTA DE CONCESSIONÁRIA ==================
+    function abrirLeadModal(id) {
+      const v = todosVeiculos.find(x => x.id === id);
+      if (!v) return;
+      encerrarTour(true);
+      document.getElementById('lead-form').reset();
+      document.getElementById('lead-veiculo-id').value = id;
+      document.getElementById('lead-modal-veiculo').textContent = `${v.Marca} ${v.Modelo_Versao}`;
+      document.getElementById('lead-modal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function fecharLeadModal() {
+      document.getElementById('lead-modal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    async function enviarLead(event) {
+      event.preventDefault();
+      const btn = document.getElementById('lead-submit-btn');
+      const id = Number(document.getElementById('lead-veiculo-id').value);
+      const v = todosVeiculos.find(x => x.id === id);
+
+      const nome = document.getElementById('lead-nome').value.trim();
+      const whatsapp = document.getElementById('lead-whatsapp').value.trim();
+      const email = document.getElementById('lead-email').value.trim();
+      const cidade = document.getElementById('lead-cidade').value.trim();
+
+      if (!nome || !whatsapp) {
+        mostrarToast('Preencha nome e WhatsApp pra continuar.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+
+      const { error } = await postJSON('/api/leads-proposta', {
+        nome,
+        whatsapp,
+        email: email || null,
+        cidade: cidade || null,
+        veiculo_id: id || null,
+        veiculo_marca: v ? v.Marca : null,
+        veiculo_modelo: v ? v.Modelo_Versao : null,
+        origem: 'comparador'
+      });
+
+      btn.disabled = false;
+      btn.textContent = 'Quero receber a proposta';
+
+      if (error) {
+        console.error(error);
+        mostrarToast('Erro ao enviar. Tenta novamente em alguns instantes.');
+        return;
+      }
+
+      fecharLeadModal();
+      trackEvento('lead_proposta', { veiculo_id: id || null });
+      mostrarToast('Recebemos seu interesse! Em breve uma concessionária parceira entra em contato.');
+    }
+
+    // ================== ORÇAMENTO: INSTALAÇÃO DE WALLBOX ==================
+    function abrirOrcamentoModal() {
+      encerrarTour(true);
+      document.getElementById('orcamento-form').reset();
+      document.getElementById('orcamento-modal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function fecharOrcamentoModal() {
+      document.getElementById('orcamento-modal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    async function enviarOrcamento(event) {
+      event.preventDefault();
+      const btn = document.getElementById('orcamento-submit-btn');
+
+      const nome = document.getElementById('orcamento-nome').value.trim();
+      const telefone = document.getElementById('orcamento-telefone').value.trim();
+      const cep = document.getElementById('orcamento-cep').value.trim();
+      const tipoImovel = document.getElementById('orcamento-imovel').value;
+
+      if (!nome || !telefone || !cep || !tipoImovel) {
+        mostrarToast('Preencha todos os campos pra continuar.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+
+      const { error } = await postJSON('/api/leads-instalacao', {
+        nome,
+        telefone,
+        cep,
+        tipo_imovel: tipoImovel,
+        origem: 'guia-como-escolher'
+      });
+
+      btn.disabled = false;
+      btn.textContent = 'Solicitar orçamento';
+
+      if (error) {
+        console.error(error);
+        mostrarToast('Erro ao enviar. Tenta novamente em alguns instantes.');
+        return;
+      }
+
+      fecharOrcamentoModal();
+      trackEvento('lead_orcamento_wallbox');
+      mostrarToast('Recebemos seu pedido! Um instalador parceiro vai te contatar em breve.');
+    }
+
+    // ================== TOAST ==================
+    function mostrarToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.querySelector('div').textContent = msg;
+      toast.classList.remove('opacity-0');
+      toast.classList.add('opacity-100');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0');
+      }, 2600);
+    }
+
+
+    // ================== NEWSLETTER (EXIT INTENT) ==================
+    let newsletterMostrado = false;
+
+    function initExitIntent() {
+      document.addEventListener("mouseleave", function(e) {
+        if (e.clientY <= 0 && !newsletterMostrado && !tourAtivo && !sessionStorage.getItem("newsletter_dispensado")) {
+          newsletterMostrado = true;
+          document.getElementById("newsletter-modal").classList.remove("hidden");
+          document.body.style.overflow = "hidden";
+        }
+      });
+    }
+
+    function fecharNewsletterModal() {
+      document.getElementById("newsletter-modal").classList.add("hidden");
+      document.body.style.overflow = "";
+      sessionStorage.setItem("newsletter_dispensado", "1");
+    }
+
+    async function enviarNewsletter() {
+      const email = document.getElementById("newsletter-email").value.trim();
+      const btn = document.getElementById("newsletter-btn");
+      if (!email || !email.includes("@")) { mostrarToast("Informe um e-mail válido."); return; }
+      btn.disabled = true;
+      btn.textContent = "Enviando...";
+      const { error } = await postJSON("/api/leads-newsletter", { email, origem: "exit_intent" });
+      btn.disabled = false;
+      if (error) { btn.textContent = "Assinar"; mostrarToast("Erro ao cadastrar. Tente novamente."); return; }
+      trackEvento('lead_newsletter');
+      fecharNewsletterModal();
+      mostrarToast("Ótimo! Você está na lista. 🎉");
+    }
+
+    // ================== MODAL SUGERIR CORREÇÃO ==================
+    let categoriaSelecionada = "";
+
+    function abrirCorrecaoModal() {
+      encerrarTour(true);
+      categoriaSelecionada = "";
+      document.getElementById("correcao-descricao").value = "";
+      document.getElementById("correcao-email").value = "";
+      document.querySelectorAll(".correcao-cat").forEach(b => {
+        b.classList.remove("border-amber-500", "text-amber-400", "bg-amber-500/10");
+        b.classList.add("border-panel3", "text-inkmuted");
+      });
+      document.getElementById("correcao-modal").classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+    }
+
+    function fecharCorrecaoModal() {
+      document.getElementById("correcao-modal").classList.add("hidden");
+      document.body.style.overflow = "";
+    }
+
+    function selecionarCategoriaCorrecao(btn) {
+      document.querySelectorAll(".correcao-cat").forEach(b => {
+        b.classList.remove("border-amber-500", "text-amber-400", "bg-amber-500/10");
+        b.classList.add("border-panel3", "text-inkmuted");
+      });
+      btn.classList.remove("border-panel3", "text-inkmuted");
+      btn.classList.add("border-amber-500", "text-amber-400", "bg-amber-500/10");
+      categoriaSelecionada = btn.dataset.cat;
+    }
+
+    async function enviarCorrecao() {
+      const descricao = document.getElementById("correcao-descricao").value.trim();
+      const email = document.getElementById("correcao-email").value.trim();
+      const btn = document.getElementById("correcao-btn");
+      if (!descricao) { mostrarToast("Descreva o erro antes de enviar."); return; }
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i> Enviando...';
+      const { error } = await postJSON("/api/leads-correcao", {
+        categoria: categoriaSelecionada || "Outros",
+        descricao,
+        email: email || null,
+        origem: "comparaevs"
+      });
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-paper-plane text-xs"></i> Enviar Sugestão';
+      if (error) { mostrarToast("Erro ao enviar. Tente novamente."); return; }
+      trackEvento('lead_correcao', { detalhe: categoriaSelecionada || 'Outros' });
+      fecharCorrecaoModal();
+      mostrarToast("Obrigado pela contribuição! Vamos verificar em breve.");
+    }
+    // Iniciar (com preloader)
+    window.addEventListener('load', function() {
+      var loaderApi = window.__evLoader;
+      if (loaderApi) loaderApi.stageBoot();
+
+      initSupabase().then(function(){
+        if (loaderApi) loaderApi.stageData();
+        // pequeno respiro pro DOM renderizar (hero, patrocinadores) antes de checar imagens
+        return new Promise(function(resolve){ setTimeout(resolve, 50); });
+      }).then(function(){
+        if (loaderApi) loaderApi.stageImages();
+        var esperar = aguardarImagens(document.body);
+        var timeout = new Promise(function(resolve){ setTimeout(resolve, 3000); }); // não trava se uma imagem do Supabase demorar demais
+        return Promise.race([esperar, timeout]);
+      }).then(function(){
+        if (loaderApi) loaderApi.finish();
+        talvezIniciarTour(); // só depois dos dados: o tour precisa das linhas renderizadas
+      }).catch(function(err){
+        console.error(err);
+        if (loaderApi) loaderApi.finish(); // nunca deixa o site preso atrás do preloader
+      });
+
+      initExitIntent();
+    });
+  </script>
+</body>
+</html>

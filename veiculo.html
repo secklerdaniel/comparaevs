@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Veículo · ComparaEVs</title>
+<meta name="description" content="Ficha técnica de veículo elétrico: autonomia, consumo, classificação Fipe e preço.">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<script>
+  tailwind.config = { theme: { extend: { colors: { void: '#0B0D10', panel2: '#1C2026', ink: '#E8EAED', inkmuted: '#8B92A0', volt: '#C8FF4D', voltdim: '#9FD93A' } } } };
+</script>
+</head>
+
+<body class="bg-void text-ink min-h-screen">
+  <div class="max-w-screen-xl mx-auto px-5 sm:px-6 py-8">
+
+    <header class="flex items-center gap-2.5 mb-8">
+      <a href="index.html" class="flex items-center gap-2.5">
+        <img src="./img/banner/logo.png" alt="ComparaEVs" class="w-10 h-10 object-contain shrink-0">
+        <div>
+          <p class="font-display font-semibold text-lg tracking-tight leading-none">ComparaEVs</p>
+          <p class="text-[11px] text-inkmuted tracking-wide">A central de comparação de carros elétricos do Brasil</p>
+        </div>
+      </a>
+    </header>
+
+    <a href="index.html" class="inline-flex items-center gap-2 text-xs text-inkmuted hover:text-ink transition-colors mb-6">
+      <i class="fa-solid fa-arrow-left"></i> Voltar para o comparador
+    </a>
+
+    <!-- LOADING STATE -->
+    <div id="loadingState" class="py-24 text-center text-inkmuted text-sm">
+      <i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Carregando veículo...
+    </div>
+
+    <!-- ERROR STATE -->
+    <div id="errorState" class="hidden py-24 text-center">
+      <i class="fa-solid fa-triangle-exclamation text-2xl text-inkmuted mb-4 block"></i>
+      <p class="text-sm text-inkmuted" id="errorMsg">Veículo não encontrado.</p>
+      <a href="index.html" class="inline-block mt-5 text-xs text-volt hover:underline">Voltar para o comparador</a>
+    </div>
+
+    <!-- CONTENT (populated via JS) -->
+    <div id="content" class="hidden">
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+        <div class="rounded-2xl border border-panel2 bg-panel2/30 overflow-hidden flex items-center justify-center p-6">
+          <img id="v-img" src="" alt="" class="w-full h-auto max-h-[380px] object-contain">
+        </div>
+
+        <div class="flex flex-col justify-center">
+          <div class="flex items-center gap-2 flex-wrap mb-4" id="v-badges"></div>
+
+          <h1 class="font-display font-semibold text-3xl sm:text-4xl tracking-tight leading-tight mb-2" id="v-title"></h1>
+          <p class="text-sm text-inkmuted mb-6" id="v-subtitle"></p>
+
+          <div class="mb-6">
+            <p class="text-3xl font-bold text-volt" id="v-price"></p>
+            <p class="text-[11px] text-inkmuted mt-1" id="v-price-source"></p>
+          </div>
+
+          <div class="flex flex-wrap gap-3">
+            <a id="v-site-link" href="#" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-volt text-void text-sm font-semibold hover:bg-voltdim transition-colors">
+              Ver no site oficial <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+            </a>
+            <a href="index.html" class="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-panel2 text-sm font-medium text-ink hover:border-white/20 transition-colors">
+              Comparar com outro veículo
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-10">
+        <h2 class="text-lg font-semibold mb-4">Ficha técnica</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4" id="v-specs"></div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/20 p-5 text-xs text-inkmuted leading-relaxed" id="v-note"></div>
+
+    </div>
+
+  </div>
+
+<script>
+/* ==========================================================================
+   Banco saiu do Supabase pro Neon em 13/09/2026 — ficha do veículo busca
+   em /api/veiculo?id=, função serverless que fala com o Neon no servidor.
+   ========================================================================== */
+
+// Dado de exemplo (usado como fallback quando SUPABASE_URL não está configurado,
+// só para você validar o layout enquanto a integração não é conectada).
+const DEMO_VEHICLE = {"idx":0,"Categoria":"Sub Compacto","Marca":"BYD","Modelo_Versao":"DOLPHIN MINI GS EV","Propulsao":"Elétrico","Transmissao":"N.A.","Direcao":"E","Combustivel":"E","Cidade_kmLe":"58.6","Estrada_kmLe":"41.9","Consumo_MJkm":"0.41","Autonomia_km":280,"Class_Cat":"A","Class_Geral":"A","id":1,"ano_tabela":2026,"data_importacao":"2026-06-20 03:07:05.7242","codigo":238,"ano":"2026","preco":"105000.00","site":"https://www.byd.com/br","imagem":"https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/2023_%D0%92YD_Seagull_%28front%29.jpg/3840px-2023_%D0%92YD_Seagull_%28front%29.jpg","fonte_preco":"Tabela Fipe","Uber":true};
+
+// códigos de uma letra conhecidos na base (confirmados por você)
+const CODE_MAP = { Direcao: { "E": "Elétrica" }, Combustivel: { "E": "Elétrico" } };
+function decodeCode(field, value){
+  if(!value) return "—";
+  return (CODE_MAP[field] && CODE_MAP[field][value]) || value;
+}
+
+function fmtPrice(v){
+  const n = parseFloat(v);
+  if(isNaN(n)) return "—";
+  return "R$ " + n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function fmtDate(v){
+  if(!v) return null;
+  const d = new Date(v.replace(' ','T'));
+  if(isNaN(d)) return null;
+  return d.toLocaleDateString('pt-BR');
+}
+
+function badge(text, highlight){
+  return `<span class="text-[11px] font-${highlight?'semibold':'medium'} px-3 py-1 rounded-full ${highlight ? 'text-void' : 'bg-panel2 border border-white/10 text-inkmuted'}" ${highlight ? 'style="background:#C8FF4D;"' : ''}>${text}</span>`;
+}
+
+function specCard(icon, label, value){
+  return `
+    <div class="rounded-xl border border-panel2 bg-panel2/30 p-5">
+      <div class="flex items-center gap-2 text-inkmuted text-xs mb-2"><i class="fa-solid ${icon}"></i> ${label}</div>
+      <p class="text-xl font-semibold">${value}</p>
+    </div>`;
+}
+
+function renderVehicle(v){
+  document.getElementById('v-img').src = v.imagem || '';
+  document.getElementById('v-img').alt = `${v.Marca} ${v.Modelo_Versao}`;
+
+  const badges = [
+    badge(v.Marca),
+    badge(v.Categoria),
+    badge(`Ano ${v.ano}`),
+  ];
+  if(v.Uber) badges.push(badge('Uber', true));
+  document.getElementById('v-badges').innerHTML = badges.join('');
+
+  document.getElementById('v-title').textContent = `${v.Marca} ${v.Modelo_Versao}`;
+  document.getElementById('v-subtitle').textContent = `${v.Propulsao} · ${v.Categoria} · Classe de eficiência ${v.Class_Geral || v.Class_Cat || '—'}`;
+
+  document.getElementById('v-price').textContent = fmtPrice(v.preco);
+  const dataFmt = fmtDate(v.data_importacao);
+  document.getElementById('v-price-source').textContent = `Fonte: ${v.fonte_preco || 'não informado'}${dataFmt ? ' · atualizado em ' + dataFmt : ''}`;
+
+  const siteLink = document.getElementById('v-site-link');
+  if(v.site){ siteLink.href = v.site; } else { siteLink.classList.add('hidden'); }
+
+  document.getElementById('v-specs').innerHTML = [
+    specCard('fa-road', 'Autonomia', v.Autonomia_km != null ? `${v.Autonomia_km} km` : '—'),
+    specCard('fa-leaf', 'Classe de eficiência', v.Class_Geral || v.Class_Cat || '—'),
+    specCard('fa-city', 'Consumo cidade', v.Cidade_kmLe ? `${v.Cidade_kmLe} km/l-e` : '—'),
+    specCard('fa-route', 'Consumo estrada', v.Estrada_kmLe ? `${v.Estrada_kmLe} km/l-e` : '—'),
+    specCard('fa-bolt', 'Consumo energético', v.Consumo_MJkm ? `${v.Consumo_MJkm} MJ/km` : '—'),
+    specCard('fa-charging-station', 'Propulsão', v.Propulsao || '—'),
+    specCard('fa-gears', 'Transmissão', v.Transmissao || '—'),
+    specCard('fa-steering-wheel', 'Direção', decodeCode('Direcao', v.Direcao)),
+    specCard('fa-gas-pump', 'Combustível', decodeCode('Combustivel', v.Combustivel)),
+    specCard('fa-tag', 'Categoria Fipe', v.Categoria || '—'),
+  ].join('');
+
+  document.getElementById('v-note').innerHTML = `<i class="fa-solid fa-circle-info mr-1"></i> Código Fipe: ${v.codigo || '—'} · Ano-modelo: ${v.ano_tabela || v.ano || '—'}.`;
+
+  document.getElementById('loadingState').classList.add('hidden');
+  document.getElementById('content').classList.remove('hidden');
+}
+
+function showError(msg){
+  document.getElementById('loadingState').classList.add('hidden');
+  document.getElementById('errorState').classList.remove('hidden');
+  if(msg) document.getElementById('errorMsg').textContent = msg;
+}
+
+async function loadVehicle(){
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+
+  if(!id){
+    showError('Nenhum veículo especificado (parâmetro ?id= ausente na URL).');
+    return;
+  }
+
+  try{
+    const res = await fetch(`/api/veiculo?id=${encodeURIComponent(id)}`);
+    if(res.status === 404){ showError('Veículo não encontrado.'); return; }
+    if(!res.ok) throw new Error(`Erro na requisição (${res.status})`);
+    const vehicle = await res.json();
+    renderVehicle(vehicle);
+  }catch(err){
+    console.error(err);
+    showError('Não foi possível carregar os dados do veículo.');
+  }
+}
+
+loadVehicle();
+</script>
+</body>
+</html>

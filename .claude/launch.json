@@ -1,0 +1,28 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "comparaevs",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4173"
+      ],
+      "port": 4173
+    },
+    {
+      "name": "comparaevs-range",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "--yes",
+        "http-server",
+        "-p",
+        "4174",
+        "-c-1",
+        "--silent"
+      ],
+      "port": 4174
+    }
+  ]
+}

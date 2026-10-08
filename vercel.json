@@ -1,0 +1,8 @@
+{
+  "cleanUrls": true,
+  "functions": {
+    "api/veiculos.js": {
+      "maxDuration": 30
+    }
+  }
+}

@@ -1,0 +1,77 @@
+[
+  {
+    "Marca": "AUDI"
+  },
+  {
+    "Marca": "BMW"
+  },
+  {
+    "Marca": "BYD"
+  },
+  {
+    "Marca": "CHEVROLET"
+  },
+  {
+    "Marca": "CITROEN"
+  },
+  {
+    "Marca": "FARIZON"
+  },
+  {
+    "Marca": "FIAT"
+  },
+  {
+    "Marca": "FORD"
+  },
+  {
+    "Marca": "FOTON"
+  },
+  {
+    "Marca": "GAC"
+  },
+  {
+    "Marca": "Geely"
+  },
+  {
+    "Marca": "GWM"
+  },
+  {
+    "Marca": "Hyundai"
+  },
+  {
+    "Marca": "JAC"
+  },
+  {
+    "Marca": "KIA"
+  },
+  {
+    "Marca": "LEAPMOTOR"
+  },
+  {
+    "Marca": "Mercedes-Benz"
+  },
+  {
+    "Marca": "MG"
+  },
+  {
+    "Marca": "MINI"
+  },
+  {
+    "Marca": "OMODA"
+  },
+  {
+    "Marca": "PEUGEOT"
+  },
+  {
+    "Marca": "PORSCHE"
+  },
+  {
+    "Marca": "Renault"
+  },
+  {
+    "Marca": "VOLVO"
+  },
+  {
+    "Marca": "ZEEKR"
+  }
+]

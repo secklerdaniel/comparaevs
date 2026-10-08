@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contato · ComparaEVs</title>
+<meta name="description" content="Entre em contato com o ComparaEVs.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='90'>⚡</text></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          void: '#0B0D10',
+          panel: '#14171C',
+          panel2: '#1C2026',
+          panel3: '#262B33',
+          ink: '#E8EAED',
+          inkmuted: '#8B92A0',
+          volt: '#C8FF4D',
+          voltdim: '#9FD93A'
+        },
+        fontFamily: {
+          display: ['"Space Grotesk"', 'sans-serif'],
+          body: ['Inter', 'sans-serif'],
+          data: ['"JetBrains Mono"', 'monospace']
+        }
+      }
+    }
+  };
+</script>
+
+<style>
+  * { scrollbar-color: #262B33 #14171C; }
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  *:focus-visible { outline: 2px solid #C8FF4D; outline-offset: 2px; border-radius: 4px; }
+</style>
+</head>
+
+<body class="bg-void text-ink min-h-screen">
+
+  <div class="max-w-screen-md mx-auto px-5 sm:px-6 py-8">
+
+    <header class="flex items-center gap-2.5 mb-10">
+      <a href="index.html" class="flex items-center gap-2.5">
+        <img src="./img/banner/logo.png" alt="ComparaEVs" class="w-10 h-10 object-contain shrink-0">
+        <div>
+          <p class="font-display font-semibold text-lg tracking-tight leading-none">ComparaEVs</p>
+          <p class="text-[11px] text-inkmuted tracking-wide">A central de comparação de carros elétricos do Brasil</p>
+        </div>
+      </a>
+    </header>
+
+    <a href="index.html" class="inline-flex items-center gap-2 text-xs text-inkmuted hover:text-ink transition-colors mb-6">
+      <i class="fa-solid fa-arrow-left"></i> Voltar para o comparador
+    </a>
+
+    <main class="rounded-2xl border border-panel2 bg-panel p-6 sm:p-8">
+      <h1 class="font-display font-semibold text-2xl sm:text-3xl mb-6">Contato</h1>
+
+      <div class="space-y-5 text-sm sm:text-[15px] text-inkmuted leading-relaxed mb-8">
+        <p>Encontrou algum dado incorreto, quer sugerir um modelo que falta na nossa base, ou tem interesse em parceria/patrocínio? Fale com a gente por um dos canais abaixo.</p>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-4">
+        <a href="mailto:daniel@comparaevs.com.br" class="flex items-center gap-3 rounded-xl border border-panel2 bg-panel2/30 p-4 hover:border-volt/40 transition-colors">
+          <span class="w-10 h-10 rounded-lg bg-panel3 flex items-center justify-center text-volt shrink-0">
+            <i class="fa-regular fa-envelope"></i>
+          </span>
+          <div>
+            <p class="text-[11px] uppercase tracking-wide text-inkmuted">E-mail</p>
+            <p class="text-ink font-medium">daniel@comparaevs.com.br</p>
+          </div>
+        </a>
+
+        <a href="https://wa.me/5554981432889" target="_blank" rel="noopener" class="flex items-center gap-3 rounded-xl border border-panel2 bg-panel2/30 p-4 hover:border-volt/40 transition-colors">
+          <span class="w-10 h-10 rounded-lg bg-panel3 flex items-center justify-center text-volt shrink-0">
+            <i class="fa-brands fa-whatsapp"></i>
+          </span>
+          <div>
+            <p class="text-[11px] uppercase tracking-wide text-inkmuted">WhatsApp</p>
+            <p class="text-ink font-medium">(54) 98143-2889</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="mt-8 pt-6 border-t border-panel2">
+        <h2 class="font-display font-medium text-ink text-base mb-2">Anunciantes e parceiros</h2>
+        <p class="text-sm text-inkmuted leading-relaxed">Para propostas de patrocínio, banner ou parceria comercial, utilize os mesmos canais acima indicando o assunto "Publicidade".</p>
+      </div>
+    </main>
+
+    <footer class="text-center text-[11px] text-inkmuted py-8">
+      <div class="flex items-center justify-center gap-3 mb-3 flex-wrap">
+        <a href="sobre.html" class="hover:text-ink transition-colors">Sobre nós</a>
+        <span class="opacity-30">·</span>
+        <a href="contato.html" class="text-ink">Contato</a>
+        <span class="opacity-30">·</span>
+        <a href="privacidade.html" class="hover:text-ink transition-colors">Política de Privacidade</a>
+        <span class="opacity-30">·</span>
+        <a href="loja.html" class="hover:text-ink transition-colors">Loja</a>
+      </div>
+      Fonte: Programa Brasileiro de Etiquetagem Veicular (PBEV) — INMETRO.
+    </footer>
+  </div>
+</body>
+</html>

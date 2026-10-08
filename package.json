@@ -1,0 +1,13 @@
+{
+  "name": "comparaevs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "@supabase/supabase-js": "^2.47.0",
+    "@types/pg": "^8.11.0"
+  }
+}

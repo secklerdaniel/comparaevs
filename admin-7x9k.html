@@ -1,0 +1,2625 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin · ComparaEVs</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          void: '#0a0d0a',
+          panel: '#10140f',
+          panel2: '#161b14',
+          panel3: '#212820',
+          ink: '#eef1ea',
+          inkmuted: '#8b9485',
+          volt: '#c8f23e',
+          voltdim: '#a7cc2f',
+        },
+        fontFamily: {
+          display: ['"Space Grotesk"', 'sans-serif'],
+          sans: ['Inter', 'sans-serif'],
+          data: ['"JetBrains Mono"', 'monospace'],
+        }
+      }
+    }
+  }
+</script>
+<style>
+  html { scroll-behavior: smooth; }
+  body { background: #0a0d0a; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #10140f; }
+  ::-webkit-scrollbar-thumb { background: #212820; border-radius: 6px; }
+  ::-webkit-scrollbar-thumb:hover { background: #2c352a; }
+  .toast { transition: opacity .25s ease, transform .25s ease; }
+  .toast.show { opacity: 1 !important; transform: translate(-50%, 0) !important; }
+  tbody tr { transition: background-color .12s ease; }
+  input:focus, select:focus, textarea:focus { outline: none; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spin { animation: spin .7s linear infinite; }
+  .copy-btn.copiado i { color: #c8f23e; }
+  .scroll-mt { scroll-margin-top: 140px; }
+</style>
+</head>
+<body class="bg-void text-ink font-sans antialiased min-h-screen">
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="sticky top-0 z-30 bg-void/90 backdrop-blur border-b border-panel2">
+    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-volt/10 border border-volt/20 flex items-center justify-center">
+          <i class="fa-solid fa-bolt text-volt text-sm"></i>
+        </div>
+        <div>
+          <h1 class="font-display font-semibold text-base leading-tight">ComparaEVs <span class="text-inkmuted font-normal">/ Admin</span></h1>
+          <p class="text-[11px] text-inkmuted font-data" id="contador-total">carregando…</p>
+        </div>
+      </div>
+      <button id="btn-novo-veiculo" onclick="abrirModalVeiculo()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-volt text-void text-sm font-medium hover:bg-voltdim transition-colors shrink-0">
+        <i class="fa-solid fa-plus text-xs"></i> <span class="hidden sm:inline">Novo veículo</span>
+      </button>
+    </div>
+    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 flex items-center gap-1 -mb-px overflow-x-auto">
+      <button onclick="trocarAba('dashboard')" data-aba="dashboard" class="aba-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-inkmuted hover:text-ink transition-colors whitespace-nowrap">
+        <i class="fa-solid fa-chart-line text-xs mr-1.5"></i> Dashboard
+      </button>
+      <button onclick="trocarAba('veiculos')" data-aba="veiculos" class="aba-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-inkmuted hover:text-ink transition-colors whitespace-nowrap">
+        <i class="fa-solid fa-car text-xs mr-1.5"></i> Veículos
+      </button>
+      <button onclick="trocarAba('patrocinadores')" data-aba="patrocinadores" class="aba-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-inkmuted hover:text-ink transition-colors whitespace-nowrap">
+        <i class="fa-solid fa-rectangle-ad text-xs mr-1.5"></i> Patrocinadores
+      </button>
+      <button onclick="trocarAba('orcamentos')" data-aba="orcamentos" class="aba-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-inkmuted hover:text-ink transition-colors whitespace-nowrap">
+        <i class="fa-solid fa-plug-circle-bolt mr-1.5 text-xs"></i>Orçamentos
+        <span id="orcamentos-badge" class="ml-1.5 px-1.5 py-0.5 rounded-full bg-volt/15 text-volt text-[10px] font-data hidden">0</span>
+      </button>
+      <button onclick="trocarAba('propostas')" data-aba="propostas" class="aba-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-inkmuted hover:text-ink transition-colors whitespace-nowrap">
+        <i class="fa-solid fa-file-signature mr-1.5 text-xs"></i>Propostas
+      </button>
+      <button onclick="trocarAba('prospeccao')" data-aba="prospeccao" class="aba-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-inkmuted hover:text-ink transition-colors whitespace-nowrap">
+        <i class="fa-solid fa-bullseye mr-1.5 text-xs"></i>Prospecção
+      </button>
+      <button onclick="trocarAba('mapa')" data-aba="mapa" class="aba-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-inkmuted hover:text-ink transition-colors whitespace-nowrap">
+        <i class="fa-solid fa-map text-xs mr-1.5"></i> Mapa
+      </button>
+      <button onclick="trocarAba('marketing')" data-aba="marketing" class="aba-btn px-4 py-3 text-sm font-medium border-b-2 border-transparent text-inkmuted hover:text-ink transition-colors whitespace-nowrap">
+        <i class="fa-solid fa-bullhorn text-xs mr-1.5"></i> Marketing
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-[1400px] mx-auto px-4 sm:px-6 py-6">
+
+    <!-- ===================== ABA: DASHBOARD ===================== -->
+    <section id="aba-dashboard" class="aba-conteudo">
+
+      <div class="flex items-center justify-between gap-3 mb-5">
+        <div>
+          <h2 class="font-display font-semibold text-lg">Visão geral</h2>
+          <p class="text-xs text-inkmuted">Cliques, leads e desempenho dos patrocinadores</p>
+        </div>
+        <select id="kpi-periodo" onchange="carregarDashboard()" class="h-[40px] bg-panel2 border border-panel3 rounded-lg px-3 text-sm text-ink focus:border-volt/50 transition-colors">
+          <option value="1">Últimas 24h</option>
+          <option value="7">Últimos 7 dias</option>
+          <option value="30" selected>Últimos 30 dias</option>
+          <option value="90">Últimos 90 dias</option>
+          <option value="9999">Tudo</option>
+        </select>
+      </div>
+
+      <!-- KPI CARDS -->
+      <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-5" id="kpi-cards">
+        <div class="rounded-xl border border-panel2 bg-panel p-4 animate-pulse h-[88px]"></div>
+        <div class="rounded-xl border border-panel2 bg-panel p-4 animate-pulse h-[88px]"></div>
+        <div class="rounded-xl border border-panel2 bg-panel p-4 animate-pulse h-[88px]"></div>
+        <div class="rounded-xl border border-panel2 bg-panel p-4 animate-pulse h-[88px]"></div>
+        <div class="rounded-xl border border-panel2 bg-panel p-4 animate-pulse h-[88px]"></div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+        <!-- Cliques por tipo de evento -->
+        <div class="rounded-2xl border border-panel2 bg-panel p-5">
+          <h3 class="font-display font-semibold text-sm mb-4">Cliques por botão</h3>
+          <div id="kpi-eventos-lista" class="space-y-2.5"></div>
+        </div>
+
+        <!-- Desempenho patrocinadores -->
+        <div class="rounded-2xl border border-panel2 bg-panel p-5">
+          <h3 class="font-display font-semibold text-sm mb-4">Desempenho dos patrocinadores</h3>
+          <div id="kpi-patrocinadores-lista" class="space-y-3"></div>
+        </div>
+      </div>
+
+      <!-- Leads recentes -->
+      <div class="rounded-2xl border border-panel2 bg-panel p-5">
+        <h3 class="font-display font-semibold text-sm mb-4">Atividade recente</h3>
+        <div id="kpi-atividade-recente" class="divide-y divide-panel2"></div>
+      </div>
+
+    </section>
+
+    <!-- ===================== ABA: PATROCINADORES ===================== -->
+    <section id="aba-patrocinadores" class="aba-conteudo hidden">
+
+      <div class="flex items-center justify-between gap-3 mb-5">
+        <div>
+          <h2 class="font-display font-semibold text-lg">Patrocinadores</h2>
+          <p class="text-xs text-inkmuted">Gerencie os 3 espaços publicitários do site</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+        <!-- HERO MASTER -->
+        <div class="rounded-2xl border border-panel2 bg-panel overflow-hidden">
+          <div class="p-4 border-b border-panel2 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-crown text-volt text-sm"></i>
+              <div>
+                <p class="font-display font-semibold text-sm">Hero Master</p>
+                <p class="text-[11px] text-inkmuted">Banner topo · rotativo</p>
+              </div>
+            </div>
+            <button onclick="abrirModalPatrocinador('hero_master')" class="w-8 h-8 rounded-lg border border-panel3 text-inkmuted hover:text-volt hover:border-volt/40 flex items-center justify-center transition-colors">
+              <i class="fa-solid fa-plus text-xs"></i>
+            </button>
+          </div>
+          <div id="lista-hero_master" class="divide-y divide-panel2"></div>
+        </div>
+
+        <!-- BANNER -->
+        <div class="rounded-2xl border border-panel2 bg-panel overflow-hidden">
+          <div class="p-4 border-b border-panel2 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fa-regular fa-rectangle-ad text-volt text-sm"></i>
+              <div>
+                <p class="font-display font-semibold text-sm">Banner</p>
+                <p class="text-[11px] text-inkmuted">Zona de conversão · único</p>
+              </div>
+            </div>
+            <button onclick="abrirModalPatrocinador('banner')" class="w-8 h-8 rounded-lg border border-panel3 text-inkmuted hover:text-volt hover:border-volt/40 flex items-center justify-center transition-colors">
+              <i class="fa-solid fa-plus text-xs"></i>
+            </button>
+          </div>
+          <div id="lista-banner" class="divide-y divide-panel2"></div>
+        </div>
+
+        <!-- NATIVO -->
+        <div class="rounded-2xl border border-panel2 bg-panel overflow-hidden">
+          <div class="p-4 border-b border-panel2 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="fa-solid fa-table-list text-volt text-sm"></i>
+              <div>
+                <p class="font-display font-semibold text-sm">Linha Nativa</p>
+                <p class="text-[11px] text-inkmuted">Na lista · único</p>
+              </div>
+            </div>
+            <button onclick="abrirModalPatrocinador('nativo')" class="w-8 h-8 rounded-lg border border-panel3 text-inkmuted hover:text-volt hover:border-volt/40 flex items-center justify-center transition-colors">
+              <i class="fa-solid fa-plus text-xs"></i>
+            </button>
+          </div>
+          <div id="lista-nativo" class="divide-y divide-panel2"></div>
+        </div>
+
+      <!-- ===== ESPECIFICAÇÕES TÉCNICAS ===== -->
+      <div class="mt-6 rounded-2xl border border-panel2 bg-panel overflow-hidden">
+        <button onclick="toggleEspecs()" class="w-full p-4 flex items-center justify-between gap-3 hover:bg-panel2/40 transition-colors text-left">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-ruler-combined text-volt text-sm"></i>
+            <div>
+              <p class="font-display font-semibold text-sm">Especificações técnicas dos espaços</p>
+              <p class="text-[11px] text-inkmuted">Medidas, formatos e o que mandar para o anunciante</p>
+            </div>
+          </div>
+          <i id="especs-seta" class="fa-solid fa-chevron-down text-xs text-inkmuted transition-transform"></i>
+        </button>
+
+        <div id="especs-corpo" class="hidden border-t border-panel2 p-5 space-y-6 text-sm">
+
+          <!-- HERO MASTER -->
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <i class="fa-solid fa-crown text-volt text-xs"></i>
+              <h3 class="font-display font-semibold">Hero Master</h3>
+              <span class="px-2 py-0.5 rounded-full bg-volt/15 text-volt text-[10px] font-medium">rotativo</span>
+            </div>
+            <div class="rounded-xl border border-panel2 overflow-hidden">
+              <table class="w-full text-[13px]">
+                <tbody class="divide-y divide-panel2">
+                  <tr><td class="p-2.5 text-inkmuted w-44">Onde aparece</td><td class="p-2.5">Topo da home, acima do simulador de financiamento</td></tr>
+                  <tr><td class="p-2.5 text-inkmuted">Área visível</td><td class="p-2.5 font-data">1536 × 440 px <span class="text-inkmuted">(desktop ≥1024px)</span><br>1536 × 360 px <span class="text-inkmuted">(tablet ≥640px)</span><br>640 × 260 px <span class="text-inkmuted">(celular &lt;640px)</span></td></tr>
+                  <tr><td class="p-2.5 text-inkmuted">Arte recomendada</td><td class="p-2.5 font-data">Desktop 1920 × 550 px · Celular 1080 × 440 px</td></tr>
+                  <tr><td class="p-2.5 text-inkmuted">Formato</td><td class="p-2.5">JPG ou WebP. Evite PNG: os atuais têm 2 MB cada e seguram o carregamento.</td></tr>
+                  <tr><td class="p-2.5 text-inkmuted">Enquadramento</td><td class="p-2.5"><code class="text-volt">background-size: cover</code> centralizado — as bordas são cortadas conforme a tela. Mantenha o essencial no <strong>centro</strong>.</td></tr>
+                  <tr><td class="p-2.5 text-inkmuted">Área proibida</td><td class="p-2.5">O site desenha uma caixa escura no <strong>canto inferior esquerdo</strong> com o nome e a headline. Não coloque texto ali na arte — sai sobreposto.</td></tr>
+                  <tr><td class="p-2.5 text-inkmuted">Campos usados</td><td class="p-2.5 font-data">imagem · imagem_mobile · nome · headline · link</td></tr>
+                  <tr><td class="p-2.5 text-inkmuted">Rotação</td><td class="p-2.5">Troca a cada 5 s entre os criativos ativos. Com um só, fica fixo.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- BANNER -->
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <i class="fa-regular fa-rectangle-ad text-volt text-xs"></i>
+              <h3 class="font-display font-semibold">Banner</h3>
+              <span class="px-2 py-0.5 rounded-full bg-panel3 text-inkmuted text-[10px] font-medium">um por vez</span>
+            </div>
+            <div class="rounded-xl border border-panel2 overflow-hidden">
+              <table class="w-full text-[13px]">
+                <tbody class="divide-y divide-panel2">
+                  <tr><td class="p-2.5 text-inkmuted w-44">Onde aparece</td><td class="p-2.5">Depois da lista de veículos, antes do conteúdo editorial</td></tr>
+                  <tr><td class="p-2.5 text-inkmuted">Altura</td><td class="p-2.5">Definida pelo texto (~110 px). A imagem é fundo, não define o tamanho.</td></tr>
+                  <tr><td class="p-2.5 text-inkmuted">Arte recomendada</td><td class="p-2.5 font-data">1920 × 240 px</td></tr>
+                  <tr><td class="p-2.5 text-inkmuted">Atenção ao gradiente</td><td class="p-2.5">Um degradê escuro cobre a imagem: <strong>90% opaco à esquerda</strong> → 10% à direita. Só o <strong>terço direito</strong> da arte aparece de verdade. Coloque o produto ali.</td></tr>
+                  <tr><td class="p-2.5 text-inkmuted">Campos usados</td><td class="p-2.5 font-data">imagem · nome · headline · subtitulo · cta · link</td></tr>
+                  <tr><td class="p-2.5 text-inkmuted">Botão</td><td class="p-2.5">O CTA é renderizado pelo site em verde volt. Não desenhe botão na arte.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- NATIVO -->
+          <div>
+            <div class="flex items-center gap-2 mb-2">
+              <i class="fa-solid fa-table-list text-volt text-xs"></i>
+              <h3 class="font-display font-semibold">Linha Nativa</h3>
+              <span class="px-2 py-0.5 rounded-full bg-panel3 text-inkmuted text-[10px] font-medium">um por vez</span>
+            </div>
+            <div class="rounded-xl border border-panel2 overflow-hidden">
+              <table class="w-full text-[13px]">
+                <tbody class="divide-y divide-panel2">
+                  <tr><td class="p-2.5 text-inkmuted w-44">Onde aparece</td><td class="p-2.5">Dentro da lista, a cada <strong>12 veículos</strong> — linha na tabela (desktop) e card (celular)</td></tr>
+                  <tr><td class="p-2.5 text-inkmuted">Imagem</td><td class="p-2.5"><strong>Não usa.</strong> É um espaço só de texto, em fundo branco para destacar da tabela escura.</td></tr>
+                  <tr><td class="p-2.5 text-inkmuted">Campos usados</td><td class="p-2.5 font-data">nome · headline · cta · link</td></tr>
+                  <tr><td class="p-2.5 text-inkmuted">Limite de texto</td><td class="p-2.5">Headline em uma linha: até ~60 caracteres no desktop. Nome curto — vira o rótulo vermelho de "Patrocinado".</td></tr>
+                  <tr><td class="p-2.5 text-inkmuted">Divulgação</td><td class="p-2.5">Sempre identificado como patrocinado, conforme a página Sobre promete.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-volt/25 bg-[#161B12] p-4">
+            <p class="text-[13px] leading-relaxed">
+              <i class="fa-solid fa-circle-info text-volt mr-1.5"></i>
+              <strong>Todos os links</strong> abrem em nova aba com <code class="font-data text-volt">rel="sponsored"</code>, e cada clique é registrado em <code class="font-data text-volt">eventos_cliques</code> — o relatório sai na aba Dashboard.
+            </p>
+          </div>
+
+        </div>
+      </div>
+
+
+      </div>
+    </section>
+
+    <!-- ===================== ABA: MAPA ===================== -->
+    <section id="aba-propostas" class="aba-conteudo hidden">
+      <div class="flex items-center justify-between gap-3 mb-4 flex-wrap">
+        <div>
+          <h2 class="font-display font-semibold text-lg">Propostas</h2>
+          <p id="prop-contagem" class="text-xs text-inkmuted mt-0.5">—</p>
+        </div>
+        <button onclick="abrirModalProposta()" class="px-4 py-2.5 rounded-lg bg-volt text-void text-sm font-semibold hover:bg-voltdim transition-colors">
+          <i class="fa-solid fa-plus mr-1.5 text-xs"></i>Nova proposta
+        </button>
+      </div>
+      <div id="prop-lista" class="grid gap-3 sm:grid-cols-2"></div>
+      <p id="prop-vazio" class="hidden text-center text-inkmuted text-sm py-14">
+        Nenhuma proposta ainda. Toque em <span class="text-volt">Nova proposta</span> para criar a primeira.
+      </p>
+    </section>
+
+    <section id="aba-prospeccao" class="aba-conteudo hidden">
+      <div class="flex items-center justify-between gap-3 mb-3 flex-wrap">
+        <div>
+          <h2 class="font-display font-semibold text-lg">Prospecção</h2>
+          <p class="text-xs text-inkmuted mt-0.5">Funil de leads — empresas e influenciadores</p>
+        </div>
+        <a href="vendas-melvianos.html" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-panel3 text-xs text-inkmuted hover:text-ink hover:border-ink/30 transition-colors">
+          <i class="fa-solid fa-expand mr-1.5"></i>Abrir em tela cheia
+        </a>
+      </div>
+      <!-- iframe de propósito: o CRM já existe e funciona sozinho. Copiar o
+           kanban para cá duplicaria ~50 KB e colidiria com mostrarToast,
+           todosLeads e filtrados, que já existem neste arquivo. -->
+      <div class="rounded-2xl border border-panel2 overflow-hidden bg-void">
+        <iframe id="frame-prospeccao" title="Prospecção" class="w-full block" style="height:calc(100vh - 230px); min-height:480px; border:0"></iframe>
+      </div>
+    </section>
+
+    <section id="aba-orcamentos" class="aba-conteudo hidden">
+      <div class="flex items-center justify-between gap-3 mb-4 flex-wrap">
+        <div>
+          <h2 class="font-display font-semibold text-lg">Pedidos de orçamento — wallbox</h2>
+          <p class="text-xs text-inkmuted mt-0.5">Formulário de instalação do index e da página de carregadores.</p>
+        </div>
+        <button onclick="carregarOrcamentos()" class="px-3 py-2 rounded-lg border border-panel3 text-sm text-inkmuted hover:text-ink hover:border-ink/30 transition-colors">
+          <i class="fa-solid fa-rotate mr-1.5 text-xs"></i>Atualizar
+        </button>
+      </div>
+
+      <div class="rounded-2xl border border-panel2 overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-panel text-[11px] uppercase tracking-wide text-inkmuted">
+            <tr>
+              <th class="p-3 text-left">Quando</th>
+              <th class="p-3 text-left">Nome</th>
+              <th class="p-3 text-left">Telefone</th>
+              <th class="p-3 text-left">CEP</th>
+              <th class="p-3 text-left">Imóvel</th>
+              <th class="p-3 text-left">Origem</th>
+            </tr>
+          </thead>
+          <tbody id="orcamentos-tbody" class="divide-y divide-panel2"></tbody>
+        </table>
+      </div>
+      <p id="orcamentos-vazio" class="hidden text-center text-inkmuted text-sm py-12">Nenhum pedido de orçamento ainda.</p>
+    </section>
+
+    <section id="aba-mapa" class="aba-conteudo hidden">
+      <div class="flex items-center gap-2 mb-6 overflow-x-auto pb-1 text-xs font-medium">
+        <a href="#pipeline" class="px-3 py-1.5 rounded-full bg-panel2 hover:bg-panel3 whitespace-nowrap transition-colors">Pipeline</a>
+        <a href="#prospeccao" class="px-3 py-1.5 rounded-full bg-panel2 hover:bg-panel3 whitespace-nowrap transition-colors">Prospecção</a>
+        <a href="#prioridade" class="px-3 py-1.5 rounded-full bg-panel2 hover:bg-panel3 whitespace-nowrap transition-colors">Prioridade</a>
+      </div>
+
+
+    <!-- ===================== PIPELINE ===================== -->
+    <section id="pipeline" class="scroll-mt">
+      <h1 class="font-display font-semibold text-2xl sm:text-3xl mb-2">Pipeline de Monetização</h1>
+      <p class="text-sm text-inkmuted max-w-2xl mb-6 leading-relaxed">Ideias de monetização categorizadas por dificuldade técnica de implementação no site — da mais simples (reaproveita estrutura existente) à mais complexa (feature nova do zero).</p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+
+        <!-- FÁCIL -->
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <h2 class="font-display font-medium text-sm uppercase tracking-wide text-emerald-400">Fácil</h2>
+          </div>
+          <div class="space-y-3">
+            <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+              <p class="text-sm font-medium text-ink mb-1">Botão de lead para concessionária</p>
+              <p class="text-xs text-inkmuted leading-relaxed">"Quero receber proposta" no card do veículo → grava lead no Supabase. Reaproveita estrutura existente.</p>
+            </div>
+            <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+              <p class="text-sm font-medium text-ink mb-1">Formulário de orçamento de instalação</p>
+              <p class="text-xs text-inkmuted leading-relaxed">Form simples (nome, telefone, CEP, tipo de imóvel) pra captar lead de instalação de wallbox.</p>
+            </div>
+            <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+              <p class="text-sm font-medium text-ink mb-1">Cupom / loja recomendada de wallbox</p>
+              <p class="text-xs text-inkmuted leading-relaxed">Reaproveita 100% a estrutura da página Loja — só trocar/adicionar produtos e links de afiliado.</p>
+            </div>
+            <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+              <p class="text-sm font-medium text-ink mb-1">Afiliado de assinatura de EV</p>
+              <p class="text-xs text-inkmuted leading-relaxed">Banner/link de afiliado pra Localiza Meoo, Movida, Unidas etc. — mesmo padrão de banner já existente.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- MÉDIO -->
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+            <h2 class="font-display font-medium text-sm uppercase tracking-wide text-amber-400">Médio</h2>
+          </div>
+          <div class="space-y-3">
+            <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+              <p class="text-sm font-medium text-ink mb-1">Afiliado de app de recarga</p>
+              <p class="text-xs text-inkmuted leading-relaxed">Tecnicamente é só um banner — a dificuldade real é comercial: achar rede com programa de afiliado self-service.</p>
+            </div>
+            <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+              <p class="text-sm font-medium text-ink mb-1">Simulador de financiamento verde</p>
+              <p class="text-xs text-inkmuted leading-relaxed">A calculadora de economia é só JS — fica médio por precisar de rota serverless (Vercel function) pra cotação real sem expor chave de API.</p>
+            </div>
+            <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+              <p class="text-sm font-medium text-ink mb-1">Simulador de seguro (form disfarçado)</p>
+              <p class="text-xs text-inkmuted leading-relaxed">Cotação real exige integração com corretora — versão simplificada é form bonito que capta dado pra cotação manual.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- DIFÍCIL -->
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
+            <h2 class="font-display font-medium text-sm uppercase tracking-wide text-red-400">Difícil</h2>
+          </div>
+          <div class="space-y-3">
+            <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+              <p class="text-sm font-medium text-ink mb-1">Mapa de eletropostos + destaque pago</p>
+              <p class="text-xs text-inkmuted leading-relaxed">Feature nova do zero: precisa base de dados de eletropostos própria, integração de mapa (Maps/Mapbox) e lógica de destaque pago por estabelecimento.</p>
+            </div>
+            <div class="rounded-xl border border-dashed border-panel3 p-4">
+              <p class="text-xs text-inkmuted leading-relaxed"><i class="fa-solid fa-circle-info text-volt mr-1"></i> Gargalo nas ideias de afiliado/CPL não é técnico — é comercial: exige tráfego comprovado antes que montadoras/bancos/corretoras topem negociar direto.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================== PROSPECÇÃO ===================== -->
+    <section id="prospeccao" class="scroll-mt">
+      <h1 class="font-display font-semibold text-2xl sm:text-3xl mb-2">Prospecção — Empresas e Contatos</h1>
+      <p class="text-sm text-inkmuted max-w-2xl mb-6 leading-relaxed">Levantamento de empresas e, quando disponível, nomes de executivos ligados a parcerias em cada um dos 4 pilares de monetização. Fontes públicas (releases, entrevistas) — confirmar cargo atual no LinkedIn antes do contato.</p>
+
+      <!-- Pilar 1 -->
+      <h3 class="font-display font-medium text-base mb-3 text-volt">Pilar 1 — Recarga Residencial (Wallbox)</h3>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">E-Wolf</p>
+          <p class="text-xs text-inkmuted mb-2">Distribuidora oficial Wallbox (Espanha) no Brasil</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Thiago Castilha — diretor de marketing e co-fundador</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">GreenV Mobilidade Elétrica</p>
+          <p class="text-xs text-inkmuted mb-2">Loja + instalação; parceira oficial GWM (wallbox grátis ORA 03)</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-envelope text-volt mr-1"></i> Canal "Fale Conosco" — loja.greenv.com.br</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Aldo Solar</p>
+          <p class="text-xs text-inkmuted mb-2">Maior distribuidor de energia solar do Brasil; vende wallbox (Growatt, GoodWe, ABB)</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-handshake text-volt mr-1"></i> Programa de parceria para integradores</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">WEG</p>
+          <p class="text-xs text-inkmuted mb-2">Fabricante nacional (linha Wemob), parceira oficial Mercedes-Benz</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-building text-volt mr-1"></i> Relacionamento institucional B2B</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Intelbras</p>
+          <p class="text-xs text-inkmuted mb-2">Fabricante nacional, linha "Eve", rede de suporte forte</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-building text-volt mr-1"></i> Departamento comercial/parcerias</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">WallBox Brasil</p>
+          <p class="text-xs text-inkmuted mb-2">Distribuidor nacional de infraestrutura de recarga</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-envelope text-volt mr-1"></i> "Fale com um especialista" no site</p>
+        </div>
+      </div>
+
+      <!-- Pilar 2 -->
+      <h3 class="font-display font-medium text-base mb-3 text-volt">Pilar 2 — Redes de Eletropostos (CPOs) e Apps</h3>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">EZVolt</p>
+          <p class="text-xs text-inkmuted mb-2">Maior rede privada do Brasil (+450 pontos); CPO da Vibra Energia</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Gustavo Tannure — CEO</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Tupi Mobilidade</p>
+          <p class="text-xs text-inkmuted mb-2">Tecnologia por trás do app BYD Recharge</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Pedro De Conti — fundador e CEO</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Zletric</p>
+          <p class="text-xs text-inkmuted mb-2">Rede com +2.500 eletropostos via integração com VoltBras</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Pedro Schaan — CEO</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">VoltBras</p>
+          <p class="text-xs text-inkmuted mb-2">Plataforma de interoperabilidade entre redes de recarga</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Bernardo Durieux — CEO</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Raízen (Shell Recharge)</p>
+          <p class="text-xs text-inkmuted mb-2">Rede de eletropostos em postos Shell</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Frederico Saliba — VP Energia e Renováveis</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Avant Charge</p>
+          <p class="text-xs text-inkmuted mb-2">Rede regional (JP/Recife/Natal) — monetiza com publicidade no próprio carregador</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-lightbulb text-volt mr-1"></i> Bom case de referência pro nosso modelo</p>
+        </div>
+      </div>
+
+      <!-- Pilar 3 -->
+      <h3 class="font-display font-medium text-base mb-3 text-volt">Pilar 3 — Concessionárias, Montadoras e Assinatura</h3>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">BYD Brasil</p>
+          <p class="text-xs text-inkmuted mb-2">Líder de vendas de elétricos no país</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Alexandre Baldy (VP Sênior) · Henri Karam (Head Com./RP) · Pablo Toledo (Dir. Marketing)</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">GWM Brasil</p>
+          <p class="text-xs text-inkmuted mb-2">2ª maior montadora chinesa de elétricos/híbridos</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Ricardo Bastos (Dir. Assuntos Institucionais) · Alexandre Oliveira (Dir. Vendas e Rede)</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 ring-1 ring-volt/30">
+          <p class="font-medium text-ink text-sm mb-1">Grupo IESA <span class="text-volt text-[10px]">★ prioridade</span></p>
+          <p class="text-xs text-inkmuted mb-2">Representa BMW, MINI, Volvo, BYD, GWM, Geely, Jeep e mais no RS (Caxias, POA, Pelotas, Sta. Maria...)</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-map-pin text-volt mr-1"></i> Local — mesma região da Seckler Digital</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Grupo Dahruj</p>
+          <p class="text-xs text-inkmuted mb-2">Maior grupo de concessionárias BYD/GWM em São Paulo</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> André Scinocca — Diretor do Grupo</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Localiza Meoo</p>
+          <p class="text-xs text-inkmuted mb-2">Maior plataforma de carro por assinatura do Brasil (+100 modelos)</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-building text-volt mr-1"></i> Departamento comercial/parcerias</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Movida Sign / Unidas Livre / LM AssineCar</p>
+          <p class="text-xs text-inkmuted mb-2">Concorrentes diretos da Meoo — GWM já roda programa com as 4</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-building text-volt mr-1"></i> Comparar comissões antes de fechar</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Volkswagen Financial Services</p>
+          <p class="text-xs text-inkmuted mb-2">Programa "Sign&amp;Drive" de assinatura</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Rodrigo Capuruço — Diretor</p>
+        </div>
+      </div>
+
+      <!-- Pilar 4 -->
+      <h3 class="font-display font-medium text-base mb-3 text-volt">Pilar 4 — Serviços Financeiros e Seguros</h3>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 ring-1 ring-volt/30">
+          <p class="font-medium text-ink text-sm mb-1">Tokio Marine <span class="text-volt text-[10px]">★ prioridade</span></p>
+          <p class="text-xs text-inkmuted mb-2">Já tem produto de cobertura para wallbox em condomínio — falta canal</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Ronaldo Dalcin — Diretoria de Assessorias Brasil</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Minuto Seguros (Creditas)</p>
+          <p class="text-xs text-inkmuted mb-2">Corretora online, compara 16 seguradoras, modelo de afiliado maduro</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-building text-volt mr-1"></i> Canal de parcerias Creditas</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Banco do Brasil</p>
+          <p class="text-xs text-inkmuted mb-2">Crédito verde a partir de 1,09% a.m. para elétricos/híbridos</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Daniela Avelar (Dir. Empréstimos) · Antonio Barreto Jr (VP Sustentabilidade)</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">BV (Banco Votorantim)</p>
+          <p class="text-xs text-inkmuted mb-2">Linha de US$50mi via IFC/Banco Mundial para "veículos verdes"</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Rogerio Monori — Dir. Atacado e Tesouraria</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Santander Financiamentos</p>
+          <p class="text-xs text-inkmuted mb-2">Desconto de até 25% na taxa para elétricos ("financeira verde")</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-building text-volt mr-1"></i> Departamento de Financiamentos Verdes</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Itaú</p>
+          <p class="text-xs text-inkmuted mb-2">Taxa a partir de 8,73% a.a. para elétricos/híbridos</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-triangle-exclamation text-amber-400 mr-1"></i> Hoje parece restrito a concessionárias parceiras</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PRIORIDADE ===================== -->
+    <section id="prioridade" class="scroll-mt">
+      <h1 class="font-display font-semibold text-2xl sm:text-3xl mb-4">Por onde começar</h1>
+      <div class="rounded-2xl border border-panel2 bg-panel p-6 sm:p-8">
+        <ol class="space-y-4 text-sm text-inkmuted leading-relaxed list-decimal list-inside">
+          <li><span class="text-ink font-medium">Grupo IESA</span> — local (RS), facilita reunião presencial, e representa BYD + GWM + Volvo numa única conversa.</li>
+          <li><span class="text-ink font-medium">EZVolt e Tupi</span> — CPOs mais avançados em interoperabilidade hoje, mais prováveis de já ter programa de afiliados estruturado.</li>
+          <li><span class="text-ink font-medium">Localiza Meoo</span> — maior player de assinatura, processo de afiliados provavelmente mais maduro que concorrentes menores.</li>
+          <li><span class="text-ink font-medium">Tokio Marine / Minuto Seguros</span> — produto de seguro para EV já existe, é só achar o canal de distribuição certo.</li>
+          <li><span class="text-ink font-medium">Bancos (BB, BV, Santander, Itaú)</span> — deixar para depois: programas de crédito verde tendem a ser negociados via parcerias institucionais maiores, ciclo de fechamento mais longo.</li>
+        </ol>
+        <p class="text-xs text-inkmuted/70 mt-6 pt-6 border-t border-panel2">
+          <i class="fa-solid fa-circle-info mr-1"></i>
+          Nomes e cargos vieram de releases e entrevistas públicas (alguns com mais de 1 ano) — confirmar no LinkedIn antes do primeiro contato.
+        </p>
+      </div>
+    </section>
+
+  
+    </section>
+
+    <!-- ===================== ABA: MARKETING ===================== -->
+    <section id="aba-marketing" class="aba-conteudo hidden">
+      <div class="flex items-center gap-2 mb-6 overflow-x-auto pb-1 text-xs font-medium">
+        <a href="#anunciantes" class="px-3 py-1.5 rounded-full bg-panel2 hover:bg-panel3 whitespace-nowrap transition-colors">Anunciantes</a>
+        <a href="#whatsapp" class="px-3 py-1.5 rounded-full bg-panel2 hover:bg-panel3 whitespace-nowrap transition-colors">WhatsApp</a>
+        <a href="#instagram" class="px-3 py-1.5 rounded-full bg-panel2 hover:bg-panel3 whitespace-nowrap transition-colors">Instagram</a>
+        <a href="#facebook" class="px-3 py-1.5 rounded-full bg-panel2 hover:bg-panel3 whitespace-nowrap transition-colors">Facebook</a>
+        <a href="#youtube" class="px-3 py-1.5 rounded-full bg-panel2 hover:bg-panel3 whitespace-nowrap transition-colors">YouTube</a>
+        <a href="#prompts" class="px-3 py-1.5 rounded-full bg-panel2 hover:bg-panel3 whitespace-nowrap transition-colors">Prompts de imagem</a>
+      </div>
+
+
+    <!-- ===================== ANUNCIANTES ===================== -->
+    <section id="anunciantes" class="scroll-mt">
+      <h2 class="font-display font-semibold text-xl mb-4">Anunciantes — E-mail</h2>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Assunto — Montadoras / Concessionárias</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90">Proposta de parceria — ComparaEVs</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Corpo — Montadoras / Concessionárias</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Olá, [nome]!
+
+Meu nome é [seu nome], responsável pelo ComparaEVs, uma plataforma de comparação de carros elétricos com dados oficiais do PBEV/INMETRO.
+
+Recebemos visitantes que já estão na fase final de decisão — comparando autonomia, consumo e preço entre modelos antes de fechar a compra. É exatamente o momento em que a marca certa, na posição certa, faz diferença.
+
+Temos espaços disponíveis: banner principal em destaque (rotativo), banner de apoio acima da lista de veículos, e inserções nativas dentro da própria tabela comparativa — todos com identificação clara de patrocínio.
+
+Posso te enviar o media kit com formatos, posições e valores?
+
+Abraço,
+[Seu nome]
+ComparaEVs — comparaevs.digital</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Assunto — Fintech / Bancos</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90">Anuncie financiamento de elétricos no ComparaEVs</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Corpo — Fintech / Bancos</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Olá, [nome]!
+
+Sou [seu nome], do ComparaEVs — plataforma onde brasileiros comparam autonomia, consumo e preço de carros elétricos antes de decidir a compra.
+
+Boa parte do nosso público já está com o modelo escolhido e pesquisando como financiar — esse é exatamente o momento em que uma oferta de crédito bem posicionada converte muito mais do que em mídia genérica.
+
+Temos um espaço de banner dedicado a ofertas de financiamento, posicionado logo após os resultados de comparação, com alta visibilidade e contexto de intenção de compra já validado.
+
+Quer que eu te envie os detalhes e valores?
+
+Abraço,
+[Seu nome]
+ComparaEVs — comparaevs.digital</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Assunto — Recarga / Wallbox / Postos</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90">Parceria ComparaEVs — visibilidade pra quem já tem (ou vai ter) elétrico</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Corpo — Recarga / Wallbox / Postos</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Olá, [nome]!
+
+Sou [seu nome], do ComparaEVs, plataforma de comparação de carros elétricos com dados oficiais do PBEV/INMETRO.
+
+Nosso público é formado por pessoas pesquisando ou já decididas a comprar um elétrico — exatamente o perfil que vai precisar instalar um carregador residencial ou buscar pontos de recarga em breve.
+
+Temos espaços publicitários disponíveis dentro do site, com formatos que vão desde banner em destaque até inserção nativa na lista de comparação.
+
+Posso te mandar o media kit completo?
+
+Abraço,
+[Seu nome]
+ComparaEVs — comparaevs.digital</div>
+      </div>
+
+      <h3 class="font-display font-medium text-base mt-6 mb-3">Anunciantes — WhatsApp</h3>
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Abordagem direta</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Oi, [nome]! Aqui é o [seu nome], do ComparaEVs ⚡ — site de comparação de carros elétricos com dados oficiais do PBEV/INMETRO.
+
+Estamos com espaços de patrocínio abertos (banner em destaque, banner de apoio e inserção nativa na tabela de comparação) pra marcas que querem aparecer pro público que já está decidindo qual elétrico comprar.
+
+Posso te mandar o media kit com formatos e valores?</div>
+      </div>
+    </section>
+
+    <!-- ===================== WHATSAPP DIVULGAÇÃO ===================== -->
+    <section id="whatsapp" class="scroll-mt">
+      <h2 class="font-display font-semibold text-xl mb-4">WhatsApp — Divulgação</h2>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Mensagem para compartilhar</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">⚡ Pesquisando carro elétrico? Descobri o ComparaEVs — compara autonomia, consumo e preço de TODOS os elétricos vendidos no Brasil, com dados oficiais do PBEV/INMETRO. De graça, sem cadastro: comparaevs.digital</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Status 1</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90">🔋 Qual elétrico tem mais autonomia no Brasil hoje? Eu sei. comparaevs.digital</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Status 2</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90">Antes de comprar um elétrico, compara aqui 👉 comparaevs.digital ⚡</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Status 3</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90">Carro elétrico não é tudo igual. Autonomia, consumo e preço lado a lado: comparaevs.digital</div>
+      </div>
+    </section>
+
+    <!-- ===================== INSTAGRAM ===================== -->
+    <section id="instagram" class="scroll-mt">
+      <h2 class="font-display font-semibold text-xl mb-4">Instagram — Perfil</h2>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Bio do perfil</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90">⚡ ComparaEVs
+Compare autonomia, consumo e preço
+Todo elétrico vendido no Brasil 🇧🇷
+Dados oficiais PBEV/INMETRO
+👇 compare agora</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-6">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Nomes dos destaques</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90">🔋 Autonomia
+💰 Preços
+⚡ Recarga
+📊 Comparar
+🏆 Top 5</div>
+      </div>
+
+      <h3 class="font-display font-medium text-base mb-3">Instagram — Feed</h3>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Post 1 — Legenda (maior autonomia)</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Esse é o elétrico com maior autonomia vendido no Brasil hoje 👆⚡
+
+Autonomia testada oficialmente pelo PBEV/INMETRO — sem chute, sem "depende".
+
+Quer comparar com outros modelos? Link na bio 🔗
+
+#carroeletrico #eletrico #mobilidadeeletrica #ev #carrosdobrasil</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Post 1 — Prompt de imagem</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Fotografia minimalista de um carro elétrico moderno visto de 3/4 frontal, fundo escuro quase preto (#0B0D10), uma luz neon verde-limão (#C8FF4D) contornando sutilmente a silhueta do carro, estilo editorial automotivo, alto contraste, sem texto, proporção quadrada 1:1.</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Post 2 — Legenda (comparativo carrossel)</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">3 elétricos, 3 propostas diferentes. Qual vence em autonomia? Qual vence no bolso? Arrasta pro lado e descobre 👉
+
+Comparação completa e gratuita: link na bio.
+
+#carroeletrico #comparativo #eletrico #ev</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Post 2 — Prompt de imagem</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Design gráfico minimalista estilo dashboard automotivo, fundo preto (#0B0D10), três silhuetas de carros elétricos em fileira, cada uma com uma barra de progresso em verde-limão (#C8FF4D) ao lado representando autonomia, tipografia geométrica sem serifa em branco, proporção quadrada 1:1, sem rostos, sem texto além de números genéricos.</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Post 3 — Legenda (educativo PBEV)</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Você sabe o que significa aquele selo de A+ a G no carro elétrico? 🤔
+
+É o PBEV — o equivalente, no carro, ao selo de eficiência da sua geladeira.
+
+A gente te ajuda a entender (e comparar) tudo isso. Link na bio.
+
+#pbev #inmetro #carroeletrico #eficienciaenergetica</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Post 3 — Prompt de imagem</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Ilustração vetorial minimalista de um selo de eficiência energética estilizado, formato retangular com gradiente de cores do verde-limão (#C8FF4D) ao cinza escuro, fundo preto absoluto (#0B0D10), estética flat design, linhas limpas, proporção quadrada 1:1, sem texto legível.</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Post 4 — Legenda (engajamento)</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Comenta aqui 👇 qual elétrico você tem (ou sonha em ter)?
+
+A gente compara qualquer modelo vendido no Brasil — autonomia, consumo e preço, tudo num lugar só.
+
+#carroeletrico #ev #eletricos #carrosbrasil</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Post 4 — Prompt de imagem</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Composição gráfica minimalista com um ponto de interrogação estilizado em verde-limão neon (#C8FF4D) sobre fundo escuro quase preto, elementos geométricos sutis ao redor sugerindo velocímetro ou painel digital, sem texto, proporção quadrada 1:1.</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Post 5 — Legenda (prova social)</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Mais de [X] comparações feitas por gente que tava decidindo qual elétrico comprar.
+
+Sem cadastro, sem pegadinha — só dado oficial, lado a lado.
+
+Testa agora: link na bio ⚡
+
+#carroeletrico #ev #mobilidadesustentavel</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-6">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Post 5 — Prompt de imagem</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Fotografia conceitual minimalista de um painel digital futurista com gráficos de barra em verde-limão neon (#C8FF4D) sobre fundo escuro (#0B0D10), profundidade de campo rasa, atmosfera tecnológica e clean, sem texto, proporção quadrada 1:1.</div>
+      </div>
+
+      <h3 class="font-display font-medium text-base mb-3">Instagram — Stories</h3>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Story 1 — Enquete</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90">Você sabe quanto custa carregar um elétrico em casa? 🤔
+[Enquete: Sei / Não tenho ideia]</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Story 2 — Quiz</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90">Qual elétrico tem MAIS autonomia hoje no Brasil? 🔋
+[Quiz com 3 opções]</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Story 3 — Link</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90">Compara TODOS os elétricos do Brasil em 1 lugar 👆
+Arrasta pra cima</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-6">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Stories — Prompt de imagem (fundo)</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Fundo vertical 9:16 minimalista, gradiente escuro do preto (#0B0D10) ao cinza-azulado (#1C2026), com uma linha fina em verde-limão neon (#C8FF4D) cruzando diagonalmente, espaço vazio no centro para texto e elementos de enquete, sem texto, estética tech automotiva.</div>
+      </div>
+
+      <h3 class="font-display font-medium text-base mb-3">Instagram — Reels</h3>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Reel 1 — Legenda</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">3 coisas que ninguém te conta antes de comprar um elétrico 👇 (segura até o final)
+
+Comparação completa: link na bio.
+
+#carroeletrico #ev #dicascarro #carrosbrasil</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Reel 1 — Roteiro / texto na tela</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">1. A autonomia anunciada não é a autonomia real.
+2. Recarregar em casa muda TUDO no seu custo mensal.
+3. A bateria tem garantia separada do carro — confere isso antes de assinar.
+
+Quer comparar modelo por modelo? Link na bio.</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Reel 2 — Legenda</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Quanto custa, de verdade, carregar um elétrico em casa por mês? Calculei aqui 👇
+
+#carroeletrico #ev #economia #carrosbrasil</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Reel 2 — Roteiro / texto na tela</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Carro elétrico médio: consumo de [X] kWh/100km.
+Rodando 1.000km por mês, isso dá aproximadamente [Y] kWh.
+Multiplicando pela tarifa de energia da sua região, o custo fica bem menos que gasolina pra mesma distância.
+
+Quer comparar o consumo exato do seu modelo? Link na bio.</div>
+      </div>
+    </section>
+
+    <!-- ===================== FACEBOOK ===================== -->
+    <section id="facebook" class="scroll-mt">
+      <h2 class="font-display font-semibold text-xl mb-4">Facebook — Grupos</h2>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Grupo — Carros elétricos (geral)</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Pessoal, pra quem tá pesquisando elétrico (como eu rs): achei um site que compara autonomia, consumo e preço de todos os modelos vendidos no Brasil, com dado oficial do PBEV/INMETRO. Ajudou muito a organizar minha cabeça antes de decidir. Segue o link pra quem quiser usar: comparaevs.digital</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Grupo — Finanças / economia doméstica</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Gente, isso aqui ajudou bastante quem tá pensando em trocar de carro pra economizar combustível: um comparador de elétricos com autonomia, consumo (kWh) e preço, tudo num lugar só, de graça. comparaevs.digital</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Grupo — Donos de carro elétrico</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Compartilhando: achei útil pra comparar dados oficiais (PBEV/INMETRO) de autonomia e consumo entre os modelos vendidos aqui no Brasil, sem precisar caçar em site de cada marca. comparaevs.digital — feedback de quem já testou é bem-vindo.</div>
+      </div>
+    </section>
+
+    <!-- ===================== YOUTUBE ===================== -->
+    <section id="youtube" class="scroll-mt">
+      <h2 class="font-display font-semibold text-xl mb-4">YouTube — Shorts</h2>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Short 1 — Título</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90">O elétrico com MAIOR autonomia do Brasil em 2026</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Short 1 — Descrição</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Comparamos todos os elétricos vendidos no Brasil com dados oficiais do PBEV/INMETRO. Veja o ranking completo: comparaevs.digital
+
+#carroeletrico #ev #carrosbrasil</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Short 1 — Roteiro / texto na tela</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Esse é o elétrico com MAIOR autonomia vendido no Brasil hoje. Dado oficial, sem chute. Quer comparar com outros modelos? Link na descrição.</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Short 2 — Título</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90">Quanto custa carregar um carro elétrico em casa?</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Short 2 — Descrição</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Calculamos o custo real de recarga residencial. Compare o consumo de cada modelo: comparaevs.digital
+
+#carroeletrico #ev #economia</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Short 2 — Roteiro / texto na tela</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Carregar um elétrico em casa custa muito menos do que você imagina. A gente te mostra o consumo oficial de cada modelo pra você calcular o seu. Link na descrição.</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Short 3 — Título</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90">PBEV: o selo que todo carro elétrico tem (e quase ninguém entende)</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Short 3 — Descrição</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Explicamos o selo de eficiência energética veicular do INMETRO em 60 segundos. comparaevs.digital
+
+#pbev #inmetro #carroeletrico</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Short 3 — Roteiro / texto na tela</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Esse selo de A+ a G no carro elétrico é tipo o selo da sua geladeira. Mostra o quão eficiente o carro é, oficialmente testado pelo INMETRO. A gente organiza tudo isso pra você comparar. Link na descrição.</div>
+      </div>
+    </section>
+
+    <!-- ===================== PROMPTS DE IMAGEM ===================== -->
+    <section id="prompts" class="scroll-mt">
+      <h2 class="font-display font-semibold text-xl mb-4">Prompts de imagem — Identidade</h2>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 mb-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Foto de perfil</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Logotipo minimalista de um raio elétrico estilizado dentro de um círculo, cor verde-limão neon (#C8FF4D) sobre fundo preto absoluto (#0B0D10), estilo flat vector, linhas geométricas limpas, alto contraste, adequado para ícone circular pequeno.</div>
+      </div>
+
+      <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+        <div class="flex items-center justify-between gap-3 mb-2">
+          <p class="text-[11px] uppercase tracking-wide text-volt font-medium">Ícone de destaque (template)</p>
+          <button onclick="copiarTexto(this)" class="copy-btn text-inkmuted hover:text-volt transition-colors shrink-0"><i class="fa-regular fa-copy"></i></button>
+        </div>
+        <div class="texto-copiavel whitespace-pre-wrap text-sm text-ink/90 leading-relaxed">Ícone circular minimalista estilo flat, fundo preto (#0B0D10), símbolo simples de [bateria / raio / cifrão / gráfico] em verde-limão neon (#C8FF4D), linhas finas, sem texto, proporção 1:1.</div>
+      </div>
+    </section>
+
+    </section>
+
+    <!-- ===================== ABA: VEÍCULOS ===================== -->
+    <section id="aba-veiculos" class="aba-conteudo hidden">
+
+    <!-- ===================== FILTROS ===================== -->
+    <section class="rounded-2xl border border-panel2 bg-panel p-4 mb-5">
+      <div class="grid grid-cols-1 sm:grid-cols-[1fr_180px_180px_140px] gap-3">
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-inkmuted text-xs"></i>
+          <input id="f-busca" type="text" placeholder="Buscar marca ou modelo…" oninput="aplicarFiltrosAdmin()"
+            class="w-full h-[42px] bg-panel2 border border-panel3 rounded-lg pl-9 pr-3 text-sm text-ink placeholder:text-inkmuted/50 focus:border-volt/50 transition-colors">
+        </div>
+        <select id="f-marca" onchange="aplicarFiltrosAdmin()" class="h-[42px] bg-panel2 border border-panel3 rounded-lg px-3 text-sm text-ink focus:border-volt/50 transition-colors">
+          <option value="">Todas marcas</option>
+        </select>
+        <select id="f-uber" onchange="aplicarFiltrosAdmin()" class="h-[42px] bg-panel2 border border-panel3 rounded-lg px-3 text-sm text-ink focus:border-volt/50 transition-colors">
+          <option value="">Uber: todos</option>
+          <option value="true">Uber: sim</option>
+          <option value="false">Uber: não</option>
+        </select>
+        <button onclick="limparFiltrosAdmin()" class="h-[42px] rounded-lg border border-panel3 text-sm text-inkmuted hover:text-ink hover:border-ink/30 transition-colors">
+          Limpar
+        </button>
+      </div>
+    </section>
+
+    <!-- ===================== TABELA (desktop) ===================== -->
+    <section class="hidden md:block rounded-2xl border border-panel2 bg-panel overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-panel2 text-left text-[11px] uppercase tracking-wide text-inkmuted">
+              <th class="px-4 py-3 font-medium">Veículo</th>
+              <th class="px-3 py-3 font-medium">Categoria</th>
+              <th class="px-3 py-3 font-medium">Ano</th>
+              <th class="px-3 py-3 font-medium text-right">Autonomia</th>
+              <th class="px-3 py-3 font-medium text-right">Preço</th>
+              <th class="px-3 py-3 font-medium text-center">Uber</th>
+              <th class="px-4 py-3 font-medium text-right">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-veiculos" class="divide-y divide-panel2"></tbody>
+        </table>
+      </div>
+      <div id="estado-vazio" class="hidden py-16 text-center">
+        <i class="fa-solid fa-car-side text-2xl text-inkmuted/40 mb-3"></i>
+        <p class="text-sm text-inkmuted">Nenhum veículo encontrado para esses filtros.</p>
+      </div>
+    </section>
+
+    <!-- ===================== CARDS (mobile) ===================== -->
+    <section id="cards-mobile" class="md:hidden flex flex-col gap-3"></section>
+
+    </section> <!-- /aba-veiculos -->
+
+  </main>
+
+  <!-- ===================== MODAL VEÍCULO (criar/editar) ===================== -->
+  <div id="veiculo-modal" class="fixed inset-0 z-[60] hidden">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="fecharModalVeiculo()"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+      <div class="bg-panel border border-panel2 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto">
+        <div class="flex items-center justify-between p-5 border-b border-panel2 sticky top-0 bg-panel z-10">
+          <h2 class="font-display font-semibold text-lg" id="veiculo-modal-titulo">Novo veículo</h2>
+          <button onclick="fecharModalVeiculo()" class="w-9 h-9 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel2 transition-colors">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="p-5">
+          <input type="hidden" id="v-id">
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs text-inkmuted mb-1.5">Marca *</label>
+              <input id="v-marca" type="text" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:border-volt/50 transition-colors">
+            </div>
+            <div>
+              <label class="block text-xs text-inkmuted mb-1.5">Modelo / Versão *</label>
+              <input id="v-modelo" type="text" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:border-volt/50 transition-colors">
+            </div>
+
+            <div>
+              <label class="block text-xs text-inkmuted mb-1.5">Categoria</label>
+              <input id="v-categoria" type="text" placeholder="Ex: Médio, SUV Compacto…" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:border-volt/50 transition-colors">
+            </div>
+            <div>
+              <label class="block text-xs text-inkmuted mb-1.5">Ano</label>
+              <input id="v-ano" type="text" placeholder="2026" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:border-volt/50 transition-colors">
+            </div>
+
+            <div>
+              <label class="block text-xs text-inkmuted mb-1.5">Propulsão</label>
+              <input id="v-propulsao" type="text" placeholder="Elétrico" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:border-volt/50 transition-colors">
+            </div>
+            <div>
+              <label class="block text-xs text-inkmuted mb-1.5">Transmissão</label>
+              <input id="v-transmissao" type="text" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:border-volt/50 transition-colors">
+            </div>
+
+            <div>
+              <label class="block text-xs text-inkmuted mb-1.5">Direção</label>
+              <input id="v-direcao" type="text" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:border-volt/50 transition-colors">
+            </div>
+            <div>
+              <label class="block text-xs text-inkmuted mb-1.5">Combustível</label>
+              <input id="v-combustivel" type="text" placeholder="E (elétrico)" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:border-volt/50 transition-colors">
+            </div>
+
+            <div>
+              <label class="block text-xs text-inkmuted mb-1.5">Cidade (km/L.e)</label>
+              <input id="v-cidade" type="number" step="0.01" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink font-data focus:border-volt/50 transition-colors">
+            </div>
+            <div>
+              <label class="block text-xs text-inkmuted mb-1.5">Estrada (km/L.e)</label>
+              <input id="v-estrada" type="number" step="0.01" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink font-data focus:border-volt/50 transition-colors">
+            </div>
+
+            <div>
+              <label class="block text-xs text-inkmuted mb-1.5">Consumo (MJ/km)</label>
+              <input id="v-consumo" type="number" step="0.01" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink font-data focus:border-volt/50 transition-colors">
+            </div>
+            <div>
+              <label class="block text-xs text-inkmuted mb-1.5">Autonomia (km)</label>
+              <input id="v-autonomia" type="number" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink font-data focus:border-volt/50 transition-colors">
+            </div>
+
+            <div>
+              <label class="block text-xs text-inkmuted mb-1.5">Classificação Categoria</label>
+              <input id="v-classcat" type="text" placeholder="A, B, C…" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:border-volt/50 transition-colors">
+            </div>
+            <div>
+              <label class="block text-xs text-inkmuted mb-1.5">Classificação Geral</label>
+              <input id="v-classgeral" type="text" placeholder="A, B, C…" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:border-volt/50 transition-colors">
+            </div>
+
+            <div>
+              <label class="block text-xs text-inkmuted mb-1.5">Preço (R$)</label>
+              <input id="v-preco" type="number" step="0.01" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink font-data focus:border-volt/50 transition-colors">
+            </div>
+            <div>
+              <label class="block text-xs text-inkmuted mb-1.5">Código (PBE)</label>
+              <input id="v-codigo" type="number" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink font-data focus:border-volt/50 transition-colors">
+            </div>
+
+            <div>
+              <label class="block text-xs text-inkmuted mb-1.5">Ano da tabela</label>
+              <input id="v-anotabela" type="number" placeholder="2026" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink font-data focus:border-volt/50 transition-colors">
+            </div>
+            <div>
+              <label class="block text-xs text-inkmuted mb-1.5">Fonte do preço</label>
+              <input id="v-fonteprecco" type="text" placeholder="Tabela Fipe" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:border-volt/50 transition-colors">
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-xs text-inkmuted mb-1.5">Site (link da oferta)</label>
+              <input id="v-site" type="url" placeholder="https://…" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:border-volt/50 transition-colors">
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-xs text-inkmuted mb-1.5">Imagem (URL)</label>
+              <input id="v-imagem" type="url" placeholder="https://…" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:border-volt/50 transition-colors">
+            </div>
+
+            <div class="sm:col-span-2 flex items-center justify-between rounded-lg border border-panel3 bg-panel2 px-4 py-3">
+              <div class="flex items-center gap-2.5">
+                <i class="fa-brands fa-uber text-volt text-sm"></i>
+                <div>
+                  <p class="text-sm text-ink">Aceito pela Uber</p>
+                  <p class="text-[11px] text-inkmuted">Marcar como elegível nos filtros do site</p>
+                </div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="v-uber" class="sr-only peer">
+                <div class="w-10 h-5 bg-panel3 rounded-full transition-colors peer-checked:bg-[#1a2b0e]"></div>
+                <div class="absolute left-0.5 top-0.5 w-4 h-4 bg-inkmuted rounded-full transition-all peer-checked:translate-x-5 peer-checked:bg-volt"></div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between gap-3 p-5 border-t border-panel2 sticky bottom-0 bg-panel">
+          <button onclick="confirmarExclusao()" id="v-btn-excluir" class="hidden items-center gap-2 px-4 py-2.5 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 text-sm font-medium transition-colors">
+            <i class="fa-solid fa-trash text-xs"></i> Excluir
+          </button>
+          <div class="flex items-center gap-2 ml-auto">
+            <button onclick="fecharModalVeiculo()" class="px-4 py-2.5 rounded-lg border border-panel3 text-inkmuted hover:text-ink text-sm font-medium transition-colors">
+              Cancelar
+            </button>
+            <button onclick="salvarVeiculo()" id="v-btn-salvar" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-volt text-void text-sm font-medium hover:bg-voltdim transition-colors disabled:opacity-60">
+              <i class="fa-solid fa-check text-xs"></i> Salvar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL CONFIRMAR EXCLUSÃO ===================== -->
+  <div id="excluir-modal" class="fixed inset-0 z-[70] hidden">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="fecharModalExcluir()"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-6">
+      <div class="bg-panel border border-panel2 rounded-2xl w-full max-w-sm p-6">
+        <div class="w-10 h-10 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
+          <i class="fa-solid fa-triangle-exclamation text-red-400"></i>
+        </div>
+        <h3 class="font-display font-semibold text-base mb-1.5">Excluir veículo?</h3>
+        <p class="text-sm text-inkmuted mb-5">Essa ação não pode ser desfeita. <span id="excluir-nome-veiculo" class="text-ink"></span> será removido permanentemente da tabela.</p>
+        <div class="flex items-center gap-2 justify-end">
+          <button onclick="fecharModalExcluir()" class="px-4 py-2.5 rounded-lg border border-panel3 text-inkmuted hover:text-ink text-sm font-medium transition-colors">Cancelar</button>
+          <button onclick="executarExclusao()" id="btn-confirmar-exclusao" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-red-500 text-white text-sm font-medium hover:bg-red-400 transition-colors disabled:opacity-60">
+            <i class="fa-solid fa-trash text-xs"></i> Excluir
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL PATROCINADOR (criar/editar) ===================== -->
+
+  <!-- ===================== MODAL: NOVA PROPOSTA ===================== -->
+  <div id="proposta-modal" class="fixed inset-0 z-[60] hidden">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="fecharModalProposta()"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+      <div class="bg-panel border border-panel2 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[92vh] overflow-y-auto">
+
+        <div class="flex items-center justify-between p-5 border-b border-panel2 sticky top-0 bg-panel z-10">
+          <h2 class="font-display font-semibold text-lg">Nova proposta</h2>
+          <button onclick="fecharModalProposta()" class="w-9 h-9 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel2 transition-colors">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div id="prop-form" class="p-5 space-y-5">
+          <div>
+            <p class="text-[10px] uppercase tracking-widest text-volt font-semibold mb-2.5">1 · Cliente</p>
+            <div class="space-y-2.5">
+              <input id="prop-nome" placeholder="Nome de quem decide *" class="w-full bg-panel2 border border-panel3 rounded-xl px-3.5 py-3 text-sm text-ink placeholder:text-inkmuted/60 focus:border-volt/60 transition-colors">
+              <input id="prop-empresa" placeholder="Empresa" class="w-full bg-panel2 border border-panel3 rounded-xl px-3.5 py-3 text-sm text-ink placeholder:text-inkmuted/60 focus:border-volt/60 transition-colors">
+              <input id="prop-whatsapp" type="tel" inputmode="numeric" placeholder="WhatsApp (só números)" class="w-full bg-panel2 border border-panel3 rounded-xl px-3.5 py-3 text-sm text-ink font-data placeholder:text-inkmuted/60 focus:border-volt/60 transition-colors">
+            </div>
+          </div>
+
+          <div>
+            <p class="text-[10px] uppercase tracking-widest text-volt font-semibold mb-2.5">2 · Espaços</p>
+            <div id="prop-espacos" class="space-y-2.5"></div>
+          </div>
+
+          <div>
+            <p class="text-[10px] uppercase tracking-widest text-volt font-semibold mb-2.5">3 · Condições</p>
+            <div class="grid grid-cols-2 gap-2.5">
+              <div>
+                <label class="block text-[11px] text-inkmuted mb-1.5">Começa em</label>
+                <input id="prop-inicio" type="month" class="w-full bg-panel2 border border-panel3 rounded-xl px-3 py-3 text-sm text-ink font-data focus:border-volt/60 transition-colors">
+              </div>
+              <div>
+                <label class="block text-[11px] text-inkmuted mb-1.5">Meses grátis</label>
+                <input id="prop-gratis" type="number" min="0" max="12" value="0" class="w-full bg-panel2 border border-panel3 rounded-xl px-3 py-3 text-sm text-ink font-data focus:border-volt/60 transition-colors">
+              </div>
+              <div>
+                <label class="block text-[11px] text-inkmuted mb-1.5">Desconto (R$)</label>
+                <input id="prop-desconto" type="number" min="0" step="50" value="0" class="w-full bg-panel2 border border-panel3 rounded-xl px-3 py-3 text-sm text-ink font-data focus:border-volt/60 transition-colors">
+              </div>
+              <div>
+                <label class="block text-[11px] text-inkmuted mb-1.5">Vale por (dias)</label>
+                <input id="prop-validade" type="number" min="1" max="60" value="7" class="w-full bg-panel2 border border-panel3 rounded-xl px-3 py-3 text-sm text-ink font-data focus:border-volt/60 transition-colors">
+              </div>
+            </div>
+            <textarea id="prop-obs" rows="2" placeholder="Observação para o cliente (opcional)" class="w-full mt-2.5 bg-panel2 border border-panel3 rounded-xl px-3.5 py-3 text-sm text-ink placeholder:text-inkmuted/60 focus:border-volt/60 transition-colors resize-none"></textarea>
+            <input id="prop-vendedor" placeholder="Seu nome" class="w-full mt-2.5 bg-panel2 border border-panel3 rounded-xl px-3.5 py-3 text-sm text-ink placeholder:text-inkmuted/60 focus:border-volt/60 transition-colors">
+          </div>
+        </div>
+
+        <!-- pronto: substitui o formulário depois de gerar -->
+        <div id="prop-pronto" class="hidden p-5">
+          <div class="text-center py-4">
+            <div class="w-14 h-14 rounded-full bg-volt/15 border border-volt/30 flex items-center justify-center mx-auto mb-3">
+              <i class="fa-solid fa-check text-volt text-xl"></i>
+            </div>
+            <p class="font-display font-semibold text-lg">Proposta pronta</p>
+            <p class="text-sm text-inkmuted">Manda o link pro cliente.</p>
+          </div>
+          <div class="flex items-center gap-2 bg-panel2 border border-panel3 rounded-xl px-3 py-2.5 mb-3">
+            <span id="prop-link" class="flex-1 min-w-0 truncate font-data text-xs text-volt"></span>
+            <button onclick="copiarLinkProposta()" class="shrink-0 px-2.5 py-1.5 rounded-lg border border-panel3 text-xs text-inkmuted hover:text-ink transition-colors">Copiar</button>
+          </div>
+          <a id="prop-whats" href="#" target="_blank" rel="noopener" class="block w-full py-3.5 rounded-xl bg-[#25D366] text-black text-center font-semibold mb-2">
+            <i class="fa-brands fa-whatsapp mr-1.5"></i>Enviar no WhatsApp
+          </a>
+          <div class="flex gap-2">
+            <a id="prop-ver" href="#" target="_blank" rel="noopener" class="flex-1 py-3 rounded-xl border border-panel3 text-center text-sm text-inkmuted hover:text-ink transition-colors">Ver</a>
+            <button onclick="abrirModalProposta()" class="flex-1 py-3 rounded-xl border border-panel3 text-sm text-inkmuted hover:text-ink transition-colors">Fazer outra</button>
+          </div>
+        </div>
+
+        <div id="prop-rodape" class="sticky bottom-0 bg-panel border-t border-panel2 p-4">
+          <div class="flex items-end justify-between gap-3 mb-2.5">
+            <p id="prop-resumo" class="text-[11px] text-inkmuted leading-tight">Nenhum espaço marcado</p>
+            <div class="text-right shrink-0">
+              <p class="text-[10px] uppercase tracking-wide text-inkmuted">Total</p>
+              <p id="prop-total" class="font-data font-bold text-xl text-volt leading-none">R$ 0</p>
+            </div>
+          </div>
+          <button id="prop-btn-gerar" onclick="gerarProposta()" class="w-full py-3.5 rounded-xl bg-volt text-void font-semibold hover:bg-voltdim transition-colors disabled:opacity-40">
+            Gerar link da proposta
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="patrocinador-modal" class="fixed inset-0 z-[60] hidden">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="fecharModalPatrocinador()"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+      <div class="bg-panel border border-panel2 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[92vh] overflow-y-auto">
+        <div class="flex items-center justify-between p-5 border-b border-panel2 sticky top-0 bg-panel z-10">
+          <h2 class="font-display font-semibold text-lg" id="patrocinador-modal-titulo">Novo patrocinador</h2>
+          <button onclick="fecharModalPatrocinador()" class="w-9 h-9 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel2 transition-colors">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="p-5 space-y-4">
+          <input type="hidden" id="p-id">
+          <input type="hidden" id="p-tipo">
+
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">Nome do patrocinador *</label>
+            <input id="p-nome" type="text" placeholder="Ex: Concessionária Volt" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:border-volt/50 transition-colors">
+          </div>
+
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">Headline / texto principal</label>
+            <textarea id="p-headline" rows="2" placeholder="Texto de destaque do anúncio" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:border-volt/50 transition-colors resize-none"></textarea>
+          </div>
+
+          <div id="p-campo-subtitulo">
+            <label class="block text-xs text-inkmuted mb-1.5">Subtítulo</label>
+            <input id="p-subtitulo" type="text" placeholder="Ex: Zona de Conversão Final" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:border-volt/50 transition-colors">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs text-inkmuted mb-1.5">Texto do botão (CTA)</label>
+              <input id="p-cta" type="text" placeholder="Ver oferta" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:border-volt/50 transition-colors">
+            </div>
+            <div>
+              <label class="block text-xs text-inkmuted mb-1.5">Ordem de exibição</label>
+              <input id="p-ordem" type="number" value="0" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink font-data focus:border-volt/50 transition-colors">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">Link de destino *</label>
+            <input id="p-link" type="url" placeholder="https://wa.me/55..." class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:border-volt/50 transition-colors">
+          </div>
+
+          <div id="p-campo-imagem">
+            <label class="block text-xs text-inkmuted mb-1.5">Imagem de fundo (URL)</label>
+            <input id="p-imagem" type="url" placeholder="https://…" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:border-volt/50 transition-colors">
+            <p class="text-[11px] text-inkmuted mt-1">Desktop. Recomendado 1920 × 550 px (hero) ou 1920 × 240 px (banner).</p>
+          </div>
+
+          <div id="p-campo-imagem-mobile">
+            <label class="block text-xs text-inkmuted mb-1.5">Imagem de celular (URL)</label>
+            <input id="p-imagem-mobile" type="url" placeholder="https://…" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:border-volt/50 transition-colors">
+            <p class="text-[11px] text-inkmuted mt-1">Usada abaixo de 640 px. Recomendado 1080 × 440 px. Em branco, usa a de desktop cortada.</p>
+          </div>
+
+          <div class="flex items-center justify-between rounded-lg border border-panel3 bg-panel2 px-4 py-3">
+            <div>
+              <p class="text-sm text-ink">Ativo</p>
+              <p class="text-[11px] text-inkmuted">Exibir esse anúncio no site agora</p>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="p-ativo" class="sr-only peer" checked>
+              <div class="w-10 h-5 bg-panel3 rounded-full transition-colors peer-checked:bg-[#1a2b0e]"></div>
+              <div class="absolute left-0.5 top-0.5 w-4 h-4 bg-inkmuted rounded-full transition-all peer-checked:translate-x-5 peer-checked:bg-volt"></div>
+            </label>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between gap-3 p-5 border-t border-panel2 sticky bottom-0 bg-panel">
+          <button onclick="confirmarExclusaoPatrocinador()" id="p-btn-excluir" class="hidden items-center gap-2 px-4 py-2.5 rounded-lg border border-red-500/30 text-red-400 hover:bg-red-500/10 text-sm font-medium transition-colors">
+            <i class="fa-solid fa-trash text-xs"></i> Excluir
+          </button>
+          <div class="flex items-center gap-2 ml-auto">
+            <button onclick="fecharModalPatrocinador()" class="px-4 py-2.5 rounded-lg border border-panel3 text-inkmuted hover:text-ink text-sm font-medium transition-colors">
+              Cancelar
+            </button>
+            <button onclick="salvarPatrocinador()" id="p-btn-salvar" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-volt text-void text-sm font-medium hover:bg-voltdim transition-colors disabled:opacity-60">
+              <i class="fa-solid fa-check text-xs"></i> Salvar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL CONFIRMAR EXCLUSÃO PATROCINADOR ===================== -->
+  <div id="excluir-patrocinador-modal" class="fixed inset-0 z-[70] hidden">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="fecharModalExcluirPatrocinador()"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-6">
+      <div class="bg-panel border border-panel2 rounded-2xl w-full max-w-sm p-6">
+        <div class="w-10 h-10 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-4">
+          <i class="fa-solid fa-triangle-exclamation text-red-400"></i>
+        </div>
+        <h3 class="font-display font-semibold text-base mb-1.5">Excluir patrocinador?</h3>
+        <p class="text-sm text-inkmuted mb-5"><span id="excluir-nome-patrocinador" class="text-ink"></span> deixará de aparecer no site imediatamente.</p>
+        <div class="flex items-center gap-2 justify-end">
+          <button onclick="fecharModalExcluirPatrocinador()" class="px-4 py-2.5 rounded-lg border border-panel3 text-inkmuted hover:text-ink text-sm font-medium transition-colors">Cancelar</button>
+          <button onclick="executarExclusaoPatrocinador()" id="btn-confirmar-exclusao-patrocinador" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-red-500 text-white text-sm font-medium hover:bg-red-400 transition-colors disabled:opacity-60">
+            <i class="fa-solid fa-trash text-xs"></i> Excluir
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TOAST ===================== -->
+  <div id="toast" class="toast fixed left-1/2 -translate-x-1/2 bottom-8 z-[80] opacity-0 pointer-events-none" style="transform: translate(-50%, 8px);">
+    <div id="toast-content" class="bg-panel3 border border-panel3 text-ink text-sm px-4 py-2.5 rounded-lg shadow-xl flex items-center gap-2"></div>
+  </div>
+
+  <script>
+    // Banco saiu do Supabase pro Neon em 13/09/2026 — ver ../manifesto/comparaevs.txt
+    // Desde 29/09/2026 a API exige a chave do admin (env ADMIN_KEY na Vercel):
+    // pedida uma vez e guardada neste navegador; se a API recusar, pede de novo.
+    async function adminFetch(url, opts = {}) {
+      let key = localStorage.getItem('adminKey');
+      if (!key) {
+        key = prompt('Chave do admin:') || '';
+        localStorage.setItem('adminKey', key);
+      }
+      const res = await fetch(url, { ...opts, headers: { ...(opts.headers || {}), 'x-admin-key': key } });
+      if (res.status === 401) localStorage.removeItem('adminKey');
+      return res;
+    }
+    async function postJSON(url, body) {
+      try {
+        const res = await adminFetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if (!res.ok) {
+          const payload = await res.json().catch(() => ({}));
+          return { error: new Error(payload.error || ('HTTP ' + res.status)) };
+        }
+        // Devolve o corpo: a criação de proposta precisa do slug de volta.
+        // Quem só lê `error` continua funcionando igual.
+        return { data: await res.json().catch(() => null), error: null };
+      } catch (e) {
+        return { error: e };
+      }
+    }
+    async function putJSON(url, body) {
+      try {
+        const res = await adminFetch(url, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if (!res.ok) {
+          const payload = await res.json().catch(() => ({}));
+          return { error: new Error(payload.error || ('HTTP ' + res.status)) };
+        }
+        return { error: null };
+      } catch (e) {
+        return { error: e };
+      }
+    }
+    async function deleteJSON(url) {
+      try {
+        const res = await adminFetch(url, { method: 'DELETE' });
+        if (!res.ok) {
+          const payload = await res.json().catch(() => ({}));
+          return { error: new Error(payload.error || ('HTTP ' + res.status)) };
+        }
+        return { error: null };
+      } catch (e) {
+        return { error: e };
+      }
+    }
+    async function getJSON(url) {
+      try {
+        const res = await adminFetch(url);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return { data: await res.json(), error: null };
+      } catch (e) {
+        return { data: null, error: e };
+      }
+    }
+
+    let todosVeiculos = [];
+    let filtrados = [];
+    let idParaExcluir = null;
+    let todosPatrocinadores = [];
+    let idPatrocinadorParaExcluir = null;
+    let abaAtual = 'dashboard';
+
+    async function init() {
+      await carregarVeiculos();
+      trocarAba('dashboard');
+    }
+
+    // ================== NAVEGAÇÃO POR ABAS ==================
+    function trocarAba(aba) {
+      abaAtual = aba;
+      document.querySelectorAll('.aba-conteudo').forEach(el => el.classList.add('hidden'));
+      document.getElementById('aba-' + aba).classList.remove('hidden');
+
+      document.querySelectorAll('.aba-btn').forEach(btn => {
+        const ativo = btn.dataset.aba === aba;
+        btn.classList.toggle('text-volt', ativo);
+        btn.classList.toggle('border-volt', ativo);
+        btn.classList.toggle('text-inkmuted', !ativo);
+        btn.classList.toggle('border-transparent', !ativo);
+      });
+
+      document.getElementById('btn-novo-veiculo').classList.toggle('hidden', aba !== 'veiculos');
+
+      if (aba === 'dashboard') carregarDashboard();
+      if (aba === 'patrocinadores') carregarPatrocinadores();
+      if (aba === 'orcamentos') carregarOrcamentos();
+      if (aba === 'propostas') carregarPropostas();
+      if (aba === 'prospeccao') {
+        const f = document.getElementById('frame-prospeccao');
+        if (!f.src) f.src = 'vendas-melvianos.html';   // só carrega na primeira visita
+      }
+    }
+
+    function toggleEspecs() {
+      const corpo = document.getElementById('especs-corpo');
+      const seta = document.getElementById('especs-seta');
+      const aberto = corpo.classList.toggle('hidden');
+      seta.classList.toggle('rotate-180', !aberto);
+    }
+
+
+    // ================== PROPOSTAS ==================
+    // TABELA DE PREÇOS — mude os valores aqui. Vale para propostas novas;
+    // as já enviadas guardam o preço da época dentro de `itens`.
+    const ESPACOS_PROPOSTA = [
+      { id:'hero_master', nome:'Hero Master',  desc:'Banner do topo, rotativo',          valor: 297 },
+      { id:'banner',      nome:'Banner',       desc:'Depois da lista de veículos',       valor: 127 },
+      { id:'nativo',      nome:'Linha Nativa', desc:'Dentro da lista, a cada 12 carros', valor: 197 },
+    ];
+
+    const STATUS_PROPOSTA = {
+      enviada:  { label:'Enviada',  cor:'text-inkmuted border-panel3' },
+      aceita:   { label:'Aceita',   cor:'text-volt border-volt/40' },
+      recusada: { label:'Recusada', cor:'text-red-400 border-red-400/40' },
+    };
+
+    const propSelecionados = new Map();   // id -> { meses }
+    const fmtR$ = (v) => 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
+
+    async function carregarPropostas() {
+      const { data, error } = await getJSON('/api/propostas');
+      if (error) { mostrarToast('Erro ao carregar propostas.', 'erro'); return; }
+      const lista = data || [];
+      window.__propostasCache = lista;
+
+      document.getElementById('prop-contagem').textContent =
+        lista.length ? lista.length + (lista.length === 1 ? ' proposta emitida' : ' propostas emitidas') : 'nenhuma ainda';
+      document.getElementById('prop-vazio').classList.toggle('hidden', !!lista.length);
+
+      document.getElementById('prop-lista').innerHTML = lista.map(p => {
+        const itens = Array.isArray(p.itens) ? p.itens : [];
+        const total = itens.reduce((s, i) => s + i.meses * i.valor_mensal, 0) - (Number(p.desconto) || 0);
+        const st = STATUS_PROPOSTA[p.status] || STATUS_PROPOSTA.enviada;
+        const url = location.origin + '/proposta?p=' + p.slug;
+        return `
+        <div class="rounded-2xl border border-panel2 bg-panel p-4">
+          <div class="flex items-start justify-between gap-3 mb-2">
+            <div class="min-w-0">
+              <p class="font-medium leading-tight truncate">${p.cliente_empresa || p.cliente_nome}</p>
+              <p class="text-[11px] text-inkmuted truncate">${p.cliente_empresa ? p.cliente_nome + ' · ' : ''}${new Date(p.criado_em).toLocaleDateString('pt-BR')}${p.vendedor ? ' · ' + p.vendedor : ''}</p>
+            </div>
+            <span class="shrink-0 px-2 py-0.5 rounded-full border text-[10px] font-medium ${st.cor}">${st.label}</span>
+          </div>
+          <p class="text-[11px] text-inkmuted mb-2.5">${itens.map(i => i.nome).join(' + ') || '—'}${p.meses_gratis ? ' · ' + p.meses_gratis + ' grátis' : ''}</p>
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <p class="font-data font-bold text-lg text-volt">${fmtR$(total)}</p>
+            <div class="flex items-center gap-1.5">
+              <button onclick="copiarTexto('${url}')" title="Copiar link" class="w-8 h-8 rounded-lg border border-panel3 text-inkmuted hover:text-ink transition-colors"><i class="fa-regular fa-copy text-xs"></i></button>
+              <a href="${url}" target="_blank" rel="noopener" title="Abrir" class="w-8 h-8 rounded-lg border border-panel3 text-inkmuted hover:text-ink transition-colors inline-flex items-center justify-center"><i class="fa-solid fa-arrow-up-right-from-square text-xs"></i></a>
+              <button onclick="confirmarExcluirProposta('${p.slug}')" title="Excluir" class="w-8 h-8 rounded-lg border border-panel3 text-inkmuted hover:text-red-400 hover:border-red-400/40 transition-colors"><i class="fa-solid fa-trash text-xs"></i></button>
+              <select onchange="mudarStatusProposta('${p.slug}', this.value)" class="bg-panel2 border border-panel3 rounded-lg px-2 py-1.5 text-[11px] text-inkmuted">
+                ${Object.entries(STATUS_PROPOSTA).map(([v, x]) => `<option value="${v}" ${p.status === v ? 'selected' : ''}>${x.label}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    async function mudarStatusProposta(slug, status) {
+      const { error } = await putJSON('/api/propostas', { slug, status });
+      if (error) { mostrarToast('Erro ao atualizar.', 'erro'); return; }
+      mostrarToast('Status atualizado.');
+      carregarPropostas();
+    }
+
+    function copiarTexto(t) {
+      navigator.clipboard?.writeText(t).then(
+        () => mostrarToast('Link copiado.'),
+        () => mostrarToast('Não consegui copiar.', 'erro'));
+    }
+
+    // -------------------- modal --------------------
+    function abrirModalProposta() {
+      propSelecionados.clear();
+      ['prop-nome','prop-empresa','prop-whatsapp','prop-obs'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('prop-gratis').value = 0;
+      document.getElementById('prop-desconto').value = 0;
+      document.getElementById('prop-validade').value = 7;
+      const hoje = new Date();
+      document.getElementById('prop-inicio').value =
+        hoje.getFullYear() + '-' + String(hoje.getMonth() + 2).padStart(2, '0');
+
+      document.getElementById('prop-form').classList.remove('hidden');
+      document.getElementById('prop-rodape').classList.remove('hidden');
+      document.getElementById('prop-pronto').classList.add('hidden');
+
+      montarEspacosProposta();
+      atualizarResumoProposta();
+      document.getElementById('proposta-modal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function fecharModalProposta() {
+      document.getElementById('proposta-modal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    function montarEspacosProposta() {
+      document.getElementById('prop-espacos').innerHTML = ESPACOS_PROPOSTA.map(e => `
+        <div class="rounded-xl border border-panel3 overflow-hidden" data-caixa="${e.id}">
+          <button type="button" onclick="alternarEspaco('${e.id}')" class="w-full flex items-center gap-3 p-3 text-left">
+            <span data-check="${e.id}" class="w-6 h-6 rounded-md border border-panel3 flex items-center justify-center shrink-0 transition-colors">
+              <i class="fa-solid fa-check text-[10px] text-transparent"></i>
+            </span>
+            <span class="flex-1 min-w-0">
+              <span class="block text-sm font-medium leading-tight">${e.nome}</span>
+              <span class="block text-[11px] text-inkmuted">${e.desc}</span>
+            </span>
+            <span class="font-data text-xs text-inkmuted shrink-0">${fmtR$(e.valor)}<span class="text-[10px]">/mês</span></span>
+          </button>
+          <div data-meses="${e.id}" class="hidden px-3 pb-3">
+            <div class="flex items-center gap-3 pt-3 border-t border-panel3">
+              <span class="text-[11px] text-inkmuted">Meses</span>
+              <button type="button" onclick="mudarMesesEspaco('${e.id}',-1)" class="w-9 h-9 rounded-lg border border-panel3 text-inkmuted active:bg-panel3">−</button>
+              <span data-qtd="${e.id}" class="font-data font-bold text-lg w-7 text-center">1</span>
+              <button type="button" onclick="mudarMesesEspaco('${e.id}',1)" class="w-9 h-9 rounded-lg border border-panel3 text-inkmuted active:bg-panel3">+</button>
+              <span data-sub="${e.id}" class="ml-auto font-data text-sm text-volt"></span>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function alternarEspaco(id) {
+      if (propSelecionados.has(id)) propSelecionados.delete(id);
+      else propSelecionados.set(id, { meses: 1 });
+      pintarEspaco(id);
+      atualizarResumoProposta();
+    }
+
+    function mudarMesesEspaco(id, delta) {
+      const s = propSelecionados.get(id);
+      if (!s) return;
+      s.meses = Math.min(24, Math.max(1, s.meses + delta));
+      pintarEspaco(id);
+      atualizarResumoProposta();
+    }
+
+    function pintarEspaco(id) {
+      const e = ESPACOS_PROPOSTA.find(x => x.id === id);
+      const marcado = propSelecionados.has(id);
+      const check = document.querySelector(`[data-check="${id}"]`);
+      check.className = 'w-6 h-6 rounded-md border flex items-center justify-center shrink-0 transition-colors ' +
+        (marcado ? 'bg-volt border-volt' : 'border-panel3');
+      check.querySelector('i').className = 'fa-solid fa-check text-[10px] ' + (marcado ? 'text-void' : 'text-transparent');
+      document.querySelector(`[data-caixa="${id}"]`).classList.toggle('border-volt/50', marcado);
+      document.querySelector(`[data-meses="${id}"]`).classList.toggle('hidden', !marcado);
+      if (marcado) {
+        const m = propSelecionados.get(id).meses;
+        document.querySelector(`[data-qtd="${id}"]`).textContent = m;
+        document.querySelector(`[data-sub="${id}"]`).textContent = fmtR$(e.valor * m);
+      }
+    }
+
+    // Mês grátis estende o período, não abate valor: somar como desconto
+    // faria a proposta parecer maior do que é.
+    function calcularProposta() {
+      let subtotal = 0, meses = 0;
+      for (const [id, s] of propSelecionados) {
+        const e = ESPACOS_PROPOSTA.find(x => x.id === id);
+        subtotal += e.valor * s.meses;
+        meses = Math.max(meses, s.meses);
+      }
+      const desconto = Math.min(subtotal, Number(document.getElementById('prop-desconto').value) || 0);
+      const gratis = Number(document.getElementById('prop-gratis').value) || 0;
+      return { subtotal, desconto, total: subtotal - desconto, meses, gratis };
+    }
+
+    function atualizarResumoProposta() {
+      const c = calcularProposta();
+      document.getElementById('prop-total').textContent = fmtR$(c.total);
+      document.getElementById('prop-resumo').innerHTML = propSelecionados.size
+        ? [...propSelecionados.keys()].map(id => ESPACOS_PROPOSTA.find(e => e.id === id).nome).join(' + ') +
+          `<span class="block">${c.meses} ${c.meses === 1 ? 'mês' : 'meses'}${c.gratis ? ' + ' + c.gratis + ' grátis' : ''}${c.desconto ? ' · −' + fmtR$(c.desconto) : ''}</span>`
+        : 'Nenhum espaço marcado';
+      document.getElementById('prop-btn-gerar').disabled = !propSelecionados.size;
+    }
+
+    async function gerarProposta() {
+      const nome = document.getElementById('prop-nome').value.trim();
+      if (!nome) { mostrarToast('Informe o nome do cliente.', 'erro'); document.getElementById('prop-nome').focus(); return; }
+      if (!propSelecionados.size) { mostrarToast('Marque ao menos um espaço.', 'erro'); return; }
+
+      const btn = document.getElementById('prop-btn-gerar');
+      btn.disabled = true; btn.textContent = 'Gerando...';
+
+      const itens = [...propSelecionados].map(([id, s]) => {
+        const e = ESPACOS_PROPOSTA.find(x => x.id === id);
+        return { tipo: id, nome: e.nome, desc: e.desc, meses: s.meses, valor_mensal: e.valor };
+      });
+      const mes = document.getElementById('prop-inicio').value;
+
+      const { data, error } = await postJSON('/api/propostas', {
+        cliente_nome: nome,
+        cliente_empresa: document.getElementById('prop-empresa').value.trim() || null,
+        cliente_whatsapp: document.getElementById('prop-whatsapp').value.replace(/\D/g, '') || null,
+        itens,
+        meses_gratis: Number(document.getElementById('prop-gratis').value) || 0,
+        desconto: Number(document.getElementById('prop-desconto').value) || 0,
+        inicio: mes ? mes + '-01' : null,
+        observacoes: document.getElementById('prop-obs').value.trim() || null,
+        validade_dias: Number(document.getElementById('prop-validade').value) || 7,
+        vendedor: document.getElementById('prop-vendedor').value.trim() || null
+      });
+
+      btn.disabled = false; btn.textContent = 'Gerar link da proposta';
+      if (error || !data?.slug) { mostrarToast('Erro ao gerar a proposta.', 'erro'); return; }
+
+      const url = location.origin + '/proposta?p=' + data.slug;
+      document.getElementById('prop-link').textContent = url;
+      document.getElementById('prop-ver').href = url;
+
+      const zap = document.getElementById('prop-whatsapp').value.replace(/\D/g, '');
+      const texto = encodeURIComponent(
+        'Olá' + (nome ? ', ' + nome.split(' ')[0] : '') + '! Segue a proposta de divulgação no ComparaEVs:\n' + url);
+      document.getElementById('prop-whats').href = zap
+        ? 'https://wa.me/' + (zap.length <= 11 ? '55' + zap : zap) + '?text=' + texto
+        : 'https://wa.me/?text=' + texto;
+
+      document.getElementById('prop-form').classList.add('hidden');
+      document.getElementById('prop-rodape').classList.add('hidden');
+      document.getElementById('prop-pronto').classList.remove('hidden');
+      carregarPropostas();
+    }
+
+    // Reusa o modal de exclusão do admin. `propostaParaExcluir` guarda o slug
+    // em jogo, para nunca apagar nada além do card que foi clicado.
+    let propostaParaExcluir = null;
+
+    function confirmarExcluirProposta(slug) {
+      propostaParaExcluir = slug;
+      const p = (window.__propostasCache || []).find(x => x.slug === slug);
+      document.querySelector('#excluir-modal h3').textContent = 'Excluir proposta?';
+      document.getElementById('excluir-nome-veiculo').textContent =
+        p ? (p.cliente_empresa || p.cliente_nome) : slug;
+      const btn = document.getElementById('btn-confirmar-exclusao');
+      btn.setAttribute('onclick', 'executarExclusaoProposta()');
+      document.getElementById('excluir-modal').classList.remove('hidden');
+    }
+
+    async function executarExclusaoProposta() {
+      if (!propostaParaExcluir) return;
+      const btn = document.getElementById('btn-confirmar-exclusao');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner spin text-xs"></i> Excluindo...';
+
+      const { error } = await deleteJSON('/api/propostas?slug=' + encodeURIComponent(propostaParaExcluir));
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-trash text-xs"></i> Excluir';
+      // devolve o modal ao dono original, senão a exclusão de veículo quebra
+      btn.setAttribute('onclick', 'executarExclusao()');
+      document.querySelector('#excluir-modal h3').textContent = 'Excluir veículo?';
+      document.getElementById('excluir-modal').classList.add('hidden');
+      propostaParaExcluir = null;
+
+      if (error) { mostrarToast('Erro ao excluir a proposta.', 'erro'); console.error(error); return; }
+      mostrarToast('Proposta excluída.');
+      carregarPropostas();
+    }
+
+    function copiarLinkProposta() {
+      copiarTexto(document.getElementById('prop-link').textContent);
+    }
+
+    async function carregarOrcamentos() {
+      const tbody = document.getElementById('orcamentos-tbody');
+      const vazio = document.getElementById('orcamentos-vazio');
+      const badge = document.getElementById('orcamentos-badge');
+
+      const { data, error } = await getJSON('/api/leads-instalacao');
+      if (error) {
+        mostrarToast('Erro ao carregar os orçamentos.', 'erro');
+        console.error(error);
+        return;
+      }
+
+      const linhas = data || [];
+      badge.textContent = linhas.length;
+      badge.classList.toggle('hidden', !linhas.length);
+      vazio.classList.toggle('hidden', !!linhas.length);
+
+      // Telefone vira link de WhatsApp: é por ali que o retorno acontece,
+      // e o número entra sem máscara no formulário.
+      tbody.innerHTML = linhas.map(l => {
+        const zap = (l.telefone || '').replace(/\D/g, '');
+        const wa = zap.length >= 10 ? (zap.length <= 11 ? '55' + zap : zap) : null;
+        return `
+        <tr class="hover:bg-panel/60 transition-colors">
+          <td class="p-3 font-data text-[11px] text-inkmuted whitespace-nowrap">${new Date(l.criado_em).toLocaleString('pt-BR')}</td>
+          <td class="p-3 font-medium">${l.nome || '—'}</td>
+          <td class="p-3 font-data">${wa
+            ? `<a href="https://wa.me/${wa}" target="_blank" rel="noopener" class="text-volt hover:underline"><i class="fa-brands fa-whatsapp mr-1"></i>${l.telefone}</a>`
+            : (l.telefone || '—')}</td>
+          <td class="p-3 font-data">${l.cep || '—'}</td>
+          <td class="p-3">${l.tipo_imovel || '—'}</td>
+          <td class="p-3 text-[11px] text-inkmuted">${l.origem || '—'}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    async function carregarVeiculos() {
+      const { data, error } = await getJSON('/api/veiculos?order=marca');
+
+      if (error) {
+        mostrarToast('Erro ao carregar veículos.', 'erro');
+        console.error(error);
+        return;
+      }
+
+      todosVeiculos = data || [];
+      preencherFiltroMarcas();
+      aplicarFiltrosAdmin();
+    }
+
+    function preencherFiltroMarcas() {
+      const select = document.getElementById('f-marca');
+      const marcas = [...new Set(todosVeiculos.map(v => v.Marca).filter(Boolean))].sort();
+      select.innerHTML = '<option value="">Todas marcas</option>' +
+        marcas.map(m => `<option value="${m}">${m}</option>`).join('');
+    }
+
+    function aplicarFiltrosAdmin() {
+      const busca = document.getElementById('f-busca').value.trim().toLowerCase();
+      const marca = document.getElementById('f-marca').value;
+      const uber = document.getElementById('f-uber').value;
+
+      filtrados = todosVeiculos.filter(v => {
+        const texto = `${v.Marca || ''} ${v.Modelo_Versao || ''}`.toLowerCase();
+        return (!busca || texto.includes(busca)) &&
+               (!marca || v.Marca === marca) &&
+               (uber === '' || String(!!v.Uber) === uber);
+      });
+
+      document.getElementById('contador-total').textContent =
+        `${filtrados.length} de ${todosVeiculos.length} veículo(s)`;
+
+      renderTabela();
+      renderCards();
+    }
+
+    function limparFiltrosAdmin() {
+      document.getElementById('f-busca').value = '';
+      document.getElementById('f-marca').value = '';
+      document.getElementById('f-uber').value = '';
+      aplicarFiltrosAdmin();
+    }
+
+    function formatarPreco(preco) {
+      if (preco === null || preco === undefined) return '<span class="text-inkmuted/50">—</span>';
+      return Number(preco).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 0 });
+    }
+
+    function renderTabela() {
+      const tbody = document.getElementById('tbody-veiculos');
+      const vazio = document.getElementById('estado-vazio');
+
+      if (!filtrados.length) {
+        tbody.innerHTML = '';
+        vazio.classList.remove('hidden');
+        return;
+      }
+      vazio.classList.add('hidden');
+
+      tbody.innerHTML = filtrados.map(v => `
+        <tr class="hover:bg-panel2/60">
+          <td class="px-4 py-3">
+            <p class="font-medium text-ink leading-tight">${v.Marca || '—'} ${v.Modelo_Versao || ''}</p>
+            <p class="text-[11px] text-inkmuted font-data">id ${v.id}${v.codigo ? ' · cód ' + v.codigo : ''}</p>
+          </td>
+          <td class="px-3 py-3 text-inkmuted">${v.Categoria || '—'}</td>
+          <td class="px-3 py-3 text-inkmuted font-data">${v.ano || '—'}</td>
+          <td class="px-3 py-3 text-right font-data">${v.Autonomia_km ? v.Autonomia_km + ' km' : '—'}</td>
+          <td class="px-3 py-3 text-right font-data">${formatarPreco(v.preco)}</td>
+          <td class="px-3 py-3 text-center">
+            ${v.Uber
+              ? '<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-volt/30 bg-[#1a2b0e] text-volt text-[10px] font-medium"><i class="fa-brands fa-uber text-[9px]"></i> sim</span>'
+              : '<span class="text-inkmuted/40 text-[11px]">não</span>'}
+          </td>
+          <td class="px-4 py-3 text-right">
+            <button onclick="abrirModalVeiculo(${v.id})" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-panel3 text-inkmuted hover:text-volt hover:border-volt/40 text-xs transition-colors">
+              <i class="fa-solid fa-pen text-[10px]"></i> Editar
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderCards() {
+      const container = document.getElementById('cards-mobile');
+      if (!filtrados.length) {
+        container.innerHTML = '<div class="py-16 text-center"><i class="fa-solid fa-car-side text-2xl text-inkmuted/40 mb-3"></i><p class="text-sm text-inkmuted">Nenhum veículo encontrado.</p></div>';
+        return;
+      }
+      container.innerHTML = filtrados.map(v => `
+        <div onclick="abrirModalVeiculo(${v.id})" class="rounded-xl border border-panel2 bg-panel p-4 active:bg-panel2 transition-colors cursor-pointer">
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <p class="font-medium text-ink leading-tight truncate">${v.Marca || '—'} ${v.Modelo_Versao || ''}</p>
+              <p class="text-[11px] text-inkmuted font-data mt-0.5">${v.Categoria || '—'} ${v.ano ? '· ' + v.ano : ''}</p>
+            </div>
+            ${v.Uber
+              ? '<span class="shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-volt/30 bg-[#1a2b0e] text-volt text-[10px] font-medium"><i class="fa-brands fa-uber text-[9px]"></i> Uber</span>'
+              : ''}
+          </div>
+          <div class="flex items-center justify-between mt-3 pt-3 border-t border-panel2">
+            <span class="text-xs text-inkmuted font-data">${v.Autonomia_km ? v.Autonomia_km + ' km' : '—'}</span>
+            <span class="text-sm font-data text-ink">${formatarPreco(v.preco)}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ================== MODAL VEÍCULO ==================
+    function abrirModalVeiculo(id) {
+      const titulo = document.getElementById('veiculo-modal-titulo');
+      const btnExcluir = document.getElementById('v-btn-excluir');
+
+      if (id) {
+        const v = todosVeiculos.find(x => x.id === id);
+        if (!v) return;
+        titulo.textContent = 'Editar veículo';
+        btnExcluir.classList.remove('hidden');
+        btnExcluir.classList.add('inline-flex');
+
+        document.getElementById('v-id').value = v.id;
+        document.getElementById('v-marca').value = v.Marca || '';
+        document.getElementById('v-modelo').value = v.Modelo_Versao || '';
+        document.getElementById('v-categoria').value = v.Categoria || '';
+        document.getElementById('v-ano').value = v.ano || '';
+        document.getElementById('v-propulsao').value = v.Propulsao || '';
+        document.getElementById('v-transmissao').value = v.Transmissao || '';
+        document.getElementById('v-direcao').value = v.Direcao || '';
+        document.getElementById('v-combustivel').value = v.Combustivel || '';
+        document.getElementById('v-cidade').value = v.Cidade_kmLe ?? '';
+        document.getElementById('v-estrada').value = v.Estrada_kmLe ?? '';
+        document.getElementById('v-consumo').value = v.Consumo_MJkm ?? '';
+        document.getElementById('v-autonomia').value = v.Autonomia_km ?? '';
+        document.getElementById('v-classcat').value = v.Class_Cat || '';
+        document.getElementById('v-classgeral').value = v.Class_Geral || '';
+        document.getElementById('v-preco').value = v.preco ?? '';
+        document.getElementById('v-codigo').value = v.codigo ?? '';
+        document.getElementById('v-anotabela').value = v.ano_tabela ?? '';
+        document.getElementById('v-fonteprecco').value = v.fonte_preco || '';
+        document.getElementById('v-site').value = v.site || '';
+        document.getElementById('v-imagem').value = v.imagem || '';
+        document.getElementById('v-uber').checked = !!v.Uber;
+      } else {
+        titulo.textContent = 'Novo veículo';
+        btnExcluir.classList.add('hidden');
+        btnExcluir.classList.remove('inline-flex');
+
+        ['v-id','v-marca','v-modelo','v-categoria','v-ano','v-propulsao','v-transmissao',
+         'v-direcao','v-combustivel','v-cidade','v-estrada','v-consumo','v-autonomia',
+         'v-classcat','v-classgeral','v-preco','v-codigo','v-site','v-imagem'
+        ].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('v-anotabela').value = 2026;
+        document.getElementById('v-fonteprecco').value = 'Tabela Fipe';
+        document.getElementById('v-uber').checked = false;
+      }
+
+      document.getElementById('veiculo-modal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function fecharModalVeiculo() {
+      document.getElementById('veiculo-modal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    function valorOuNull(id, tipo) {
+      const el = document.getElementById(id);
+      const val = el.value.trim();
+      if (val === '') return null;
+      return tipo === 'number' ? Number(val) : val;
+    }
+
+    async function salvarVeiculo() {
+      const marca = document.getElementById('v-marca').value.trim();
+      const modelo = document.getElementById('v-modelo').value.trim();
+
+      if (!marca || !modelo) {
+        mostrarToast('Marca e Modelo/Versão são obrigatórios.', 'erro');
+        return;
+      }
+
+      const id = document.getElementById('v-id').value;
+      const btn = document.getElementById('v-btn-salvar');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner spin text-xs"></i> Salvando...';
+
+      const payload = {
+        Marca: marca,
+        Modelo_Versao: modelo,
+        Categoria: valorOuNull('v-categoria'),
+        ano: valorOuNull('v-ano'),
+        Propulsao: valorOuNull('v-propulsao'),
+        Transmissao: valorOuNull('v-transmissao'),
+        Direcao: valorOuNull('v-direcao'),
+        Combustivel: valorOuNull('v-combustivel'),
+        Cidade_kmLe: valorOuNull('v-cidade', 'number'),
+        Estrada_kmLe: valorOuNull('v-estrada', 'number'),
+        Consumo_MJkm: valorOuNull('v-consumo', 'number'),
+        Autonomia_km: valorOuNull('v-autonomia', 'number'),
+        Class_Cat: valorOuNull('v-classcat'),
+        Class_Geral: valorOuNull('v-classgeral'),
+        preco: valorOuNull('v-preco', 'number'),
+        codigo: valorOuNull('v-codigo', 'number'),
+        ano_tabela: valorOuNull('v-anotabela', 'number'),
+        fonte_preco: valorOuNull('v-fonteprecco'),
+        site: valorOuNull('v-site'),
+        imagem: valorOuNull('v-imagem'),
+        Uber: document.getElementById('v-uber').checked
+      };
+
+      let error;
+      if (id) {
+        ({ error } = await putJSON('/api/veiculos', { ...payload, id }));
+      } else {
+        ({ error } = await postJSON('/api/veiculos', payload));
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-check text-xs"></i> Salvar';
+
+      if (error) {
+        mostrarToast('Erro ao salvar. Veja o console.', 'erro');
+        console.error(error);
+        return;
+      }
+
+      fecharModalVeiculo();
+      mostrarToast(id ? 'Veículo atualizado.' : 'Veículo criado.', 'sucesso');
+      await carregarVeiculos();
+    }
+
+    // ================== EXCLUSÃO ==================
+    function confirmarExclusao() {
+      const id = Number(document.getElementById('v-id').value);
+      const v = todosVeiculos.find(x => x.id === id);
+      if (!v) return;
+      idParaExcluir = id;
+      document.getElementById('excluir-nome-veiculo').textContent = `${v.Marca} ${v.Modelo_Versao}`;
+      document.getElementById('excluir-modal').classList.remove('hidden');
+    }
+
+    function fecharModalExcluir() {
+      document.getElementById('excluir-modal').classList.add('hidden');
+      idParaExcluir = null;
+      // o modal é compartilhado com propostas: restaura o texto e a ação
+      propostaParaExcluir = null;
+      document.querySelector('#excluir-modal h3').textContent = 'Excluir veículo?';
+      document.getElementById('btn-confirmar-exclusao').setAttribute('onclick', 'executarExclusao()');
+    }
+
+    async function executarExclusao() {
+      if (!idParaExcluir) return;
+      const btn = document.getElementById('btn-confirmar-exclusao');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner spin text-xs"></i> Excluindo...';
+
+      const { error } = await deleteJSON('/api/veiculos?id=' + encodeURIComponent(idParaExcluir));
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-trash text-xs"></i> Excluir';
+
+      if (error) {
+        mostrarToast('Erro ao excluir. Veja o console.', 'erro');
+        console.error(error);
+        return;
+      }
+
+      fecharModalExcluir();
+      fecharModalVeiculo();
+      mostrarToast('Veículo excluído.', 'sucesso');
+      await carregarVeiculos();
+    }
+
+    // ================== TOAST ==================
+    let toastTimeout;
+    function mostrarToast(msg, tipo) {
+      const toast = document.getElementById('toast');
+      const content = document.getElementById('toast-content');
+      const icone = tipo === 'erro'
+        ? '<i class="fa-solid fa-circle-exclamation text-red-400"></i>'
+        : '<i class="fa-solid fa-circle-check text-volt"></i>';
+      content.innerHTML = `${icone}<span>${msg}</span>`;
+      toast.classList.add('show');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // ================== PATROCINADORES: CRUD ==================
+    const TIPO_LABEL = { hero_master: 'Hero Master', banner: 'Banner', nativo: 'Linha Nativa' };
+    const TIPO_PERMITE_MULTIPLOS = { hero_master: true, banner: false, nativo: false };
+
+    async function carregarPatrocinadores() {
+      const { data, error } = await getJSON('/api/patrocinadores?all=1');
+
+      if (error) {
+        mostrarToast('Erro ao carregar patrocinadores.', 'erro');
+        console.error(error);
+        return;
+      }
+
+      todosPatrocinadores = data || [];
+      renderListaPatrocinadores('hero_master');
+      renderListaPatrocinadores('banner');
+      renderListaPatrocinadores('nativo');
+    }
+
+    function renderListaPatrocinadores(tipo) {
+      const container = document.getElementById('lista-' + tipo);
+      const itens = todosPatrocinadores.filter(p => p.tipo === tipo);
+
+      // botão "+" desabilitado se o slot é único e já está ocupado
+      const btnAdd = container.parentElement.querySelector('button');
+      if (!TIPO_PERMITE_MULTIPLOS[tipo] && itens.length >= 1) {
+        btnAdd.disabled = true;
+        btnAdd.classList.add('opacity-30', 'cursor-not-allowed');
+      } else {
+        btnAdd.disabled = false;
+        btnAdd.classList.remove('opacity-30', 'cursor-not-allowed');
+      }
+
+      if (!itens.length) {
+        container.innerHTML = `<div class="p-5 text-center text-inkmuted text-xs">Nenhum patrocinador cadastrado.<br>Clique em + para adicionar.</div>`;
+        return;
+      }
+
+      container.innerHTML = itens.map(p => `
+        <div class="p-4 flex items-start justify-between gap-3 hover:bg-panel2/60 transition-colors">
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2 mb-1">
+              <p class="font-medium text-sm text-ink truncate">${p.nome || '(sem nome)'}</p>
+              ${p.ativo
+                ? '<span class="shrink-0 px-1.5 py-0.5 rounded bg-[#1a2b0e] border border-volt/30 text-volt text-[10px] font-medium">ativo</span>'
+                : '<span class="shrink-0 px-1.5 py-0.5 rounded bg-panel3 text-inkmuted text-[10px]">pausado</span>'}
+            </div>
+            <p class="text-[11px] text-inkmuted truncate">${p.headline || '—'}</p>
+          </div>
+          <button onclick="abrirModalPatrocinador('${tipo}', ${p.id})" class="shrink-0 w-7 h-7 rounded-lg border border-panel3 text-inkmuted hover:text-volt hover:border-volt/40 flex items-center justify-center transition-colors">
+            <i class="fa-solid fa-pen text-[10px]"></i>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function abrirModalPatrocinador(tipo, id) {
+      const titulo = document.getElementById('patrocinador-modal-titulo');
+      const btnExcluir = document.getElementById('p-btn-excluir');
+      const campoSubtitulo = document.getElementById('p-campo-subtitulo');
+
+      document.getElementById('p-tipo').value = tipo;
+      campoSubtitulo.style.display = tipo === 'banner' ? 'block' : 'none';
+      // o nativo é só texto e o banner não tem versão de celular
+      document.getElementById('p-campo-imagem').style.display = tipo === 'nativo' ? 'none' : 'block';
+      document.getElementById('p-campo-imagem-mobile').style.display = tipo === 'hero_master' ? 'block' : 'none';
+
+      if (id) {
+        const p = todosPatrocinadores.find(x => x.id === id);
+        if (!p) return;
+        titulo.textContent = 'Editar ' + TIPO_LABEL[tipo];
+        btnExcluir.classList.remove('hidden');
+        btnExcluir.classList.add('inline-flex');
+
+        document.getElementById('p-id').value = p.id;
+        document.getElementById('p-nome').value = p.nome || '';
+        document.getElementById('p-headline').value = p.headline || '';
+        document.getElementById('p-subtitulo').value = p.subtitulo || '';
+        document.getElementById('p-cta').value = p.cta || '';
+        document.getElementById('p-ordem').value = p.ordem ?? 0;
+        document.getElementById('p-link').value = p.link || '';
+        document.getElementById('p-imagem').value = p.imagem || '';
+        document.getElementById('p-imagem-mobile').value = p.imagem_mobile || '';
+        document.getElementById('p-ativo').checked = !!p.ativo;
+      } else {
+        titulo.textContent = 'Novo ' + TIPO_LABEL[tipo];
+        btnExcluir.classList.add('hidden');
+        btnExcluir.classList.remove('inline-flex');
+
+        document.getElementById('p-id').value = '';
+        document.getElementById('p-nome').value = '';
+        document.getElementById('p-headline').value = '';
+        document.getElementById('p-subtitulo').value = '';
+        document.getElementById('p-cta').value = 'Ver oferta';
+        document.getElementById('p-ordem').value = 0;
+        document.getElementById('p-link').value = '';
+        document.getElementById('p-imagem').value = '';
+        document.getElementById('p-imagem-mobile').value = '';
+        document.getElementById('p-ativo').checked = true;
+      }
+
+      document.getElementById('patrocinador-modal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function fecharModalPatrocinador() {
+      document.getElementById('patrocinador-modal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    async function salvarPatrocinador() {
+      const nome = document.getElementById('p-nome').value.trim();
+      const link = document.getElementById('p-link').value.trim();
+
+      if (!nome || !link) {
+        mostrarToast('Nome e link de destino são obrigatórios.', 'erro');
+        return;
+      }
+
+      const id = document.getElementById('p-id').value;
+      const tipo = document.getElementById('p-tipo').value;
+      const btn = document.getElementById('p-btn-salvar');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner spin text-xs"></i> Salvando...';
+
+      const payload = {
+        tipo,
+        nome,
+        headline: document.getElementById('p-headline').value.trim() || null,
+        subtitulo: document.getElementById('p-subtitulo').value.trim() || null,
+        cta: document.getElementById('p-cta').value.trim() || 'Ver oferta',
+        ordem: Number(document.getElementById('p-ordem').value) || 0,
+        link,
+        imagem: document.getElementById('p-imagem').value.trim() || null,
+        imagem_mobile: document.getElementById('p-imagem-mobile').value.trim() || null,
+        ativo: document.getElementById('p-ativo').checked,
+        updated_at: new Date().toISOString()
+      };
+
+      let error;
+      if (id) {
+        ({ error } = await putJSON('/api/patrocinadores', { ...payload, id }));
+      } else {
+        ({ error } = await postJSON('/api/patrocinadores', payload));
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-check text-xs"></i> Salvar';
+
+      if (error) {
+        mostrarToast('Erro ao salvar. Veja o console.', 'erro');
+        console.error(error);
+        return;
+      }
+
+      fecharModalPatrocinador();
+      mostrarToast(id ? 'Patrocinador atualizado.' : 'Patrocinador criado.', 'sucesso');
+      await carregarPatrocinadores();
+    }
+
+    function confirmarExclusaoPatrocinador() {
+      const id = Number(document.getElementById('p-id').value);
+      const p = todosPatrocinadores.find(x => x.id === id);
+      if (!p) return;
+      idPatrocinadorParaExcluir = id;
+      document.getElementById('excluir-nome-patrocinador').textContent = p.nome;
+      document.getElementById('excluir-patrocinador-modal').classList.remove('hidden');
+    }
+
+    function fecharModalExcluirPatrocinador() {
+      document.getElementById('excluir-patrocinador-modal').classList.add('hidden');
+      idPatrocinadorParaExcluir = null;
+    }
+
+    async function executarExclusaoPatrocinador() {
+      if (!idPatrocinadorParaExcluir) return;
+      const btn = document.getElementById('btn-confirmar-exclusao-patrocinador');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner spin text-xs"></i> Excluindo...';
+
+      const { error } = await deleteJSON('/api/patrocinadores?id=' + encodeURIComponent(idPatrocinadorParaExcluir));
+
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-trash text-xs"></i> Excluir';
+
+      if (error) {
+        mostrarToast('Erro ao excluir. Veja o console.', 'erro');
+        console.error(error);
+        return;
+      }
+
+      fecharModalExcluirPatrocinador();
+      fecharModalPatrocinador();
+      mostrarToast('Patrocinador excluído.', 'sucesso');
+      await carregarPatrocinadores();
+    }
+
+    // ================== DASHBOARD DE KPIs ==================
+    const EVENTO_LABEL = {
+      pageview: 'Página acessada',
+      cta_proposta: 'Quero proposta',
+      cta_site_oferta: 'Ver oferta no site',
+      cta_comparar: 'Abrir comparação',
+      cta_compartilhar_comparacao: 'Compartilhar comparação',
+      cta_financiamento_simular: 'Simular financiamento',
+      cta_filtro_uber: 'Filtro Uber ativado',
+      lead_proposta: 'Lead: proposta enviada',
+      lead_newsletter: 'Lead: newsletter',
+      lead_correcao: 'Sugestão de correção',
+      lead_orcamento_wallbox: 'Lead: orçamento wallbox',
+      cta_patrocinador_hero: 'Clique · Hero Master',
+      cta_patrocinador_banner: 'Clique · Banner',
+      cta_patrocinador_nativo: 'Clique · Linha Nativa'
+    };
+
+    async function carregarDashboard() {
+      const dias = Number(document.getElementById('kpi-periodo').value);
+      const desde = new Date();
+      desde.setDate(desde.getDate() - dias);
+
+      const { data, error } = await getJSON('/api/eventos?desde=' + encodeURIComponent(desde.toISOString()));
+
+      if (error) {
+        mostrarToast('Erro ao carregar eventos.', 'erro');
+        console.error(error);
+        return;
+      }
+
+      renderKpiCards(data || []);
+      renderKpiEventos(data || []);
+      await renderKpiPatrocinadores(data || []);
+      renderAtividadeRecente(data || []);
+    }
+
+    function renderKpiCards(eventos) {
+      const acessos = eventos.filter(e => e.tipo_evento === 'pageview').length;
+      const cliques = eventos.filter(e => e.tipo_evento !== 'pageview');
+      const totalCliques = cliques.length;
+      const leads = eventos.filter(e => e.tipo_evento.startsWith('lead_')).length;
+      const propostas = eventos.filter(e => e.tipo_evento === 'lead_proposta').length;
+      const cliquesPatrocinadores = eventos.filter(e => e.tipo_evento.startsWith('cta_patrocinador_')).length;
+
+      const cards = [
+        { label: 'Acessos à página', valor: acessos, icone: 'fa-solid fa-eye', cor: 'text-ink' },
+        { label: 'Cliques totais', valor: totalCliques, icone: 'fa-solid fa-cursor', cor: 'text-ink' },
+        { label: 'Leads gerados', valor: leads, icone: 'fa-solid fa-bullseye', cor: 'text-volt' },
+        { label: 'Propostas de compra', valor: propostas, icone: 'fa-solid fa-envelope', cor: 'text-ink' },
+        { label: 'Cliques em patrocinadores', valor: cliquesPatrocinadores, icone: 'fa-solid fa-rectangle-ad', cor: 'text-ink' }
+      ];
+
+      document.getElementById('kpi-cards').innerHTML = cards.map(c => `
+        <div class="rounded-xl border border-panel2 bg-panel p-4">
+          <div class="flex items-center justify-between mb-2">
+            <i class="${c.icone} text-inkmuted text-sm"></i>
+          </div>
+          <p class="text-2xl font-display font-semibold ${c.cor}">${c.valor}</p>
+          <p class="text-[11px] text-inkmuted mt-0.5">${c.label}</p>
+        </div>
+      `).join('');
+    }
+
+    function renderKpiEventos(eventos) {
+      const semPageview = eventos.filter(e => e.tipo_evento !== 'pageview');
+      const contagem = {};
+      semPageview.forEach(e => { contagem[e.tipo_evento] = (contagem[e.tipo_evento] || 0) + 1; });
+
+      const ordenado = Object.entries(contagem).sort((a, b) => b[1] - a[1]);
+      const max = ordenado.length ? ordenado[0][1] : 1;
+
+      const container = document.getElementById('kpi-eventos-lista');
+      if (!ordenado.length) {
+        container.innerHTML = '<p class="text-xs text-inkmuted text-center py-6">Nenhum clique registrado nesse período.</p>';
+        return;
+      }
+
+      container.innerHTML = ordenado.map(([tipo, qtd]) => `
+        <div>
+          <div class="flex items-center justify-between text-xs mb-1">
+            <span class="text-ink">${EVENTO_LABEL[tipo] || tipo}</span>
+            <span class="font-data text-inkmuted">${qtd}</span>
+          </div>
+          <div class="h-1.5 bg-panel2 rounded-full overflow-hidden">
+            <div class="h-full bg-volt rounded-full" style="width:${Math.max(4, (qtd / max) * 100)}%"></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function renderKpiPatrocinadores(eventos) {
+      if (!todosPatrocinadores.length) {
+        const { data } = await getJSON('/api/patrocinadores?all=1');
+        todosPatrocinadores = data || [];
+      }
+
+      const cliquesPorPatrocinador = {};
+      eventos.filter(e => e.tipo_evento.startsWith('cta_patrocinador_')).forEach(e => {
+        if (!e.patrocinador_id) return;
+        cliquesPorPatrocinador[e.patrocinador_id] = (cliquesPorPatrocinador[e.patrocinador_id] || 0) + 1;
+      });
+
+      const container = document.getElementById('kpi-patrocinadores-lista');
+      if (!todosPatrocinadores.length) {
+        container.innerHTML = '<p class="text-xs text-inkmuted text-center py-6">Nenhum patrocinador cadastrado ainda.</p>';
+        return;
+      }
+
+      container.innerHTML = todosPatrocinadores.map(p => `
+        <div class="flex items-center justify-between gap-3 p-3 rounded-lg border border-panel2">
+          <div class="min-w-0">
+            <p class="text-sm text-ink truncate">${p.nome || '(sem nome)'}</p>
+            <p class="text-[11px] text-inkmuted">${TIPO_LABEL[p.tipo] || p.tipo} ${p.ativo ? '' : '· pausado'}</p>
+          </div>
+          <div class="text-right shrink-0">
+            <p class="font-data text-lg text-volt leading-none">${cliquesPorPatrocinador[p.id] || 0}</p>
+            <p class="text-[10px] text-inkmuted">cliques</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderAtividadeRecente(eventos) {
+      const container = document.getElementById('kpi-atividade-recente');
+      const recentes = eventos.filter(e => e.tipo_evento !== 'pageview').slice(0, 25);
+
+      if (!recentes.length) {
+        container.innerHTML = '<p class="text-xs text-inkmuted text-center py-6">Sem atividade nesse período.</p>';
+        return;
+      }
+
+      container.innerHTML = recentes.map(e => {
+        const data = new Date(e.created_at);
+        const dataFmt = data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' ' +
+                         data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        return `
+          <div class="flex items-center justify-between gap-3 py-2.5 text-xs">
+            <span class="text-ink">${EVENTO_LABEL[e.tipo_evento] || e.tipo_evento}</span>
+            <span class="text-inkmuted font-data shrink-0">${dataFmt}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ================== MARKETING: COPIAR TEXTO ==================
+    function copiarTexto(btn) {
+      const card = btn.closest('div').parentElement;
+      const bloco = card.querySelector('.texto-copiavel');
+      const texto = bloco.innerText;
+      navigator.clipboard.writeText(texto).then(() => {
+        const icon = btn.querySelector('i');
+        icon.className = 'fa-solid fa-check';
+        btn.classList.add('copiado');
+        setTimeout(() => {
+          icon.className = 'fa-regular fa-copy';
+          btn.classList.remove('copiado');
+        }, 1500);
+      });
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Proposta · ComparaEVs</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='90'>⚡</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+<script>
+  tailwind.config = { theme: { extend: {
+    colors: { void:'#0B0D10', panel:'#14171C', panel2:'#1C2026', panel3:'#262B33',
+              ink:'#E8EAED', inkmuted:'#8B92A0', volt:'#C8FF4D', voltdim:'#9FD93A' },
+    fontFamily: { display:['"Space Grotesk"','sans-serif'], body:['Inter','sans-serif'], data:['"JetBrains Mono"','monospace'] }
+  } } };
+</script>
+<style>
+  body { font-family:'Inter', system-ui, sans-serif; }
+  @keyframes sobe { from { opacity:0; transform:translateY(10px) } to { opacity:1; transform:none } }
+  .sobe { animation: sobe .45s cubic-bezier(.4,0,.2,1) both; }
+  @media print { .nao-imprime { display:none !important } body { background:#fff; color:#000 } }
+</style>
+</head>
+
+<body class="bg-void text-ink min-h-screen">
+
+  <div id="carregando" class="min-h-screen flex items-center justify-center">
+    <i class="fa-solid fa-circle-notch fa-spin text-volt text-2xl"></i>
+  </div>
+
+  <div id="erro" class="hidden min-h-screen flex-col items-center justify-center text-center px-6">
+    <p class="text-4xl mb-3">🔗</p>
+    <p class="font-display font-semibold text-lg mb-1">Proposta não encontrada</p>
+    <p class="text-inkmuted text-sm mb-5">O link pode ter expirado ou sido digitado errado.</p>
+    <a href="/" class="px-4 py-2.5 rounded-lg bg-volt text-void text-sm font-medium">Ir para o ComparaEVs</a>
+  </div>
+
+  <main id="conteudo" class="hidden max-w-2xl mx-auto px-5 py-8">
+
+    <header class="flex items-center gap-2.5 mb-8 sobe">
+      <img src="./img/banner/logo.png" alt="ComparaEVs" class="w-11 h-11 object-contain">
+      <div>
+        <p class="font-display font-semibold text-lg leading-none">ComparaEVs</p>
+        <p class="text-[11px] text-inkmuted">A central de comparação de carros elétricos do Brasil</p>
+      </div>
+    </header>
+
+    <div class="sobe" style="animation-delay:.05s">
+      <p class="text-[10px] uppercase tracking-widest text-volt font-semibold mb-2">Proposta comercial</p>
+      <h1 id="titulo" class="font-display font-semibold text-2xl sm:text-3xl leading-tight mb-1"></h1>
+      <p id="subtitulo" class="text-inkmuted text-sm"></p>
+    </div>
+
+    <!-- alcance: números reais do site -->
+    <section class="grid grid-cols-3 gap-3 my-7 sobe" style="animation-delay:.1s">
+      <div class="rounded-xl border border-panel2 bg-panel p-3.5 text-center">
+        <p id="n-veiculos" class="font-data font-bold text-xl text-volt">—</p>
+        <p class="text-[10px] text-inkmuted uppercase tracking-wide mt-0.5">Veículos</p>
+      </div>
+      <div class="rounded-xl border border-panel2 bg-panel p-3.5 text-center">
+        <p id="n-marcas" class="font-data font-bold text-xl text-volt">—</p>
+        <p class="text-[10px] text-inkmuted uppercase tracking-wide mt-0.5">Marcas</p>
+      </div>
+      <div class="rounded-xl border border-panel2 bg-panel p-3.5 text-center">
+        <p class="font-data font-bold text-xl text-volt">INMETRO</p>
+        <p class="text-[10px] text-inkmuted uppercase tracking-wide mt-0.5">Fonte</p>
+      </div>
+    </section>
+
+    <!-- itens -->
+    <section class="rounded-2xl border border-panel2 bg-panel overflow-hidden mb-5 sobe" style="animation-delay:.15s">
+      <div class="p-4 border-b border-panel2">
+        <p class="font-display font-semibold">O que está incluído</p>
+      </div>
+      <div id="itens" class="divide-y divide-panel2"></div>
+      <div id="totais" class="p-4 border-t border-panel2 bg-panel2/40 space-y-2 text-sm"></div>
+    </section>
+
+    <section id="bloco-periodo" class="rounded-2xl border border-volt/25 bg-[#161B12] p-4 mb-5 sobe" style="animation-delay:.2s">
+      <p class="text-[10px] uppercase tracking-widest text-volt font-semibold mb-1.5">Período</p>
+      <p id="periodo" class="text-[15px]"></p>
+    </section>
+
+    <section id="bloco-obs" class="hidden rounded-2xl border border-panel2 bg-panel p-4 mb-5 sobe" style="animation-delay:.25s">
+      <p class="text-[10px] uppercase tracking-widest text-inkmuted font-semibold mb-1.5">Observações</p>
+      <p id="obs" class="text-sm text-ink/85 leading-relaxed whitespace-pre-line"></p>
+    </section>
+
+    <div class="rounded-2xl border border-panel2 bg-panel p-5 mb-6 sobe nao-imprime" style="animation-delay:.3s">
+      <p class="font-display font-semibold mb-1">Vamos fechar?</p>
+      <p id="validade" class="text-xs text-inkmuted mb-4"></p>
+      <a id="cta-whats" href="#" target="_blank" rel="noopener" class="block w-full py-3.5 rounded-xl bg-[#25D366] text-black text-center font-semibold">
+        <i class="fa-brands fa-whatsapp mr-1.5"></i>Quero fechar
+      </a>
+      <div class="flex gap-2 mt-2">
+        <a href="/" target="_blank" rel="noopener" class="flex-1 py-3 rounded-xl border border-panel3 text-center text-sm text-inkmuted hover:text-ink transition-colors">Ver o site</a>
+        <button onclick="print()" class="flex-1 py-3 rounded-xl border border-panel3 text-sm text-inkmuted hover:text-ink transition-colors">Salvar PDF</button>
+      </div>
+    </div>
+
+    <footer class="text-center text-[11px] text-inkmuted pb-8">
+      <p id="assinatura" class="mb-1"></p>
+      <p>comparaevs.com.br · Dados do Programa Brasileiro de Etiquetagem Veicular — INMETRO</p>
+    </footer>
+  </main>
+
+<script>
+  const WHATS_COMERCIAL = '5554981432889';
+  const fmt = (v) => 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  const MES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+
+  function mesAno(iso, somar = 0) {
+    if (!iso) return null;
+    // "2026-10-01" parseado como UTC vira setembro em fuso negativo; monta na mão
+    const [a, m] = iso.split('-').map(Number);
+    const d = new Date(a, m - 1 + somar, 1);
+    return MES[d.getMonth()] + '/' + d.getFullYear();
+  }
+
+  async function carregar() {
+    const slug = new URLSearchParams(location.search).get('p');
+    if (!slug) return falhar();
+
+    let p;
+    try {
+      const r = await fetch('/api/propostas?slug=' + encodeURIComponent(slug));
+      if (!r.ok) return falhar();
+      p = await r.json();
+    } catch { return falhar(); }
+
+    document.getElementById('carregando').classList.add('hidden');
+    document.getElementById('conteudo').classList.remove('hidden');
+
+    const primeiro = (p.cliente_nome || '').split(' ')[0];
+    document.getElementById('titulo').textContent =
+      (p.cliente_empresa || p.cliente_nome) + ', sua marca onde o comprador decide.';
+    document.getElementById('subtitulo').textContent =
+      'Preparada para ' + p.cliente_nome + (p.cliente_empresa ? ' · ' + p.cliente_empresa : '');
+
+    // itens
+    const itens = Array.isArray(p.itens) ? p.itens : [];
+    document.getElementById('itens').innerHTML = itens.map(i => `
+      <div class="p-4 flex items-start justify-between gap-4">
+        <div class="min-w-0">
+          <p class="font-medium">${i.nome}</p>
+          <p class="text-[11px] text-inkmuted">${i.desc || ''}</p>
+          <p class="text-[11px] text-inkmuted font-data mt-1">${i.meses} ${i.meses === 1 ? 'mês' : 'meses'} × ${fmt(i.valor_mensal)}</p>
+        </div>
+        <p class="font-data text-sm shrink-0">${fmt(i.meses * i.valor_mensal)}</p>
+      </div>
+    `).join('');
+
+    const subtotal = itens.reduce((s, i) => s + i.meses * i.valor_mensal, 0);
+    const desconto = Number(p.desconto) || 0;
+    const total = subtotal - desconto;
+    const linhas = [];
+    if (desconto) {
+      linhas.push(`<div class="flex justify-between text-inkmuted"><span>Subtotal</span><span class="font-data">${fmt(subtotal)}</span></div>`);
+      linhas.push(`<div class="flex justify-between text-volt"><span>Desconto</span><span class="font-data">− ${fmt(desconto)}</span></div>`);
+    }
+    linhas.push(`<div class="flex justify-between items-baseline pt-1"><span class="font-display font-semibold">Total</span><span class="font-data font-bold text-2xl text-volt">${fmt(total)}</span></div>`);
+    document.getElementById('totais').innerHTML = linhas.join('');
+
+    // período
+    const meses = itens.reduce((m, i) => Math.max(m, i.meses), 0);
+    const gratis = Number(p.meses_gratis) || 0;
+    const ini = mesAno(p.inicio);
+    const fim = mesAno(p.inicio, meses + gratis - 1);
+    let texto = `${meses} ${meses === 1 ? 'mês' : 'meses'} de veiculação`;
+    if (gratis) texto += ` <strong class="text-volt">+ ${gratis} ${gratis === 1 ? 'mês grátis' : 'meses grátis'}</strong>`;
+    if (ini) texto += `, de ${ini} a ${fim}`;
+    texto += '.';
+    document.getElementById('periodo').innerHTML = texto;
+
+    if (p.observacoes) {
+      document.getElementById('bloco-obs').classList.remove('hidden');
+      document.getElementById('obs').textContent = p.observacoes;
+    }
+
+    // validade
+    const criada = new Date(p.criado_em);
+    const vence = new Date(criada.getTime() + (p.validade_dias || 7) * 86400000);
+    const venceu = Date.now() > vence.getTime();
+    document.getElementById('validade').textContent = venceu
+      ? 'Esta proposta venceu em ' + vence.toLocaleDateString('pt-BR') + ' — fale com a gente para revalidar.'
+      : 'Condições válidas até ' + vence.toLocaleDateString('pt-BR') + '.';
+
+    const msg = encodeURIComponent(`Olá! Recebi a proposta${p.cliente_empresa ? ' para ' + p.cliente_empresa : ''} e quero fechar. (ref: ${p.slug})`);
+    document.getElementById('cta-whats').href = `https://wa.me/${WHATS_COMERCIAL}?text=${msg}`;
+    document.getElementById('assinatura').textContent = p.vendedor ? 'Proposta de ' + p.vendedor : '';
+
+    document.title = 'Proposta · ' + (p.cliente_empresa || p.cliente_nome);
+    carregarAlcance();
+  }
+
+  // Números do próprio site, não promessa de mídia kit.
+  async function carregarAlcance() {
+    try {
+      const r = await fetch('/api/veiculos');
+      if (!r.ok) return;
+      const v = await r.json();
+      document.getElementById('n-veiculos').textContent = v.length;
+      document.getElementById('n-marcas').textContent = new Set(v.map(x => x.Marca)).size;
+    } catch { /* o bloco fica com "—", não quebra a proposta */ }
+  }
+
+  function falhar() {
+    document.getElementById('carregando').classList.add('hidden');
+    const e = document.getElementById('erro');
+    e.classList.remove('hidden'); e.classList.add('flex');
+  }
+
+  carregar();
+</script>
+</body>
+</html>

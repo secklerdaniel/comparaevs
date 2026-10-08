@@ -1,0 +1,642 @@
+[
+  {
+    "Marca": "Audi",
+    "codigo": 6,
+    "Modelo_Versao": "Q6 e-tron Quattro Performance"
+  },
+  {
+    "Marca": "Audi",
+    "codigo": 6,
+    "Modelo_Versao": "Q6 e-tron Quattro Performance black"
+  },
+  {
+    "Marca": "Audi",
+    "codigo": 6,
+    "Modelo_Versao": "Q6 e-tron RWD Performance"
+  },
+  {
+    "Marca": "Audi",
+    "codigo": 6,
+    "Modelo_Versao": "Q6 Sportback e-tron Quattro Performance black"
+  },
+  {
+    "Marca": "Audi",
+    "codigo": 6,
+    "Modelo_Versao": "SQ6 Sportback e-tron Quattro"
+  },
+  {
+    "Marca": "BMW",
+    "codigo": 7,
+    "Modelo_Versao": "I5 M60"
+  },
+  {
+    "Marca": "BMW",
+    "codigo": 7,
+    "Modelo_Versao": "i7 xDrive60"
+  },
+  {
+    "Marca": "BMW",
+    "codigo": 7,
+    "Modelo_Versao": "IX xDrive 50"
+  },
+  {
+    "Marca": "BMW",
+    "codigo": 7,
+    "Modelo_Versao": "iX1 eDrive20"
+  },
+  {
+    "Marca": "BMW",
+    "codigo": 7,
+    "Modelo_Versao": "iX1 xDrive30"
+  },
+  {
+    "Marca": "BMW",
+    "codigo": 7,
+    "Modelo_Versao": "iX2 xDrive30 MSP"
+  },
+  {
+    "Marca": "BYD",
+    "codigo": 238,
+    "Modelo_Versao": "DOLPHIN GS 180EV"
+  },
+  {
+    "Marca": "BYD",
+    "codigo": 238,
+    "Modelo_Versao": "DOLPHIN MINI GL5EV"
+  },
+  {
+    "Marca": "BYD",
+    "codigo": 238,
+    "Modelo_Versao": "DOLPHIN MINI GS 5 EV"
+  },
+  {
+    "Marca": "BYD",
+    "codigo": 238,
+    "Modelo_Versao": "DOLPHIN MINI GS EV"
+  },
+  {
+    "Marca": "BYD",
+    "codigo": 238,
+    "Modelo_Versao": "DOLPHIN PLUS 310EV"
+  },
+  {
+    "Marca": "BYD",
+    "codigo": 238,
+    "Modelo_Versao": "ET3"
+  },
+  {
+    "Marca": "BYD",
+    "codigo": 238,
+    "Modelo_Versao": "HAN AWD GS 680EV"
+  },
+  {
+    "Marca": "BYD",
+    "codigo": 238,
+    "Modelo_Versao": "SEAL AWD GS 590EV"
+  },
+  {
+    "Marca": "BYD",
+    "codigo": 238,
+    "Modelo_Versao": "TAN AWD GS 700EV"
+  },
+  {
+    "Marca": "BYD",
+    "codigo": 238,
+    "Modelo_Versao": "YUAN PLUS GL310 EV"
+  },
+  {
+    "Marca": "BYD",
+    "codigo": 238,
+    "Modelo_Versao": "YUAN PLUS GS310 EV"
+  },
+  {
+    "Marca": "BYD",
+    "codigo": 238,
+    "Modelo_Versao": "YUAN PRO GS 290EV"
+  },
+  {
+    "Marca": "Citroën",
+    "codigo": 13,
+    "Modelo_Versao": "E-JUMPY CARGO ELÉTRICO"
+  },
+  {
+    "Marca": "FARIZON",
+    "codigo": null,
+    "Modelo_Versao": "SV AIR 11M3"
+  },
+  {
+    "Marca": "FARIZON",
+    "codigo": null,
+    "Modelo_Versao": "SV AIR 8M3"
+  },
+  {
+    "Marca": "FARIZON",
+    "codigo": null,
+    "Modelo_Versao": "SV AIR PRO 8M3"
+  },
+  {
+    "Marca": "FARIZON",
+    "codigo": null,
+    "Modelo_Versao": "SV AIR PRO11M3"
+  },
+  {
+    "Marca": "FARIZON",
+    "codigo": null,
+    "Modelo_Versao": "SV LUX 11M3"
+  },
+  {
+    "Marca": "FARIZON",
+    "codigo": null,
+    "Modelo_Versao": "SV LUX 8M3"
+  },
+  {
+    "Marca": "FARIZON",
+    "codigo": null,
+    "Modelo_Versao": "SV LUX PRO 8M3"
+  },
+  {
+    "Marca": "FARIZON",
+    "codigo": null,
+    "Modelo_Versao": "SV LUX PRO11M3"
+  },
+  {
+    "Marca": "FARIZON",
+    "codigo": null,
+    "Modelo_Versao": "V6E"
+  },
+  {
+    "Marca": "Fiat",
+    "codigo": 21,
+    "Modelo_Versao": "500E ICON ELÉTRICO"
+  },
+  {
+    "Marca": "Fiat",
+    "codigo": 21,
+    "Modelo_Versao": "E-SCUDO CARGO ELÉTRICO"
+  },
+  {
+    "Marca": "Ford",
+    "codigo": 22,
+    "Modelo_Versao": "E-Transit C35EBAB"
+  },
+  {
+    "Marca": "Ford",
+    "codigo": 22,
+    "Modelo_Versao": "E-Transit C35LBAB"
+  },
+  {
+    "Marca": "Ford",
+    "codigo": 22,
+    "Modelo_Versao": "E-Transit F35EAAB"
+  },
+  {
+    "Marca": "Ford",
+    "codigo": 22,
+    "Modelo_Versao": "E-Transit F35LAAB"
+  },
+  {
+    "Marca": "Ford",
+    "codigo": 22,
+    "Modelo_Versao": "E-Transit F35LMAB"
+  },
+  {
+    "Marca": "Ford",
+    "codigo": 22,
+    "Modelo_Versao": "E-Transit F35MAAB"
+  },
+  {
+    "Marca": "Ford",
+    "codigo": 22,
+    "Modelo_Versao": "E-Transit F35MMAB"
+  },
+  {
+    "Marca": "FOTON",
+    "codigo": 190,
+    "Modelo_Versao": "EVIEW CONNECT 50S"
+  },
+  {
+    "Marca": "FOTON",
+    "codigo": 190,
+    "Modelo_Versao": "EVIEW GRAND53"
+  },
+  {
+    "Marca": "FOTON",
+    "codigo": 190,
+    "Modelo_Versao": "EWONDER CHASSI"
+  },
+  {
+    "Marca": "GAC",
+    "codigo": 254,
+    "Modelo_Versao": "AION ES PLUS"
+  },
+  {
+    "Marca": "GAC",
+    "codigo": 254,
+    "Modelo_Versao": "AION V ELITE"
+  },
+  {
+    "Marca": "GAC",
+    "codigo": 254,
+    "Modelo_Versao": "AION V PREMIUM"
+  },
+  {
+    "Marca": "GAC",
+    "codigo": 254,
+    "Modelo_Versao": "AION Y ELITE"
+  },
+  {
+    "Marca": "GAC",
+    "codigo": 254,
+    "Modelo_Versao": "AION Y PREMIUM"
+  },
+  {
+    "Marca": "GAC",
+    "codigo": 254,
+    "Modelo_Versao": "HYPTEC HT ELITE"
+  },
+  {
+    "Marca": "GAC",
+    "codigo": 254,
+    "Modelo_Versao": "HYPTEC HT ULTRA"
+  },
+  {
+    "Marca": "GEELY",
+    "codigo": 199,
+    "Modelo_Versao": "EX2 MAX"
+  },
+  {
+    "Marca": "GEELY",
+    "codigo": 199,
+    "Modelo_Versao": "EX2 PRO"
+  },
+  {
+    "Marca": "GEELY",
+    "codigo": 199,
+    "Modelo_Versao": "EX5 MAX"
+  },
+  {
+    "Marca": "GEELY",
+    "codigo": 199,
+    "Modelo_Versao": "EX5 PRO"
+  },
+  {
+    "Marca": "GM - Chevrolet",
+    "codigo": 23,
+    "Modelo_Versao": "BLAZER EV RS"
+  },
+  {
+    "Marca": "GM - Chevrolet",
+    "codigo": 23,
+    "Modelo_Versao": "CAPTIVA EV PR"
+  },
+  {
+    "Marca": "GM - Chevrolet",
+    "codigo": 23,
+    "Modelo_Versao": "EQUINOX EV"
+  },
+  {
+    "Marca": "GM - Chevrolet",
+    "codigo": 23,
+    "Modelo_Versao": "SPARK EUV ACTIV"
+  },
+  {
+    "Marca": "GWM",
+    "codigo": 240,
+    "Modelo_Versao": "ORA 03 BEV58"
+  },
+  {
+    "Marca": "GWM",
+    "codigo": 240,
+    "Modelo_Versao": "ORA 03 GT BEV63"
+  },
+  {
+    "Marca": "GWM",
+    "codigo": 240,
+    "Modelo_Versao": "ORA 03 SKIN BEV48"
+  },
+  {
+    "Marca": "Hyundai",
+    "codigo": 26,
+    "Modelo_Versao": "IONIQ 5 Platinum"
+  },
+  {
+    "Marca": "Hyundai",
+    "codigo": 26,
+    "Modelo_Versao": "IONIQ 5 Signature"
+  },
+  {
+    "Marca": "Hyundai",
+    "codigo": 26,
+    "Modelo_Versao": "IONIQ 5 Ultimate"
+  },
+  {
+    "Marca": "JAC",
+    "codigo": 177,
+    "Modelo_Versao": "e-J7 e-J7"
+  },
+  {
+    "Marca": "JAC",
+    "codigo": 177,
+    "Modelo_Versao": "e-JS1 e-JS1"
+  },
+  {
+    "Marca": "JAC",
+    "codigo": 177,
+    "Modelo_Versao": "e-JS1 e-JS1 EXT"
+  },
+  {
+    "Marca": "JAC",
+    "codigo": 177,
+    "Modelo_Versao": "e-JS4 e-JS4"
+  },
+  {
+    "Marca": "JAC",
+    "codigo": 177,
+    "Modelo_Versao": "EJV5.5 CARGO"
+  },
+  {
+    "Marca": "JAC",
+    "codigo": 177,
+    "Modelo_Versao": "IEV330P IEV330"
+  },
+  {
+    "Marca": "Kia Motors",
+    "codigo": 31,
+    "Modelo_Versao": "EV5 2WD AIR 2WD ELÉTRICO"
+  },
+  {
+    "Marca": "Kia Motors",
+    "codigo": 31,
+    "Modelo_Versao": "EV5 2WD LAND 2WD ELÉTRICO"
+  },
+  {
+    "Marca": "Leapmotor",
+    "codigo": 260,
+    "Modelo_Versao": "C10 Design ELÉTRICO"
+  },
+  {
+    "Marca": "Mercedes-Benz",
+    "codigo": 39,
+    "Modelo_Versao": "320 ESPRINTER C"
+  },
+  {
+    "Marca": "Mercedes-Benz",
+    "codigo": 39,
+    "Modelo_Versao": "320 ESPRINTER F"
+  },
+  {
+    "Marca": "Mercedes-Benz",
+    "codigo": 39,
+    "Modelo_Versao": "G580 EQ"
+  },
+  {
+    "Marca": "MG",
+    "codigo": 167,
+    "Modelo_Versao": "MG4 64 KWH AWD"
+  },
+  {
+    "Marca": "MG",
+    "codigo": 167,
+    "Modelo_Versao": "MG4 64 KWH COM"
+  },
+  {
+    "Marca": "MG",
+    "codigo": 167,
+    "Modelo_Versao": "MG4 64 KWH LUX"
+  },
+  {
+    "Marca": "MG",
+    "codigo": 167,
+    "Modelo_Versao": "S5 EV 62KWH COM"
+  },
+  {
+    "Marca": "MG",
+    "codigo": 167,
+    "Modelo_Versao": "S5 EV 62KWH LUX"
+  },
+  {
+    "Marca": "MINI",
+    "codigo": 156,
+    "Modelo_Versao": "Aceman E"
+  },
+  {
+    "Marca": "MINI",
+    "codigo": 156,
+    "Modelo_Versao": "Aceman SE"
+  },
+  {
+    "Marca": "MINI",
+    "codigo": 156,
+    "Modelo_Versao": "Countryman SE EXCLUSIVE"
+  },
+  {
+    "Marca": "MINI",
+    "codigo": 156,
+    "Modelo_Versao": "Countryman SE TOP"
+  },
+  {
+    "Marca": "MINI",
+    "codigo": 156,
+    "Modelo_Versao": "JCW-E ACEMAN"
+  },
+  {
+    "Marca": "Omoda",
+    "codigo": 252,
+    "Modelo_Versao": "E5"
+  },
+  {
+    "Marca": "Peugeot",
+    "codigo": 44,
+    "Modelo_Versao": "E2008 GT ELÉTRICO"
+  },
+  {
+    "Marca": "Porsche",
+    "codigo": 47,
+    "Modelo_Versao": "MACAN E4"
+  },
+  {
+    "Marca": "Porsche",
+    "codigo": 47,
+    "Modelo_Versao": "MACAN E4S"
+  },
+  {
+    "Marca": "Porsche",
+    "codigo": 47,
+    "Modelo_Versao": "MACAN ETURBO"
+  },
+  {
+    "Marca": "Porsche",
+    "codigo": 47,
+    "Modelo_Versao": "TAYCAN 4CT"
+  },
+  {
+    "Marca": "Porsche",
+    "codigo": 47,
+    "Modelo_Versao": "TAYCAN 4S"
+  },
+  {
+    "Marca": "Porsche",
+    "codigo": 47,
+    "Modelo_Versao": "TAYCAN 4S BE"
+  },
+  {
+    "Marca": "Porsche",
+    "codigo": 47,
+    "Modelo_Versao": "TAYCAN 4S CT"
+  },
+  {
+    "Marca": "Porsche",
+    "codigo": 47,
+    "Modelo_Versao": "TAYCAN TURBO S"
+  },
+  {
+    "Marca": "Porsche",
+    "codigo": 47,
+    "Modelo_Versao": "TAYCAN TURBOCT"
+  },
+  {
+    "Marca": "Renault",
+    "codigo": 48,
+    "Modelo_Versao": "E-KWID INTENS"
+  },
+  {
+    "Marca": "Renault",
+    "codigo": 48,
+    "Modelo_Versao": "MÉGANE E-TECH"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EC40 6 CORE"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EC40 6 PLUS"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EC40 6 ULTRA"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EC40 8 CORE"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EC40 8 PLUS"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EC40 8 ULTRA"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EC40 PERF BLACK"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EC40 PERF ULTRA"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EX30 C COUNTRY"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EX30 E40 CORE"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EX30 E40 PLUS"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EX30 E60 CORE"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EX30 E60 PLUS"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EX30 E60 ULTRA"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EX30 TWIN ULTRA"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EX40 8 CORE"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EX40 8 PLUS"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EX40 8 ULTRA"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EX40 PERF BLACK"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EX40 PERF ULTRA"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EX90 PLUS TWIN"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EX90 ULT TWIN PER"
+  },
+  {
+    "Marca": "Volvo",
+    "codigo": 58,
+    "Modelo_Versao": "EX90 ULTRA TWIN"
+  },
+  {
+    "Marca": "ZEEKR",
+    "codigo": 253,
+    "Modelo_Versao": "001 Flagship"
+  },
+  {
+    "Marca": "ZEEKR",
+    "codigo": 253,
+    "Modelo_Versao": "001 Premium"
+  },
+  {
+    "Marca": "ZEEKR",
+    "codigo": 253,
+    "Modelo_Versao": "X Flagship"
+  },
+  {
+    "Marca": "ZEEKR",
+    "codigo": 253,
+    "Modelo_Versao": "X Premium"
+  }
+]

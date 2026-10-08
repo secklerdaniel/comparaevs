@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparador de Motos Elétricas — ComparaEVs</title>
+<meta name="description" content="Compare motos e scooters elétricas: autonomia, potência, tempo de recarga, consumo e preço, lado a lado.">
+<meta property="og:title" content="Comparador de Motos Elétricas — ComparaEVs">
+<meta property="og:description" content="Escolha a moto elétrica ideal comparando autonomia, potência, consumo e preço.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='90'>🏍️</text></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          void: '#0B0D10', panel: '#14171C', panel2: '#1C2026', panel3: '#262B33',
+          ink: '#E8EAED', inkmuted: '#8B92A0', volt: '#C8FF4D', voltdim: '#9FD93A'
+        },
+        fontFamily: {
+          display: ['"Space Grotesk"', 'sans-serif'],
+          body: ['Inter', 'sans-serif'],
+          data: ['"JetBrains Mono"', 'monospace']
+        }
+      }
+    }
+  };
+</script>
+
+<style>
+  * { scrollbar-color: #262B33 #14171C; }
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(8px);} to {opacity:1; transform:translateY(0);} }
+  .reveal { animation: fadeUp .4s cubic-bezier(.4,0,.2,1) both; }
+  @keyframes pulseBg { 0%,100%{opacity:.5;} 50%{opacity:.9;} }
+  .skeleton { animation: pulseBg 1.4s ease-in-out infinite; }
+  *:focus-visible { outline: 2px solid #C8FF4D; outline-offset: 2px; border-radius: 4px; }
+  .force-hidden { display: none !important; }
+  .toast { transition: opacity .25s ease, transform .25s ease; }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  }
+</style>
+<style>
+  /* Celular: um respiro só. Antes eram 20px de margem do site + 20-24px dentro de cada
+     seção com borda (conteúdo a 41-45px da borda da tela, tudo espremido). */
+  @media (max-width: 639px) {
+    .max-w-screen-2xl.mx-auto { padding-left: 12px !important; padding-right: 12px !important; }
+    .max-w-screen-2xl.mx-auto [class~="p-5"],
+    .max-w-screen-2xl.mx-auto [class~="p-6"],
+    .max-w-screen-2xl.mx-auto [class~="p-8"] { padding: 16px !important; }
+  }
+</style>
+</head>
+
+<body class="bg-void text-ink min-h-screen">
+
+  <div class="max-w-screen-2xl mx-auto px-5 sm:px-6 py-8">
+
+    <!-- ===================== HEADER ===================== -->
+    <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8">
+      <a href="index.html" class="flex items-center gap-2.5 w-full sm:w-auto">
+        <img src="./img/banner/logo.png" alt="ComparaEVs" class="w-12 h-12 object-contain shrink-0">
+        <div class="min-w-0">
+          <h1 class="font-display font-semibold text-lg sm:text-xl tracking-tight leading-none">ComparaEVs</h1>
+          <p class="text-[11px] text-inkmuted tracking-wide">Comparador de motos elétricas</p>
+        </div>
+      </a>
+      <nav class="flex items-center justify-center sm:justify-end gap-3 w-full sm:w-auto text-xs text-inkmuted flex-wrap">
+        <a href="index.html" class="hover:text-ink transition-colors"><i class="fa-solid fa-car-side mr-1"></i>Veículos</a>
+        <span class="opacity-30">·</span>
+        <a href="carregadores.html" class="hover:text-ink transition-colors"><i class="fa-solid fa-plug-circle-bolt mr-1"></i>Carregadores</a>
+        <span class="opacity-30">·</span>
+        <a href="https://comparaevs.vercel.app/sobre.html" class="hover:text-ink transition-colors">Sobre nós</a>
+        <span class="opacity-30">·</span>
+        <a href="https://comparaevs.vercel.app/contato.html" class="hover:text-ink transition-colors">Contato</a>
+        <span class="opacity-30">·</span>
+        <a href="https://comparaevs.vercel.app/loja.html" class="hover:text-ink transition-colors">Loja</a>
+      </nav>
+    </header>
+
+    <!-- ===================== HERO ===================== -->
+    <section class="rounded-2xl border border-panel2 bg-panel mb-8 p-6 sm:p-8">
+      <p class="text-[11px] uppercase tracking-widest text-volt font-medium mb-2">Motos e scooters elétricas</p>
+      <h2 class="font-display font-bold text-2xl sm:text-3xl tracking-tight mb-2">Qual moto elétrica combina com você?</h2>
+      <p class="text-sm text-inkmuted max-w-2xl leading-relaxed">Compare autonomia, potência, tempo de recarga, consumo e preço de motos e scooters elétricas vendidas no Brasil, com a mesma classificação PBE/INMETRO usada nos carros. Selecione até 3 para comparar lado a lado.</p>
+    </section>
+
+    <!-- ===================== FILTROS ===================== -->
+    <section class="rounded-2xl border border-panel2 bg-panel p-5 sm:p-6 mb-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div class="lg:col-span-2">
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Buscar</label>
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-inkmuted text-xs"></i>
+            <input id="filter-busca" type="text" placeholder="Marca ou modelo"
+              class="w-full bg-panel2 border border-panel3 rounded-lg pl-9 pr-3 py-2.5 text-sm placeholder:text-inkmuted/60 focus:border-volt/60 transition-colors">
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Marca</label>
+          <select id="filter-marca" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors"></select>
+        </div>
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Categoria</label>
+          <select id="filter-categoria" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors"></select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 items-end">
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Autonomia mín. (km)</label>
+          <input id="filter-autonomia" type="number" step="5" value="0" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm font-data focus:border-volt/60 transition-colors">
+        </div>
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Preço até (R$)</label>
+          <input id="filter-preco" type="number" step="500" placeholder="sem limite" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm font-data placeholder:text-inkmuted/50 focus:border-volt/60 transition-colors">
+        </div>
+        <div class="flex items-center gap-4 pb-2">
+          <label class="inline-flex items-center gap-3 cursor-pointer select-none group">
+            <div class="relative">
+              <input type="checkbox" id="filter-uber" class="sr-only peer" onchange="if(this.checked) trackEvento('cta_filtro_uber_motos'); aplicarFiltros()">
+              <div class="w-10 h-5 bg-panel3 rounded-full transition-colors peer-checked:bg-[#1a2b0e]"></div>
+              <div class="absolute left-0.5 top-0.5 w-4 h-4 bg-inkmuted rounded-full transition-all peer-checked:translate-x-5 peer-checked:bg-volt"></div>
+            </div>
+            <span class="text-sm text-inkmuted group-has-[:checked]:text-ink transition-colors flex items-center gap-1">
+              <i class="fa-brands fa-uber text-[11px]"></i> Aceitas pela Uber
+            </span>
+          </label>
+        </div>
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">CNH</label>
+          <select id="filter-cnh" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+            <option value="">Todas</option>
+            <option value="sim">Exige CNH</option>
+            <option value="nao">Não exige CNH</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex justify-end mt-4">
+        <button onclick="limparFiltros()" class="px-4 py-2 rounded-lg border border-panel3 text-sm text-inkmuted hover:text-ink hover:border-ink/30 transition-colors">
+          Limpar filtros
+        </button>
+      </div>
+    </section>
+
+    <!-- ===================== SKELETON ===================== -->
+    <div id="skeleton" class="space-y-3 mb-8">
+      <div class="h-14 bg-panel rounded-xl skeleton"></div>
+      <div class="h-14 bg-panel rounded-xl skeleton" style="animation-delay:.1s"></div>
+      <div class="h-14 bg-panel rounded-xl skeleton" style="animation-delay:.2s"></div>
+    </div>
+
+    <p id="contagem" class="text-xs text-inkmuted mb-3 hidden"></p>
+
+    <div id="empty-state" class="hidden text-center py-16 text-inkmuted">
+      <i class="fa-solid fa-motorcycle text-3xl mb-3 opacity-50"></i>
+      <p class="text-sm">Nenhuma moto encontrada com esses filtros.</p>
+    </div>
+
+    <!-- ===================== TABELA (desktop) ===================== -->
+    <div id="tabela-wrap" class="force-hidden hidden md:block rounded-2xl border border-panel2 bg-panel overflow-hidden mb-8">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-panel2 text-left text-[11px] uppercase tracking-wide text-inkmuted">
+            <th class="p-3 text-center w-12">Comparar</th>
+            <th class="p-3">Moto</th>
+            <th class="p-3 text-right">Autonomia</th>
+            <th class="p-3 text-right">Consumo</th>
+            <th class="p-3 w-[160px]">Selo geral</th>
+            <th class="p-3 text-right">Preço</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- ===================== CARDS (mobile) ===================== -->
+    <div id="cards-wrap" class="force-hidden md:hidden space-y-3 mb-8"></div>
+
+    <!-- ===================== FOOTER ===================== -->
+    <footer class="text-center text-[11px] text-inkmuted/70 py-6 border-t border-panel2">
+      <div class="flex items-center justify-center gap-2 mb-2 flex-wrap">
+        <a href="index.html" class="hover:text-ink transition-colors">Veículos</a>
+        <span class="opacity-30">·</span>
+        <a href="carregadores.html" class="hover:text-ink transition-colors">Carregadores</a>
+        <span class="opacity-30">·</span>
+        <a href="https://comparaevs.vercel.app/sobre.html" class="hover:text-ink transition-colors">Sobre nós</a>
+        <span class="opacity-30">·</span>
+        <a href="https://comparaevs.vercel.app/contato.html" class="hover:text-ink transition-colors">Contato</a>
+        <span class="opacity-30">·</span>
+        <a href="https://comparaevs.vercel.app/loja.html" class="hover:text-ink transition-colors">Loja</a>
+      </div>
+      Fonte: Programa Brasileiro de Etiquetagem Veicular (PBEV) — INMETRO / Tabela FIPE. Preços são estimativas e podem variar por região e concessionária.
+    </footer>
+  </div>
+
+  <!-- ===================== BARRA FLUTUANTE DE COMPARAÇÃO ===================== -->
+  <div id="compare-bar" class="fixed left-1/2 -translate-x-1/2 bottom-5 z-40 hidden">
+    <div class="flex items-center gap-4 bg-panel2 border border-panel3 rounded-full pl-5 pr-2 py-2 shadow-2xl shadow-black/50">
+      <span class="text-sm"><span id="compare-count" class="font-data text-volt font-bold">0</span> selecionada(s)</span>
+      <button onclick="abrirComparacao()" class="px-4 py-2 rounded-full bg-volt text-void text-sm font-medium hover:bg-voltdim transition-colors">Comparar</button>
+      <button onclick="limparComparacao()" class="w-9 h-9 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel3 transition-colors" title="Limpar seleção">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL DE COMPARAÇÃO ===================== -->
+  <div id="compare-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/70" onclick="fecharComparacao()"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+      <div class="bg-panel border border-panel2 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-4xl max-h-[88vh] overflow-y-auto">
+        <div class="flex items-center justify-between p-5 border-b border-panel2 sticky top-0 bg-panel">
+          <h2 class="font-display font-semibold text-lg">Comparação</h2>
+          <div class="flex items-center gap-2">
+            <button onclick="compartilharComparacao()" id="btn-compartilhar"
+              class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-panel3 text-inkmuted hover:text-volt hover:border-volt/50 text-xs font-medium transition-colors">
+              <i class="fa-solid fa-link"></i>
+              <span id="btn-compartilhar-label">Compartilhar</span>
+            </button>
+            <button onclick="fecharComparacao()" class="w-9 h-9 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel2 transition-colors">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>
+        <div id="compare-content" class="p-5 sm:p-6"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TOAST ===================== -->
+  <div id="toast" class="toast fixed left-1/2 -translate-x-1/2 bottom-24 z-50 opacity-0 pointer-events-none">
+    <div class="bg-panel3 border border-panel3 text-ink text-sm px-4 py-2.5 rounded-lg shadow-xl"></div>
+  </div>
+
+  <script>
+    // ================== CONFIGURAÇÃO ==================
+    // Banco saiu do Supabase pro Neon em 13/09/2026 — ver ../manifesto/comparaevs.txt
+    let todasMotos = [];
+    let filtradas = [];
+    const selecionados = new Set();
+    const MAX_COMPARACAO = 3;
+    const ORDEM_CLASSES = ['A+', 'A', 'B', 'C', 'D', 'E', 'F', 'G'];
+    let seloCounter = 0;
+
+    // ================== INIT ==================
+    async function initSupabase() {
+      trackEvento('pageview_motos');
+      await carregarMotos();
+    }
+
+    // ================== TRACKING ==================
+    function trackEvento(tipo_evento, opcoes) {
+      opcoes = opcoes || {};
+      try {
+        fetch('/api/eventos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tipo_evento,
+            veiculo_id: null,
+            patrocinador_id: null,
+            detalhe: opcoes.detalhe || null,
+            pagina: window.location.pathname
+          }),
+          keepalive: true
+        }).catch(function (e) { console.warn('track falhou:', e); });
+      } catch (e) { console.warn('track falhou:', e); }
+    }
+
+    // ================== CARREGAR DADOS ==================
+    async function carregarMotos() {
+      let data = [];
+      let error = null;
+      try {
+        const res = await fetch('/api/motos');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        data = await res.json();
+      } catch (e) {
+        error = e;
+      }
+
+      document.getElementById('skeleton').classList.add('hidden');
+
+      if (error) {
+        console.error(error);
+        mostrarToast('Erro ao carregar dados. Veja o console.');
+        return;
+      }
+
+      todasMotos = data || [];
+      preencherFiltros();
+      lerComparacaoURL();
+      aplicarFiltros();
+    }
+
+    function preencherFiltros() {
+      const marcas = [...new Set(todasMotos.map(m => m.Marca).filter(Boolean))].sort();
+      document.getElementById('filter-marca').innerHTML = '<option value="">Todas as marcas</option>' +
+        marcas.map(m => `<option value="${m}">${m}</option>`).join('');
+
+      const categorias = [...new Set(todasMotos.map(m => m.Categoria).filter(Boolean))].sort();
+      document.getElementById('filter-categoria').innerHTML = '<option value="">Todas as categorias</option>' +
+        categorias.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+
+    // ================== FILTROS ==================
+    function aplicarFiltros() {
+      const busca = document.getElementById('filter-busca').value.trim().toLowerCase();
+      const marca = document.getElementById('filter-marca').value;
+      const categoria = document.getElementById('filter-categoria').value;
+      const autonomiaMin = Number(document.getElementById('filter-autonomia').value) || 0;
+      const precoTeto = document.getElementById('filter-preco').value ? Number(document.getElementById('filter-preco').value) : null;
+      const apenasUber = document.getElementById('filter-uber').checked;
+      const cnh = document.getElementById('filter-cnh').value;
+
+      filtradas = todasMotos.filter(m => {
+        if (busca && !`${m.Marca} ${m.Modelo_Versao}`.toLowerCase().includes(busca)) return false;
+        if (marca && m.Marca !== marca) return false;
+        if (categoria && m.Categoria !== categoria) return false;
+        if (Number(m.Autonomia_km || 0) < autonomiaMin) return false;
+        if (precoTeto !== null && Number(m.preco || 0) > precoTeto) return false;
+        if (apenasUber && m.Uber !== true) return false;
+        if (cnh === 'sim' && m.CNH !== true) return false;
+        if (cnh === 'nao' && m.CNH !== false) return false;
+        return true;
+      });
+
+      render();
+    }
+
+    function limparFiltros() {
+      document.getElementById('filter-busca').value = '';
+      document.getElementById('filter-marca').value = '';
+      document.getElementById('filter-categoria').value = '';
+      document.getElementById('filter-autonomia').value = 0;
+      document.getElementById('filter-preco').value = '';
+      document.getElementById('filter-uber').checked = false;
+      document.getElementById('filter-cnh').value = '';
+      aplicarFiltros();
+    }
+
+    ['filter-busca','filter-marca','filter-categoria','filter-autonomia','filter-preco','filter-cnh'].forEach(id => {
+      document.getElementById(id).addEventListener('input', aplicarFiltros);
+      document.getElementById(id).addEventListener('change', aplicarFiltros);
+    });
+
+    // ================== FORMATAÇÃO ==================
+    function fmtPreco(v) {
+      if (v == null) return '—';
+      return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+    }
+    function fmtAutonomia(v) { return v == null ? '—' : `${v} km`; }
+    function fmtConsumo(v) { return v == null ? '—' : `${Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} Wh/km`; }
+
+    // ================== SELO PBE (mesmo elemento visual do index.html) ==================
+    function renderSelo(classeRaw, tamanho) {
+      const classe = (classeRaw || '').toString().trim().toUpperCase();
+      let idx = ORDEM_CLASSES.indexOf(classe);
+      if (idx === -1) idx = Math.round((ORDEM_CLASSES.length - 1) / 2);
+      const pct = idx / (ORDEM_CLASSES.length - 1);
+
+      const barX = 6, barW = 248, barY = 38, barH = 14;
+      const pointerX = barX + pct * barW;
+      const chipX = Math.min(238, Math.max(22, pointerX));
+      const gradId = 'grad-selo-moto-' + (seloCounter++);
+      const alturaSvg = 74;
+
+      const legenda = tamanho === 'lg'
+        ? `<p class="text-[10px] uppercase tracking-widest text-inkmuted text-center mt-1">Classificação geral PBEV</p>`
+        : '';
+
+      return `
+        <svg viewBox="0 0 260 ${alturaSvg}" class="w-full h-auto" role="img" aria-label="Classificação energética: ${classeRaw || 'não informada'}">
+          <defs>
+            <linearGradient id="${gradId}" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#2E7D32"/>
+              <stop offset="20%" stop-color="#66BB6A"/>
+              <stop offset="40%" stop-color="#C8FF4D"/>
+              <stop offset="60%" stop-color="#FFC107"/>
+              <stop offset="80%" stop-color="#FB8C00"/>
+              <stop offset="100%" stop-color="#E53935"/>
+            </linearGradient>
+          </defs>
+          <rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" rx="7" fill="url(#${gradId})"/>
+          <polygon points="${pointerX - 7},30 ${pointerX + 7},30 ${pointerX},40" fill="#E8EAED"/>
+          <rect x="${chipX - 16}" y="2" width="32" height="22" rx="6" fill="#14171C" stroke="#E8EAED" stroke-width="1"/>
+          <text x="${chipX}" y="18" text-anchor="middle" font-family="'Space Grotesk', sans-serif" font-size="13" font-weight="700" fill="#E8EAED">${(classeRaw || '?').toString()}</text>
+        </svg>
+        ${legenda}
+      `;
+    }
+
+    function badgesExtras(m) {
+      const badges = [];
+      if (m.Uber) badges.push(`<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-volt/30 bg-[#1a2b0e] text-volt text-[10px] font-medium" title="Aceita pela Uber (verifique critérios no app)"><i class="fa-brands fa-uber text-[9px]"></i> Uber</span>`);
+      badges.push(m.CNH
+        ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-panel3 text-inkmuted text-[10px] font-medium"><i class="fa-solid fa-id-card text-[9px]"></i> Exige CNH</span>`
+        : `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-panel3 text-inkmuted text-[10px] font-medium"><i class="fa-solid fa-id-card text-[9px]"></i> Sem CNH</span>`);
+      return badges.join(' ');
+    }
+
+    // ================== RENDER RESULTADOS ==================
+    function render() {
+      const contagem = document.getElementById('contagem');
+      const tabelaWrap = document.getElementById('tabela-wrap');
+      const cardsWrap = document.getElementById('cards-wrap');
+      const emptyState = document.getElementById('empty-state');
+
+      if (!filtradas.length) {
+        tabelaWrap.classList.add('force-hidden');
+        cardsWrap.classList.add('force-hidden');
+        contagem.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      contagem.classList.remove('hidden');
+      contagem.textContent = `${filtradas.length} moto(s) encontrada(s)`;
+
+      tabelaWrap.classList.remove('force-hidden');
+      document.getElementById('tbody').innerHTML = filtradas.map((m, i) => linhaTabela(m, i)).join('');
+
+      cardsWrap.classList.remove('force-hidden');
+      cardsWrap.innerHTML = filtradas.map((m, i) => cardMobile(m, i)).join('');
+    }
+
+    function linhaTabela(m, i) {
+      const selecionado = selecionados.has(m.id);
+      return `
+        <tr class="hover:bg-panel/60 transition-colors reveal border-b border-panel2/60 last:border-0" style="animation-delay:${Math.min(i, 8) * 25}ms">
+          <td class="p-3 text-center">
+            <button onclick="toggleSelecionado(${m.id})"
+              class="w-6 h-6 rounded-md border flex items-center justify-center transition-colors
+                ${selecionado ? 'bg-volt border-volt text-void' : 'border-panel3 text-transparent hover:border-inkmuted'}">
+              <i class="fa-solid fa-check text-[10px]"></i>
+            </button>
+          </td>
+          <td class="p-3">
+            <p class="font-medium">
+              ${m.Marca || ''} ${m.Modelo_Versao || ''}
+              ${m.site ? `<a href="${m.site}" target="_blank" rel="noopener" onclick="trackEvento('cta_site_moto', {detalhe: ${m.id}})" class="inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded border border-panel3 text-inkmuted hover:text-volt hover:border-volt/50 text-[10px] transition-colors" title="Ver site oficial"><i class="fa-solid fa-globe"></i> site</a>` : ''}
+            </p>
+            <p class="text-[11px] text-inkmuted mt-0.5">${m.Categoria || ''} ${m.Potencia_Motor ? '· ' + m.Potencia_Motor : ''}</p>
+            <div class="flex flex-wrap gap-1 mt-1">${badgesExtras(m)}</div>
+          </td>
+          <td class="p-3 text-right font-data font-semibold text-volt">${fmtAutonomia(m.Autonomia_km)}</td>
+          <td class="p-3 text-right font-data text-inkmuted">${fmtConsumo(m.Consumo_Whkm)}</td>
+          <td class="p-3">${renderSelo(m.Class_Geral, 'sm')}</td>
+          <td class="p-3 text-right font-data">${fmtPreco(m.preco)}</td>
+        </tr>
+      `;
+    }
+
+    function cardMobile(m, i) {
+      const selecionado = selecionados.has(m.id);
+      return `
+        <div class="rounded-xl border border-panel2 bg-panel p-4 reveal" style="animation-delay:${Math.min(i, 8) * 25}ms">
+          <div class="flex items-start justify-between gap-3 mb-3">
+            <div>
+              <p class="font-medium leading-tight">
+                ${m.Marca || ''} ${m.Modelo_Versao || ''}
+                ${m.site ? `<a href="${m.site}" target="_blank" rel="noopener" onclick="trackEvento('cta_site_moto', {detalhe: ${m.id}})" class="inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded border border-panel3 text-inkmuted hover:text-volt hover:border-volt/50 text-[10px] transition-colors" title="Ver site oficial"><i class="fa-solid fa-globe"></i> site</a>` : ''}
+              </p>
+              <p class="text-[11px] text-inkmuted mt-0.5">${m.Categoria || ''} ${m.Potencia_Motor ? '· ' + m.Potencia_Motor : ''}</p>
+            </div>
+            <button onclick="toggleSelecionado(${m.id})"
+              class="w-8 h-8 rounded-lg border flex items-center justify-center transition-colors shrink-0
+                ${selecionado ? 'bg-volt border-volt text-void' : 'border-panel3 text-inkmuted'}">
+              <i class="fa-solid fa-check text-xs"></i>
+            </button>
+          </div>
+
+          <div class="flex items-baseline gap-1.5 mb-2">
+            <span class="font-data font-bold text-2xl text-volt">${fmtAutonomia(m.Autonomia_km)}</span>
+            <span class="text-[11px] text-inkmuted">autonomia</span>
+          </div>
+
+          <div class="flex flex-wrap gap-1.5 mb-3">${badgesExtras(m)}</div>
+
+          <div class="mb-3">${renderSelo(m.Class_Geral, 'sm')}</div>
+
+          <div class="grid grid-cols-2 gap-3 text-sm">
+            <div>
+              <p class="text-[11px] text-inkmuted">Consumo</p>
+              <p class="font-data">${fmtConsumo(m.Consumo_Whkm)}</p>
+            </div>
+            <div>
+              <p class="text-[11px] text-inkmuted">Preço</p>
+              <p class="font-data">${fmtPreco(m.preco)}</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // ================== COMPARAÇÃO ==================
+    function toggleSelecionado(id) {
+      if (selecionados.has(id)) {
+        selecionados.delete(id);
+      } else {
+        if (selecionados.size >= MAX_COMPARACAO) {
+          mostrarToast(`Selecione no máximo ${MAX_COMPARACAO} motos para comparar.`);
+          return;
+        }
+        selecionados.add(id);
+      }
+      render();
+      atualizarBarraComparacao();
+    }
+
+    function limparComparacao() {
+      selecionados.clear();
+      render();
+      atualizarBarraComparacao();
+    }
+
+    function atualizarBarraComparacao() {
+      const bar = document.getElementById('compare-bar');
+      document.getElementById('compare-count').textContent = selecionados.size;
+      bar.classList.toggle('hidden', selecionados.size === 0);
+    }
+
+    const CORES_FICHA = [
+      { borda: '#C8FF4D', fundo: '#1A2B0E' },
+      { borda: '#5EC8F2', fundo: '#0E222B' },
+      { borda: '#C792EA', fundo: '#241A2B' }
+    ];
+
+    function linhasFichaTecnica(m) {
+      return [
+        { icon: 'fa-tag', label: 'Marca', valor: m.Marca || '—' },
+        { icon: 'fa-motorcycle', label: 'Modelo', valor: m.Modelo_Versao || '—' },
+        { icon: 'fa-layer-group', label: 'Categoria', valor: m.Categoria || '—' },
+        { icon: 'fa-bolt', label: 'Potência do motor', valor: m.Potencia_Motor || '—' },
+        { icon: 'fa-car-battery', label: 'Capacidade da bateria', valor: m.Capacidade_Bateria || '—' },
+        { icon: 'fa-road', label: 'Autonomia', valor: fmtAutonomia(m.Autonomia_km) },
+        { icon: 'fa-plug-circle-bolt', label: 'Tempo de recarga', valor: m.Tempo_Recarga || '—' },
+        { icon: 'fa-gauge', label: 'Consumo', valor: fmtConsumo(m.Consumo_Whkm) },
+        { icon: 'fa-award', label: 'Selo (categoria)', valor: m.Class_Cat || '—' },
+        { icon: 'fa-sack-dollar', label: 'Preço', valor: fmtPreco(m.preco) },
+        { icon: 'fa-calendar', label: 'Ano', valor: m.ano || '—' },
+        { icon: 'fa-brands fa-uber', label: 'Aceita Uber', valor: m.Uber ? 'Sim' : 'Não' },
+        { icon: 'fa-id-card', label: 'Exige CNH', valor: m.CNH ? 'Sim (categoria A)' : 'Não' }
+      ];
+    }
+
+    function fichaTecnicaHTML(m, idx) {
+      const cor = CORES_FICHA[idx % CORES_FICHA.length];
+      const linhasHtml = linhasFichaTecnica(m).map((l, i) => `
+        <div class="flex items-center gap-2.5 px-3 py-2 text-sm ${i % 2 === 0 ? 'bg-panel2/30' : ''}">
+          <i class="fa-solid ${l.icon.replace('fa-solid ', '')} w-4 text-center text-[12px]" style="color:${cor.borda}"></i>
+          <span class="text-inkmuted flex-1">${l.label}</span>
+          <span class="font-medium text-right">${l.valor}</span>
+        </div>
+      `).join('');
+
+      return `
+        <div class="rounded-2xl overflow-hidden border-2" style="border-color:${cor.borda}">
+          <div class="px-4 py-3 text-center" style="background:${cor.fundo}">
+            <p class="font-display font-bold text-base tracking-wide" style="color:${cor.borda}">${(m.Marca || '').toUpperCase()}</p>
+            <p class="text-inkmuted text-xs">${m.Modelo_Versao || ''}</p>
+          </div>
+          <div class="p-3">${renderSelo(m.Class_Geral, 'lg')}</div>
+          <div class="divide-y divide-panel3/40">${linhasHtml}</div>
+          <div class="p-3 bg-panel space-y-2">
+            ${m.site ? `<a href="${m.site}" target="_blank" rel="noopener" class="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors" style="background:${cor.borda};color:#0B0D10">
+              <i class="fa-solid fa-globe"></i> Ver site oficial
+            </a>` : ''}
+            <button onclick="toggleSelecionado(${m.id}); abrirComparacao();" class="w-full text-center text-[11px] text-inkmuted hover:text-ink transition-colors">
+              <i class="fa-solid fa-trash-can mr-1"></i> remover da comparação
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function compartilharComparacao() {
+      if (!selecionados.size) return;
+      trackEvento('cta_compartilhar_comparacao_motos', { detalhe: [...selecionados].join(',') });
+      const ids = [...selecionados].join(',');
+      const url = new URL(window.location.href);
+      url.searchParams.set('comparar', ids);
+      navigator.clipboard.writeText(url.toString()).then(() => {
+        const label = document.getElementById('btn-compartilhar-label');
+        const btn = document.getElementById('btn-compartilhar');
+        label.textContent = 'Link copiado!';
+        btn.classList.add('text-volt', 'border-volt/50');
+        btn.classList.remove('text-inkmuted', 'border-panel3');
+        setTimeout(() => {
+          label.textContent = 'Compartilhar';
+          btn.classList.remove('text-volt', 'border-volt/50');
+          btn.classList.add('text-inkmuted', 'border-panel3');
+        }, 2500);
+      }).catch(() => mostrarToast('Não foi possível copiar. Tente manualmente.'));
+    }
+
+    function lerComparacaoURL() {
+      const params = new URLSearchParams(window.location.search);
+      const comparar = params.get('comparar');
+      if (!comparar) return;
+      const ids = comparar.split(',').map(Number).filter(n => !isNaN(n));
+      if (!ids.length) return;
+      const validos = ids.filter(id => todasMotos.some(m => m.id === id));
+      validos.forEach(id => selecionados.add(id));
+      atualizarBarraComparacao();
+      if (selecionados.size) setTimeout(abrirComparacao, 50);
+    }
+
+    function abrirComparacao() {
+      if (!selecionados.size) return;
+      trackEvento('cta_comparar_motos', { detalhe: [...selecionados].join(',') });
+      const motos = todasMotos.filter(m => selecionados.has(m.id));
+      const colunas = motos.map((m, idx) => fichaTecnicaHTML(m, idx)).join('');
+
+      document.getElementById('compare-content').innerHTML = `
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-${motos.length}">${colunas}</div>
+      `;
+      document.getElementById('compare-modal').classList.remove('hidden');
+    }
+
+    function fecharComparacao() {
+      document.getElementById('compare-modal').classList.add('hidden');
+    }
+
+    // ================== TOAST ==================
+    function mostrarToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.querySelector('div').textContent = msg;
+      toast.classList.remove('opacity-0');
+      toast.classList.add('opacity-100');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0');
+      }, 2600);
+    }
+
+    window.onload = function() { initSupabase(); };
+  </script>
+</body>
+</html>

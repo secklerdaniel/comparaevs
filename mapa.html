@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa — Pipeline & Prospecção · ComparaEVs</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='90'>⚡</text></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          void: '#0B0D10', panel: '#14171C', panel2: '#1C2026', panel3: '#262B33',
+          ink: '#E8EAED', inkmuted: '#8B92A0', volt: '#C8FF4D', voltdim: '#9FD93A'
+        },
+        fontFamily: {
+          display: ['"Space Grotesk"', 'sans-serif'],
+          body: ['Inter', 'sans-serif'],
+          data: ['"JetBrains Mono"', 'monospace']
+        }
+      }
+    }
+  };
+</script>
+
+<style>
+  html { scroll-behavior: smooth; }
+  * { scrollbar-color: #262B33 #14171C; }
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  *:focus-visible { outline: 2px solid #C8FF4D; outline-offset: 2px; border-radius: 4px; }
+  .scroll-mt { scroll-margin-top: 90px; }
+</style>
+</head>
+
+<body class="bg-void text-ink min-h-screen">
+
+  <div class="sticky top-0 z-30 bg-void/95 backdrop-blur border-b border-panel2">
+    <div class="max-w-screen-xl mx-auto px-5 py-3">
+      <div class="flex items-center justify-between gap-3">
+        <a href="index.html" class="flex items-center gap-2.5">
+          <img src="./img/banner/logo.png" alt="ComparaEVs" class="w-8 h-8 object-contain shrink-0">
+          <p class="font-display font-semibold">Mapa — Pipeline & Prospecção</p>
+        </a>
+        <nav class="hidden sm:flex gap-2 text-xs font-medium">
+          <a href="#pipeline" class="px-3 py-1.5 rounded-full bg-panel2 hover:bg-panel3 transition-colors">Pipeline</a>
+          <a href="#prospeccao" class="px-3 py-1.5 rounded-full bg-panel2 hover:bg-panel3 transition-colors">Prospecção</a>
+          <a href="#prioridade" class="px-3 py-1.5 rounded-full bg-panel2 hover:bg-panel3 transition-colors">Prioridade</a>
+        </nav>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-screen-xl mx-auto px-5 sm:px-6 py-8 space-y-14">
+
+    <!-- ===================== PIPELINE ===================== -->
+    <section id="pipeline" class="scroll-mt">
+      <h1 class="font-display font-semibold text-2xl sm:text-3xl mb-2">Pipeline de Monetização</h1>
+      <p class="text-sm text-inkmuted max-w-2xl mb-6 leading-relaxed">Ideias de monetização categorizadas por dificuldade técnica de implementação no site — da mais simples (reaproveita estrutura existente) à mais complexa (feature nova do zero).</p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+
+        <!-- FÁCIL -->
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <h2 class="font-display font-medium text-sm uppercase tracking-wide text-emerald-400">Fácil</h2>
+          </div>
+          <div class="space-y-3">
+            <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+              <p class="text-sm font-medium text-ink mb-1">Botão de lead para concessionária</p>
+              <p class="text-xs text-inkmuted leading-relaxed">"Quero receber proposta" no card do veículo → grava lead no Supabase. Reaproveita estrutura existente.</p>
+            </div>
+            <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+              <p class="text-sm font-medium text-ink mb-1">Formulário de orçamento de instalação</p>
+              <p class="text-xs text-inkmuted leading-relaxed">Form simples (nome, telefone, CEP, tipo de imóvel) pra captar lead de instalação de wallbox.</p>
+            </div>
+            <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+              <p class="text-sm font-medium text-ink mb-1">Cupom / loja recomendada de wallbox</p>
+              <p class="text-xs text-inkmuted leading-relaxed">Reaproveita 100% a estrutura da página Loja — só trocar/adicionar produtos e links de afiliado.</p>
+            </div>
+            <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+              <p class="text-sm font-medium text-ink mb-1">Afiliado de assinatura de EV</p>
+              <p class="text-xs text-inkmuted leading-relaxed">Banner/link de afiliado pra Localiza Meoo, Movida, Unidas etc. — mesmo padrão de banner já existente.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- MÉDIO -->
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+            <h2 class="font-display font-medium text-sm uppercase tracking-wide text-amber-400">Médio</h2>
+          </div>
+          <div class="space-y-3">
+            <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+              <p class="text-sm font-medium text-ink mb-1">Afiliado de app de recarga</p>
+              <p class="text-xs text-inkmuted leading-relaxed">Tecnicamente é só um banner — a dificuldade real é comercial: achar rede com programa de afiliado self-service.</p>
+            </div>
+            <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+              <p class="text-sm font-medium text-ink mb-1">Simulador de financiamento verde</p>
+              <p class="text-xs text-inkmuted leading-relaxed">A calculadora de economia é só JS — fica médio por precisar de rota serverless (Vercel function) pra cotação real sem expor chave de API.</p>
+            </div>
+            <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+              <p class="text-sm font-medium text-ink mb-1">Simulador de seguro (form disfarçado)</p>
+              <p class="text-xs text-inkmuted leading-relaxed">Cotação real exige integração com corretora — versão simplificada é form bonito que capta dado pra cotação manual.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- DIFÍCIL -->
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
+            <h2 class="font-display font-medium text-sm uppercase tracking-wide text-red-400">Difícil</h2>
+          </div>
+          <div class="space-y-3">
+            <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+              <p class="text-sm font-medium text-ink mb-1">Mapa de eletropostos + destaque pago</p>
+              <p class="text-xs text-inkmuted leading-relaxed">Feature nova do zero: precisa base de dados de eletropostos própria, integração de mapa (Maps/Mapbox) e lógica de destaque pago por estabelecimento.</p>
+            </div>
+            <div class="rounded-xl border border-dashed border-panel3 p-4">
+              <p class="text-xs text-inkmuted leading-relaxed"><i class="fa-solid fa-circle-info text-volt mr-1"></i> Gargalo nas ideias de afiliado/CPL não é técnico — é comercial: exige tráfego comprovado antes que montadoras/bancos/corretoras topem negociar direto.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================== PROSPECÇÃO ===================== -->
+    <section id="prospeccao" class="scroll-mt">
+      <h1 class="font-display font-semibold text-2xl sm:text-3xl mb-2">Prospecção — Empresas e Contatos</h1>
+      <p class="text-sm text-inkmuted max-w-2xl mb-6 leading-relaxed">Levantamento de empresas e, quando disponível, nomes de executivos ligados a parcerias em cada um dos 4 pilares de monetização. Fontes públicas (releases, entrevistas) — confirmar cargo atual no LinkedIn antes do contato.</p>
+
+      <!-- Pilar 1 -->
+      <h3 class="font-display font-medium text-base mb-3 text-volt">Pilar 1 — Recarga Residencial (Wallbox)</h3>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">E-Wolf</p>
+          <p class="text-xs text-inkmuted mb-2">Distribuidora oficial Wallbox (Espanha) no Brasil</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Thiago Castilha — diretor de marketing e co-fundador</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">GreenV Mobilidade Elétrica</p>
+          <p class="text-xs text-inkmuted mb-2">Loja + instalação; parceira oficial GWM (wallbox grátis ORA 03)</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-envelope text-volt mr-1"></i> Canal "Fale Conosco" — loja.greenv.com.br</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Aldo Solar</p>
+          <p class="text-xs text-inkmuted mb-2">Maior distribuidor de energia solar do Brasil; vende wallbox (Growatt, GoodWe, ABB)</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-handshake text-volt mr-1"></i> Programa de parceria para integradores</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">WEG</p>
+          <p class="text-xs text-inkmuted mb-2">Fabricante nacional (linha Wemob), parceira oficial Mercedes-Benz</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-building text-volt mr-1"></i> Relacionamento institucional B2B</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Intelbras</p>
+          <p class="text-xs text-inkmuted mb-2">Fabricante nacional, linha "Eve", rede de suporte forte</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-building text-volt mr-1"></i> Departamento comercial/parcerias</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">WallBox Brasil</p>
+          <p class="text-xs text-inkmuted mb-2">Distribuidor nacional de infraestrutura de recarga</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-envelope text-volt mr-1"></i> "Fale com um especialista" no site</p>
+        </div>
+      </div>
+
+      <!-- Pilar 2 -->
+      <h3 class="font-display font-medium text-base mb-3 text-volt">Pilar 2 — Redes de Eletropostos (CPOs) e Apps</h3>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">EZVolt</p>
+          <p class="text-xs text-inkmuted mb-2">Maior rede privada do Brasil (+450 pontos); CPO da Vibra Energia</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Gustavo Tannure — CEO</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Tupi Mobilidade</p>
+          <p class="text-xs text-inkmuted mb-2">Tecnologia por trás do app BYD Recharge</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Pedro De Conti — fundador e CEO</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Zletric</p>
+          <p class="text-xs text-inkmuted mb-2">Rede com +2.500 eletropostos via integração com VoltBras</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Pedro Schaan — CEO</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">VoltBras</p>
+          <p class="text-xs text-inkmuted mb-2">Plataforma de interoperabilidade entre redes de recarga</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Bernardo Durieux — CEO</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Raízen (Shell Recharge)</p>
+          <p class="text-xs text-inkmuted mb-2">Rede de eletropostos em postos Shell</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Frederico Saliba — VP Energia e Renováveis</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Avant Charge</p>
+          <p class="text-xs text-inkmuted mb-2">Rede regional (JP/Recife/Natal) — monetiza com publicidade no próprio carregador</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-lightbulb text-volt mr-1"></i> Bom case de referência pro nosso modelo</p>
+        </div>
+      </div>
+
+      <!-- Pilar 3 -->
+      <h3 class="font-display font-medium text-base mb-3 text-volt">Pilar 3 — Concessionárias, Montadoras e Assinatura</h3>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">BYD Brasil</p>
+          <p class="text-xs text-inkmuted mb-2">Líder de vendas de elétricos no país</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Alexandre Baldy (VP Sênior) · Henri Karam (Head Com./RP) · Pablo Toledo (Dir. Marketing)</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">GWM Brasil</p>
+          <p class="text-xs text-inkmuted mb-2">2ª maior montadora chinesa de elétricos/híbridos</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Ricardo Bastos (Dir. Assuntos Institucionais) · Alexandre Oliveira (Dir. Vendas e Rede)</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 ring-1 ring-volt/30">
+          <p class="font-medium text-ink text-sm mb-1">Grupo IESA <span class="text-volt text-[10px]">★ prioridade</span></p>
+          <p class="text-xs text-inkmuted mb-2">Representa BMW, MINI, Volvo, BYD, GWM, Geely, Jeep e mais no RS (Caxias, POA, Pelotas, Sta. Maria...)</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-map-pin text-volt mr-1"></i> Local — mesma região da Seckler Digital</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Grupo Dahruj</p>
+          <p class="text-xs text-inkmuted mb-2">Maior grupo de concessionárias BYD/GWM em São Paulo</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> André Scinocca — Diretor do Grupo</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Localiza Meoo</p>
+          <p class="text-xs text-inkmuted mb-2">Maior plataforma de carro por assinatura do Brasil (+100 modelos)</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-building text-volt mr-1"></i> Departamento comercial/parcerias</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Movida Sign / Unidas Livre / LM AssineCar</p>
+          <p class="text-xs text-inkmuted mb-2">Concorrentes diretos da Meoo — GWM já roda programa com as 4</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-building text-volt mr-1"></i> Comparar comissões antes de fechar</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Volkswagen Financial Services</p>
+          <p class="text-xs text-inkmuted mb-2">Programa "Sign&amp;Drive" de assinatura</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Rodrigo Capuruço — Diretor</p>
+        </div>
+      </div>
+
+      <!-- Pilar 4 -->
+      <h3 class="font-display font-medium text-base mb-3 text-volt">Pilar 4 — Serviços Financeiros e Seguros</h3>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4 ring-1 ring-volt/30">
+          <p class="font-medium text-ink text-sm mb-1">Tokio Marine <span class="text-volt text-[10px]">★ prioridade</span></p>
+          <p class="text-xs text-inkmuted mb-2">Já tem produto de cobertura para wallbox em condomínio — falta canal</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Ronaldo Dalcin — Diretoria de Assessorias Brasil</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Minuto Seguros (Creditas)</p>
+          <p class="text-xs text-inkmuted mb-2">Corretora online, compara 16 seguradoras, modelo de afiliado maduro</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-building text-volt mr-1"></i> Canal de parcerias Creditas</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Banco do Brasil</p>
+          <p class="text-xs text-inkmuted mb-2">Crédito verde a partir de 1,09% a.m. para elétricos/híbridos</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Daniela Avelar (Dir. Empréstimos) · Antonio Barreto Jr (VP Sustentabilidade)</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">BV (Banco Votorantim)</p>
+          <p class="text-xs text-inkmuted mb-2">Linha de US$50mi via IFC/Banco Mundial para "veículos verdes"</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-user text-volt mr-1"></i> Rogerio Monori — Dir. Atacado e Tesouraria</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Santander Financiamentos</p>
+          <p class="text-xs text-inkmuted mb-2">Desconto de até 25% na taxa para elétricos ("financeira verde")</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-building text-volt mr-1"></i> Departamento de Financiamentos Verdes</p>
+        </div>
+        <div class="rounded-xl border border-panel2 bg-panel2/30 p-4">
+          <p class="font-medium text-ink text-sm mb-1">Itaú</p>
+          <p class="text-xs text-inkmuted mb-2">Taxa a partir de 8,73% a.a. para elétricos/híbridos</p>
+          <p class="text-xs text-ink/80"><i class="fa-solid fa-triangle-exclamation text-amber-400 mr-1"></i> Hoje parece restrito a concessionárias parceiras</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PRIORIDADE ===================== -->
+    <section id="prioridade" class="scroll-mt">
+      <h1 class="font-display font-semibold text-2xl sm:text-3xl mb-4">Por onde começar</h1>
+      <div class="rounded-2xl border border-panel2 bg-panel p-6 sm:p-8">
+        <ol class="space-y-4 text-sm text-inkmuted leading-relaxed list-decimal list-inside">
+          <li><span class="text-ink font-medium">Grupo IESA</span> — local (RS), facilita reunião presencial, e representa BYD + GWM + Volvo numa única conversa.</li>
+          <li><span class="text-ink font-medium">EZVolt e Tupi</span> — CPOs mais avançados em interoperabilidade hoje, mais prováveis de já ter programa de afiliados estruturado.</li>
+          <li><span class="text-ink font-medium">Localiza Meoo</span> — maior player de assinatura, processo de afiliados provavelmente mais maduro que concorrentes menores.</li>
+          <li><span class="text-ink font-medium">Tokio Marine / Minuto Seguros</span> — produto de seguro para EV já existe, é só achar o canal de distribuição certo.</li>
+          <li><span class="text-ink font-medium">Bancos (BB, BV, Santander, Itaú)</span> — deixar para depois: programas de crédito verde tendem a ser negociados via parcerias institucionais maiores, ciclo de fechamento mais longo.</li>
+        </ol>
+        <p class="text-xs text-inkmuted/70 mt-6 pt-6 border-t border-panel2">
+          <i class="fa-solid fa-circle-info mr-1"></i>
+          Nomes e cargos vieram de releases e entrevistas públicas (alguns com mais de 1 ano) — confirmar no LinkedIn antes do primeiro contato.
+        </p>
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>

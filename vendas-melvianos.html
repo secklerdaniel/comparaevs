@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vendas · Prospecção — Melvianos</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='90'>🎯</text></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          void: '#0B0D10', panel: '#14171C', panel2: '#1C2026', panel3: '#262B33',
+          ink: '#E8EAED', inkmuted: '#8B92A0', volt: '#C8FF4D', voltdim: '#9FD93A'
+        },
+        fontFamily: {
+          display: ['"Space Grotesk"', 'sans-serif'],
+          body: ['Inter', 'sans-serif'],
+          data: ['"JetBrains Mono"', 'monospace']
+        }
+      }
+    }
+  };
+</script>
+
+<style>
+  * { scrollbar-color: #262B33 #14171C; }
+  body { font-family: 'Inter', system-ui, sans-serif; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(6px);} to {opacity:1; transform:translateY(0);} }
+  .reveal { animation: fadeUp .3s cubic-bezier(.4,0,.2,1) both; }
+  *:focus-visible { outline: 2px solid #C8FF4D; outline-offset: 2px; border-radius: 4px; }
+  .force-hidden { display: none !important; }
+  .kanban-col { min-width: 280px; }
+  .kanban-col.drag-over { background: rgba(200,255,77,0.06); border-color: #C8FF4D66 !important; }
+  .lead-card { cursor: grab; }
+  .lead-card.dragging { opacity: .4; }
+  ::-webkit-scrollbar { height: 8px; width: 8px; }
+  ::-webkit-scrollbar-thumb { background: #262B33; border-radius: 4px; }
+  .toast { transition: opacity .25s ease, transform .25s ease; }
+</style>
+</head>
+
+<body class="bg-void text-ink min-h-screen">
+
+  <div class="max-w-[1600px] mx-auto px-5 sm:px-6 py-8">
+
+    <!-- ===================== HEADER ===================== -->
+    <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+      <div>
+        <p class="text-[11px] uppercase tracking-widest text-volt font-medium mb-1">COMPARA EVS · CRM interno</p>
+        <h1 class="font-display font-bold text-2xl sm:text-3xl tracking-tight">Prospecção de Vendas</h1>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="abrirLeadModal()" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-volt text-void text-sm font-medium hover:bg-voltdim transition-colors">
+          <i class="fa-solid fa-plus"></i> Novo lead
+        </button>
+      </div>
+    </header>
+
+    <!-- ===================== STATS ===================== -->
+    <section id="stats" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6"></section>
+
+    <!-- ===================== TOOLBAR ===================== -->
+    <section class="rounded-2xl border border-panel2 bg-panel p-4 sm:p-5 mb-6">
+      <div class="flex flex-col lg:flex-row lg:items-center gap-3">
+        <div class="relative flex-1 min-w-[200px]">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-inkmuted text-xs"></i>
+          <input id="filter-busca" type="text" placeholder="Buscar por nome, nicho, cidade..."
+            class="w-full bg-panel2 border border-panel3 rounded-lg pl-9 pr-3 py-2.5 text-sm placeholder:text-inkmuted/60 focus:border-volt/60 transition-colors">
+        </div>
+        <select id="filter-tipo" class="bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+          <option value="">Todos os tipos</option>
+        </select>
+        <select id="filter-prioridade" class="bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+          <option value="">Toda prioridade</option>
+          <option value="alta">Alta</option>
+          <option value="media">Média</option>
+          <option value="baixa">Baixa</option>
+        </select>
+        <select id="filter-status" class="bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+          <option value="">Todo status</option>
+        </select>
+        <div class="flex items-center gap-1 bg-panel2 border border-panel3 rounded-lg p-1 shrink-0">
+          <button id="btn-view-kanban" onclick="setView('kanban')" class="px-3 py-1.5 rounded-md text-xs font-medium transition-colors">
+            <i class="fa-solid fa-table-columns mr-1.5"></i>Kanban
+          </button>
+          <button id="btn-view-lista" onclick="setView('lista')" class="px-3 py-1.5 rounded-md text-xs font-medium transition-colors">
+            <i class="fa-solid fa-list mr-1.5"></i>Lista
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== SKELETON ===================== -->
+    <div id="skeleton" class="space-y-3">
+      <div class="h-16 bg-panel rounded-xl animate-pulse"></div>
+      <div class="h-16 bg-panel rounded-xl animate-pulse"></div>
+    </div>
+
+    <!-- ===================== EMPTY STATE ===================== -->
+    <div id="empty-state" class="hidden text-center py-16 text-inkmuted">
+      <i class="fa-solid fa-inbox text-3xl mb-3 opacity-50"></i>
+      <p class="text-sm">Nenhum lead encontrado com esses filtros.</p>
+    </div>
+
+    <!-- ===================== KANBAN VIEW ===================== -->
+    <div id="kanban-view" class="force-hidden overflow-x-auto pb-4">
+      <div id="kanban-cols" class="flex gap-4"></div>
+    </div>
+
+    <!-- ===================== LISTA VIEW ===================== -->
+    <div id="lista-view" class="force-hidden">
+      <!-- Tabela (desktop) -->
+      <div class="hidden md:block rounded-2xl border border-panel2 bg-panel overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm min-w-[900px]">
+            <thead>
+              <tr class="border-b border-panel2 text-left text-[11px] uppercase tracking-wide text-inkmuted">
+                <th class="p-3">Lead</th>
+                <th class="p-3">Tipo / Nicho</th>
+                <th class="p-3">Local</th>
+                <th class="p-3 text-center">Score</th>
+                <th class="p-3">Prioridade</th>
+                <th class="p-3">Status</th>
+                <th class="p-3">Próximo contato</th>
+                <th class="p-3 text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="lista-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Cards (mobile) -->
+      <div id="lista-cards" class="md:hidden space-y-3"></div>
+    </div>
+
+  </div>
+
+  <!-- ===================== MODAL DETALHE DO LEAD ===================== -->
+  <div id="detalhe-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/70" onclick="fecharDetalhe()"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+      <div class="bg-panel border border-panel2 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+        <div id="detalhe-content" class="p-5 sm:p-6"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL NOVO/EDITAR LEAD ===================== -->
+  <div id="lead-modal" class="fixed inset-0 z-[60] hidden">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="fecharLeadModal()"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+      <div class="bg-panel border border-panel2 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl max-h-[92vh] overflow-y-auto">
+        <div class="flex items-center justify-between p-5 border-b border-panel2 sticky top-0 bg-panel z-10">
+          <h2 id="lead-modal-title" class="font-display font-semibold text-lg">Novo lead</h2>
+          <button onclick="fecharLeadModal()" class="w-9 h-9 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel2 transition-colors">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <form id="lead-form" onsubmit="salvarLead(event)" class="p-5 space-y-5">
+          <input type="hidden" id="lead-id">
+
+          <div>
+            <p class="text-[11px] uppercase tracking-wide text-inkmuted mb-2">Identificação</p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="sm:col-span-2">
+                <label class="block text-xs text-inkmuted mb-1.5">Nome *</label>
+                <input id="lead-nome" type="text" required class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+              </div>
+              <div>
+                <label class="block text-xs text-inkmuted mb-1.5">Tipo</label>
+                <select id="lead-tipo" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+                  <option value="empresa">Empresa</option>
+                  <option value="influenciador">Influenciador</option>
+                  <option value="agencia">Agência</option>
+                  <option value="pessoa_fisica">Pessoa física</option>
+                  <option value="outro">Outro</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-inkmuted mb-1.5">Nicho</label>
+                <input id="lead-nicho" type="text" placeholder="ex: estética, automotivo" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+              </div>
+              <div>
+                <label class="block text-xs text-inkmuted mb-1.5">Website</label>
+                <input id="lead-website" type="text" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+              </div>
+              <div>
+                <label class="block text-xs text-inkmuted mb-1.5">Cidade</label>
+                <input id="lead-cidade" type="text" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+              </div>
+              <div>
+                <label class="block text-xs text-inkmuted mb-1.5">Estado (UF)</label>
+                <input id="lead-estado" type="text" maxlength="2" placeholder="RS" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm uppercase focus:border-volt/60 transition-colors">
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p class="text-[11px] uppercase tracking-wide text-inkmuted mb-2">Redes sociais</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-inkmuted mb-1.5"><i class="fa-brands fa-instagram mr-1"></i>Instagram (URL)</label>
+                <input id="lead-instagram_url" type="text" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+              </div>
+              <div>
+                <label class="block text-xs text-inkmuted mb-1.5">Seguidores Instagram</label>
+                <input id="lead-instagram_seguidores" type="number" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm font-data focus:border-volt/60 transition-colors">
+              </div>
+              <div>
+                <label class="block text-xs text-inkmuted mb-1.5"><i class="fa-brands fa-youtube mr-1"></i>YouTube (URL)</label>
+                <input id="lead-youtube_url" type="text" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+              </div>
+              <div>
+                <label class="block text-xs text-inkmuted mb-1.5">Inscritos YouTube</label>
+                <input id="lead-youtube_inscritos" type="number" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm font-data focus:border-volt/60 transition-colors">
+              </div>
+              <div>
+                <label class="block text-xs text-inkmuted mb-1.5"><i class="fa-brands fa-tiktok mr-1"></i>TikTok (URL)</label>
+                <input id="lead-tiktok_url" type="text" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+              </div>
+              <div>
+                <label class="block text-xs text-inkmuted mb-1.5">Seguidores TikTok</label>
+                <input id="lead-tiktok_seguidores" type="number" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm font-data focus:border-volt/60 transition-colors">
+              </div>
+              <div>
+                <label class="block text-xs text-inkmuted mb-1.5"><i class="fa-brands fa-linkedin mr-1"></i>LinkedIn (URL)</label>
+                <input id="lead-linkedin_url" type="text" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+              </div>
+              <div>
+                <label class="block text-xs text-inkmuted mb-1.5"><i class="fa-brands fa-facebook mr-1"></i>Facebook (URL)</label>
+                <input id="lead-facebook_url" type="text" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p class="text-[11px] uppercase tracking-wide text-inkmuted mb-2">Contato</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs text-inkmuted mb-1.5">Nome do contato</label>
+                <input id="lead-contato_nome" type="text" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+              </div>
+              <div>
+                <label class="block text-xs text-inkmuted mb-1.5">Cargo</label>
+                <input id="lead-contato_cargo" type="text" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+              </div>
+              <div>
+                <label class="block text-xs text-inkmuted mb-1.5">WhatsApp</label>
+                <input id="lead-whatsapp" type="text" placeholder="5554999999999" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm font-data focus:border-volt/60 transition-colors">
+              </div>
+              <div>
+                <label class="block text-xs text-inkmuted mb-1.5">Telefone</label>
+                <input id="lead-telefone" type="text" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm font-data focus:border-volt/60 transition-colors">
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block text-xs text-inkmuted mb-1.5">E-mail</label>
+                <input id="lead-email" type="email" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <p class="text-[11px] uppercase tracking-wide text-inkmuted mb-2">Qualificação / Pipeline</p>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div>
+                <label class="block text-xs text-inkmuted mb-1.5">Status</label>
+                <select id="lead-status" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors"></select>
+              </div>
+              <div>
+                <label class="block text-xs text-inkmuted mb-1.5">Prioridade</label>
+                <select id="lead-prioridade" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+                  <option value="alta">Alta</option>
+                  <option value="media" selected>Média</option>
+                  <option value="baixa">Baixa</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs text-inkmuted mb-1.5">Score (0-100)</label>
+                <input id="lead-score" type="number" min="0" max="100" value="50" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm font-data focus:border-volt/60 transition-colors">
+              </div>
+              <div>
+                <label class="block text-xs text-inkmuted mb-1.5">Orçamento estimado</label>
+                <input id="lead-orcamento_estimado" type="number" step="0.01" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm font-data focus:border-volt/60 transition-colors">
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block text-xs text-inkmuted mb-1.5">Interesse</label>
+                <input id="lead-interesse" type="text" placeholder="ex: parceria de mídia, publi" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+              </div>
+              <div class="sm:col-span-2">
+                <label class="block text-xs text-inkmuted mb-1.5">Origem</label>
+                <input id="lead-origem" type="text" placeholder="ex: indicação, prospecção ativa" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+              </div>
+              <div>
+                <label class="block text-xs text-inkmuted mb-1.5">Próximo contato</label>
+                <input id="lead-proximo_contato_em" type="date" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm font-data focus:border-volt/60 transition-colors">
+              </div>
+              <div class="flex items-end gap-4 pb-1">
+                <label class="inline-flex items-center gap-2 text-xs cursor-pointer">
+                  <input type="checkbox" id="lead-aceita_publicidade" class="w-4 h-4 accent-[#C8FF4D]">
+                  Aceita publicidade
+                </label>
+                <label class="inline-flex items-center gap-2 text-xs cursor-pointer">
+                  <input type="checkbox" id="lead-interesse_em_ev" class="w-4 h-4 accent-[#C8FF4D]">
+                  Interesse em EV
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">Observações</label>
+            <textarea id="lead-observacoes" rows="3" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors resize-none"></textarea>
+          </div>
+
+          <div class="flex gap-3 pt-2">
+            <button type="submit" id="lead-submit-btn" class="flex-1 px-4 py-3 rounded-lg bg-volt text-void text-sm font-medium hover:bg-voltdim transition-colors disabled:opacity-60">
+              Salvar lead
+            </button>
+            <button type="button" onclick="fecharLeadModal()" class="px-4 py-3 rounded-lg border border-panel3 text-inkmuted hover:text-ink text-sm transition-colors">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL NOVA INTERAÇÃO ===================== -->
+  <div id="interacao-modal" class="fixed inset-0 z-[70] hidden">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="fecharInteracaoModal()"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+      <div class="bg-panel border border-panel2 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md overflow-hidden">
+        <div class="flex items-center justify-between p-5 border-b border-panel2">
+          <h2 class="font-display font-semibold text-base">Registrar interação</h2>
+          <button onclick="fecharInteracaoModal()" class="w-8 h-8 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel2 transition-colors">
+            <i class="fa-solid fa-xmark text-sm"></i>
+          </button>
+        </div>
+        <form id="interacao-form" onsubmit="salvarInteracao(event)" class="p-5 space-y-4">
+          <input type="hidden" id="interacao-lead-id">
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">Tipo</label>
+            <select id="interacao-tipo" required class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+              <option value="ligacao">Ligação</option>
+              <option value="whatsapp">WhatsApp</option>
+              <option value="email">E-mail</option>
+              <option value="reuniao">Reunião</option>
+              <option value="visita">Visita</option>
+              <option value="outro">Outro</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">Título</label>
+            <input id="interacao-titulo" type="text" placeholder="ex: Primeiro contato" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">Descrição</label>
+            <textarea id="interacao-descricao" rows="3" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors resize-none"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">Resultado</label>
+            <select id="interacao-resultado" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+              <option value="">—</option>
+              <option value="positivo">Positivo</option>
+              <option value="neutro">Neutro</option>
+              <option value="negativo">Negativo</option>
+              <option value="sem_resposta">Sem resposta</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">Próxima ação em</label>
+            <input id="interacao-proxima_acao_em" type="date" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm font-data focus:border-volt/60 transition-colors">
+          </div>
+          <button type="submit" id="interacao-submit-btn" class="w-full px-4 py-3 rounded-lg bg-volt text-void text-sm font-medium hover:bg-voltdim transition-colors disabled:opacity-60">
+            Registrar
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TOAST ===================== -->
+  <div id="toast" class="toast fixed left-1/2 -translate-x-1/2 bottom-6 z-[80] opacity-0 pointer-events-none">
+    <div class="bg-panel3 border border-panel3 text-ink text-sm px-4 py-2.5 rounded-lg shadow-xl"></div>
+  </div>
+
+  <script>
+    // ================== API ==================
+    // Migrado do Supabase para o Neon em 30/09/2026: o projeto Supabase foi
+    // suspenso por cota e passou a responder 402, o que deixava esta tela vazia.
+    const API = '/api/leads-prospeccao';
+
+    async function apiGet(qs = '') {
+      try {
+        const res = await fetch(API + qs);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return { data: await res.json(), error: null };
+      } catch (e) { return { data: null, error: e }; }
+    }
+
+    async function apiEnviar(metodo, corpo, qs = '') {
+      try {
+        const res = await fetch(API + qs, {
+          method: metodo,
+          headers: { 'Content-Type': 'application/json' },
+          body: corpo ? JSON.stringify(corpo) : undefined
+        });
+        if (!res.ok) {
+          const p = await res.json().catch(() => ({}));
+          throw new Error(p.error || ('HTTP ' + res.status));
+        }
+        return { data: await res.json().catch(() => null), error: null };
+      } catch (e) { return { data: null, error: e }; }
+    }
+
+    let todosLeads = [];
+    let filtrados = [];
+    let interacoesCache = {}; // lead_id -> array
+    let viewAtual = 'kanban';
+    let leadArrastando = null;
+
+    const STATUS_COLUNAS = [
+      { valor: 'novo',        label: 'Novo',        cor: '#8B92A0' },
+      { valor: 'contatado',   label: 'Contatado',   cor: '#5EC8F2' },
+      { valor: 'qualificado', label: 'Qualificado', cor: '#F2C85E' },
+      { valor: 'negociando',  label: 'Negociando',  cor: '#C792EA' },
+      { valor: 'convertido',  label: 'Convertido',  cor: '#C8FF4D' },
+      { valor: 'perdido',     label: 'Perdido',     cor: '#F26D6D' }
+    ];
+
+    const PRIORIDADE_COR = { alta: '#F26D6D', media: '#F2C85E', baixa: '#8B92A0' };
+    const TIPO_LABEL = { empresa: 'Empresa', influenciador: 'Influenciador', agencia: 'Agência', pessoa_fisica: 'Pessoa física', outro: 'Outro' };
+
+    // ================== INIT ==================
+    async function init() {
+      montarSelects();
+      await carregarLeads();
+      setView('kanban');
+    }
+
+    function montarSelects() {
+      const statusSelects = ['lead-status', 'filter-status'];
+      statusSelects.forEach(idSel => {
+        const el = document.getElementById(idSel);
+        const base = idSel === 'filter-status' ? '<option value="">Todo status</option>' : '';
+        el.innerHTML = base + STATUS_COLUNAS.map(s => `<option value="${s.valor}">${s.label}</option>`).join('');
+      });
+
+      const filterTipo = document.getElementById('filter-tipo');
+      filterTipo.innerHTML = '<option value="">Todos os tipos</option>' +
+        Object.entries(TIPO_LABEL).map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
+    }
+
+    // ================== CARREGAR DADOS ==================
+    async function carregarLeads() {
+      const { data, error } = await apiGet();
+
+      document.getElementById('skeleton').classList.add('hidden');
+
+      if (error) {
+        console.error(error);
+        mostrarToast('Erro ao carregar leads. Veja o console.');
+        return;
+      }
+
+      todosLeads = data || [];
+      atualizarStats();
+      aplicarFiltros();
+    }
+
+    function atualizarStats() {
+      const total = todosLeads.length;
+      const porStatus = {};
+      STATUS_COLUNAS.forEach(s => porStatus[s.valor] = 0);
+      todosLeads.forEach(l => { if (porStatus[l.status] !== undefined) porStatus[l.status]++; });
+
+      const cards = [
+        { label: 'Total de leads', valor: total, cor: '#E8EAED' },
+        ...STATUS_COLUNAS.filter(s => s.valor !== 'perdido').map(s => ({ label: s.label, valor: porStatus[s.valor], cor: s.cor }))
+      ];
+
+      document.getElementById('stats').innerHTML = cards.map(c => `
+        <div class="rounded-xl border border-panel2 bg-panel p-3.5">
+          <p class="text-[10px] uppercase tracking-wide text-inkmuted mb-1">${c.label}</p>
+          <p class="font-data font-bold text-2xl" style="color:${c.cor}">${c.valor}</p>
+        </div>
+      `).join('');
+    }
+
+    // ================== FILTROS ==================
+    function aplicarFiltros() {
+      const busca = document.getElementById('filter-busca').value.trim().toLowerCase();
+      const tipo = document.getElementById('filter-tipo').value;
+      const prioridade = document.getElementById('filter-prioridade').value;
+      const status = document.getElementById('filter-status').value;
+
+      filtrados = todosLeads.filter(l => {
+        if (busca && !`${l.nome} ${l.nicho||''} ${l.cidade||''}`.toLowerCase().includes(busca)) return false;
+        if (tipo && l.tipo !== tipo) return false;
+        if (prioridade && l.prioridade !== prioridade) return false;
+        if (status && l.status !== status) return false;
+        return true;
+      });
+
+      render();
+    }
+    ['filter-busca','filter-tipo','filter-prioridade','filter-status'].forEach(id => {
+      document.getElementById(id).addEventListener('input', aplicarFiltros);
+      document.getElementById(id).addEventListener('change', aplicarFiltros);
+    });
+
+    // ================== VIEW TOGGLE ==================
+    function setView(v) {
+      viewAtual = v;
+      document.getElementById('kanban-view').classList.toggle('force-hidden', v !== 'kanban');
+      document.getElementById('lista-view').classList.toggle('force-hidden', v !== 'lista');
+
+      const btnK = document.getElementById('btn-view-kanban');
+      const btnL = document.getElementById('btn-view-lista');
+      btnK.className = 'px-3 py-1.5 rounded-md text-xs font-medium transition-colors ' + (v === 'kanban' ? 'bg-volt text-void' : 'text-inkmuted hover:text-ink');
+      btnL.className = 'px-3 py-1.5 rounded-md text-xs font-medium transition-colors ' + (v === 'lista' ? 'bg-volt text-void' : 'text-inkmuted hover:text-ink');
+
+      render();
+    }
+
+    // ================== RENDER ==================
+    function render() {
+      const empty = document.getElementById('empty-state');
+      if (!filtrados.length) {
+        empty.classList.remove('hidden');
+        document.getElementById('kanban-view').classList.add('force-hidden');
+        document.getElementById('lista-view').classList.add('force-hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+      if (viewAtual === 'kanban') { renderKanban(); document.getElementById('kanban-view').classList.remove('force-hidden'); }
+      else { renderLista(); document.getElementById('lista-view').classList.remove('force-hidden'); }
+    }
+
+    function fmtMoeda(v) {
+      if (v == null) return '—';
+      return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+    }
+    function fmtData(v) {
+      if (!v) return '—';
+      const d = new Date(v);
+      return d.toLocaleDateString('pt-BR');
+    }
+
+    function redesIcons(l) {
+      const redes = [
+        { url: l.instagram_url, icon: 'fa-instagram' },
+        { url: l.youtube_url, icon: 'fa-youtube' },
+        { url: l.tiktok_url, icon: 'fa-tiktok' },
+        { url: l.linkedin_url, icon: 'fa-linkedin' },
+        { url: l.facebook_url, icon: 'fa-facebook' },
+        { url: l.x_url, icon: 'fa-x-twitter' }
+      ].filter(r => r.url);
+      if (!redes.length) return '';
+      return `<div class="flex gap-1.5 mt-1.5">` + redes.map(r =>
+        `<a href="${r.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="text-inkmuted hover:text-volt transition-colors text-xs"><i class="fa-brands ${r.icon}"></i></a>`
+      ).join('') + `</div>`;
+    }
+
+    function scoreBadge(score) {
+      const s = score ?? 0;
+      let cor = '#8B92A0';
+      if (s >= 70) cor = '#C8FF4D'; else if (s >= 40) cor = '#F2C85E'; else cor = '#F26D6D';
+      return `<span class="font-data font-bold text-sm" style="color:${cor}">${s}</span>`;
+    }
+
+    function prioridadeBadge(p) {
+      const cor = PRIORIDADE_COR[p] || '#8B92A0';
+      const label = p ? p.charAt(0).toUpperCase() + p.slice(1) : '—';
+      return `<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium" style="background:${cor}22;color:${cor}">
+        <span class="w-1.5 h-1.5 rounded-full" style="background:${cor}"></span>${label}
+      </span>`;
+    }
+
+    // ------------------ KANBAN ------------------
+    function renderKanban() {
+      const cols = document.getElementById('kanban-cols');
+      cols.innerHTML = STATUS_COLUNAS.map(col => {
+        const leadsCol = filtrados.filter(l => l.status === col.valor);
+        return `
+          <div class="kanban-col shrink-0 w-72 rounded-xl border border-panel2 bg-panel/60 flex flex-col"
+            ondragover="event.preventDefault(); this.classList.add('drag-over')"
+            ondragleave="this.classList.remove('drag-over')"
+            ondrop="onDropCard(event, '${col.valor}')">
+            <div class="flex items-center justify-between px-3 py-2.5 border-b border-panel2">
+              <span class="flex items-center gap-2 text-xs font-medium">
+                <span class="w-2 h-2 rounded-full" style="background:${col.cor}"></span>${col.label}
+              </span>
+              <span class="font-data text-[11px] text-inkmuted">${leadsCol.length}</span>
+            </div>
+            <div class="p-2 space-y-2 overflow-y-auto max-h-[65vh]">
+              ${leadsCol.map(l => kanbanCard(l)).join('') || '<p class="text-[11px] text-inkmuted/60 text-center py-4">Vazio</p>'}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function kanbanCard(l) {
+      return `
+        <div class="lead-card reveal rounded-lg border border-panel3 bg-panel2 p-3 hover:border-volt/40 transition-colors"
+          draggable="true"
+          ondragstart="onDragStart(event, '${l.id}')"
+          ondragend="this.classList.remove('dragging')"
+          onclick="abrirDetalhe('${l.id}')">
+          <div class="flex items-start justify-between gap-2">
+            <p class="font-medium text-sm leading-tight">${l.nome}</p>
+            ${scoreBadge(l.score)}
+          </div>
+          <p class="text-[11px] text-inkmuted mt-0.5">${TIPO_LABEL[l.tipo] || l.tipo || ''} ${l.nicho ? '· ' + l.nicho : ''}</p>
+          <div class="flex items-center justify-between mt-2">
+            ${prioridadeBadge(l.prioridade)}
+            <span class="text-[10px] text-inkmuted font-data">${fmtData(l.proximo_contato_em)}</span>
+          </div>
+          ${redesIcons(l)}
+        </div>
+      `;
+    }
+
+    function onDragStart(ev, id) {
+      leadArrastando = id;
+      ev.target.classList.add('dragging');
+      ev.dataTransfer.effectAllowed = 'move';
+    }
+
+    async function onDropCard(ev, novoStatus) {
+      ev.preventDefault();
+      ev.currentTarget.classList.remove('drag-over');
+      if (!leadArrastando) return;
+      const lead = todosLeads.find(l => l.id === leadArrastando);
+      if (!lead || lead.status === novoStatus) { leadArrastando = null; return; }
+
+      const statusAnterior = lead.status;
+      lead.status = novoStatus;
+      render();
+      atualizarStats();
+
+      const { error } = await apiEnviar('PUT', { id: leadArrastando, status: novoStatus });
+      if (error) {
+        console.error(error);
+        lead.status = statusAnterior;
+        render();
+        atualizarStats();
+        mostrarToast('Erro ao mover lead. Tenta de novo.');
+      } else {
+        mostrarToast(`Lead movido para "${STATUS_COLUNAS.find(s=>s.valor===novoStatus)?.label}"`);
+      }
+      leadArrastando = null;
+    }
+
+    // ------------------ LISTA ------------------
+    function renderLista() {
+      document.getElementById('lista-tbody').innerHTML = filtrados.map(l => {
+        const statusInfo = STATUS_COLUNAS.find(s => s.valor === l.status) || {};
+        return `
+        <tr class="border-b border-panel2/60 last:border-0 hover:bg-panel2/30 transition-colors cursor-pointer" onclick="abrirDetalhe('${l.id}')">
+          <td class="p-3">
+            <p class="font-medium">${l.nome}</p>
+            ${redesIcons(l)}
+          </td>
+          <td class="p-3 text-inkmuted">${TIPO_LABEL[l.tipo] || l.tipo || '—'}${l.nicho ? ' · ' + l.nicho : ''}</td>
+          <td class="p-3 text-inkmuted">${[l.cidade, l.estado].filter(Boolean).join('/') || '—'}</td>
+          <td class="p-3 text-center">${scoreBadge(l.score)}</td>
+          <td class="p-3">${prioridadeBadge(l.prioridade)}</td>
+          <td class="p-3">
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium" style="background:${statusInfo.cor}22;color:${statusInfo.cor}">
+              <span class="w-1.5 h-1.5 rounded-full" style="background:${statusInfo.cor}"></span>${statusInfo.label || l.status}
+            </span>
+          </td>
+          <td class="p-3 font-data text-inkmuted">${fmtData(l.proximo_contato_em)}</td>
+          <td class="p-3 text-center">
+            <div class="flex items-center justify-center gap-2">
+              ${l.whatsapp ? `<a href="https://wa.me/${l.whatsapp.replace(/\\D/g,'')}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="w-7 h-7 rounded-md flex items-center justify-center text-inkmuted hover:text-volt hover:bg-panel3 transition-colors" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
+              <button onclick="event.stopPropagation(); abrirLeadModal('${l.id}')" class="w-7 h-7 rounded-md flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel3 transition-colors" title="Editar"><i class="fa-solid fa-pen text-xs"></i></button>
+            </div>
+          </td>
+        </tr>
+      `;
+      }).join('');
+
+      document.getElementById('lista-cards').innerHTML = filtrados.map(l => {
+        const statusInfo = STATUS_COLUNAS.find(s => s.valor === l.status) || {};
+        return `
+        <div class="rounded-xl border border-panel2 bg-panel p-4 reveal" onclick="abrirDetalhe('${l.id}')">
+          <div class="flex items-start justify-between gap-3 mb-2">
+            <div class="min-w-0">
+              <p class="font-medium leading-tight">${l.nome}</p>
+              <p class="text-[11px] text-inkmuted mt-0.5 truncate">${TIPO_LABEL[l.tipo] || l.tipo || '—'}${l.nicho ? ' · ' + l.nicho : ''}</p>
+            </div>
+            ${scoreBadge(l.score)}
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 mb-2">
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium" style="background:${statusInfo.cor}22;color:${statusInfo.cor}">
+              <span class="w-1.5 h-1.5 rounded-full" style="background:${statusInfo.cor}"></span>${statusInfo.label || l.status}
+            </span>
+            ${prioridadeBadge(l.prioridade)}
+          </div>
+
+          ${redesIcons(l)}
+
+          <div class="flex items-center justify-between mt-3 pt-3 border-t border-panel2/60">
+            <span class="text-[11px] text-inkmuted">Próximo contato: <span class="font-data text-ink">${fmtData(l.proximo_contato_em)}</span></span>
+            <div class="flex items-center gap-2">
+              ${l.whatsapp ? `<a href="https://wa.me/${l.whatsapp.replace(/\\D/g,'')}" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="w-8 h-8 rounded-lg flex items-center justify-center text-inkmuted hover:text-volt hover:bg-panel3 transition-colors" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>` : ''}
+              <button onclick="event.stopPropagation(); abrirLeadModal('${l.id}')" class="w-8 h-8 rounded-lg flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel3 transition-colors" title="Editar"><i class="fa-solid fa-pen text-xs"></i></button>
+            </div>
+          </div>
+        </div>
+      `;
+      }).join('');
+    }
+
+    // ================== DETALHE DO LEAD ==================
+    async function abrirDetalhe(id) {
+      const l = todosLeads.find(x => x.id === id);
+      if (!l) return;
+
+      document.getElementById('detalhe-content').innerHTML = `<div class="text-center py-10 text-inkmuted text-sm">Carregando...</div>`;
+      document.getElementById('detalhe-modal').classList.remove('hidden');
+
+      if (!interacoesCache[id]) {
+        const { data, error } = await apiGet('?recurso=interacoes&lead_id=' + encodeURIComponent(id));
+        interacoesCache[id] = error ? [] : (data || []);
+      }
+
+      renderDetalhe(l);
+    }
+
+    function renderDetalhe(l) {
+      const statusInfo = STATUS_COLUNAS.find(s => s.valor === l.status) || {};
+      const interacoes = interacoesCache[l.id] || [];
+
+      const TIPO_INTERACAO_ICON = { ligacao: 'fa-phone', whatsapp: 'fa-brands fa-whatsapp', email: 'fa-envelope', reuniao: 'fa-users', visita: 'fa-location-dot', outro: 'fa-circle-dot' };
+
+      document.getElementById('detalhe-content').innerHTML = `
+        <div class="flex items-start justify-between gap-3 mb-4">
+          <div>
+            <h2 class="font-display font-bold text-xl">${l.nome}</h2>
+            <p class="text-xs text-inkmuted mt-0.5">${TIPO_LABEL[l.tipo] || l.tipo || ''} ${l.nicho ? '· ' + l.nicho : ''} ${l.cidade ? '· ' + [l.cidade, l.estado].filter(Boolean).join('/') : ''}</p>
+            ${redesIcons(l)}
+          </div>
+          <button onclick="fecharDetalhe()" class="w-9 h-9 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel2 transition-colors shrink-0">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="flex flex-wrap gap-2 mb-5">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium" style="background:${statusInfo.cor}22;color:${statusInfo.cor}">
+            <span class="w-1.5 h-1.5 rounded-full" style="background:${statusInfo.cor}"></span>${statusInfo.label || l.status}
+          </span>
+          ${prioridadeBadge(l.prioridade)}
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-panel2 text-inkmuted">Score: ${scoreBadge(l.score)}</span>
+          ${l.interesse_em_ev ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[#1a2b0e] text-volt border border-volt/30"><i class="fa-solid fa-bolt text-[10px]"></i> Interesse em EV</span>` : ''}
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5 text-sm">
+          <div><p class="text-[11px] text-inkmuted">Contato</p><p>${l.contato_nome || '—'}${l.contato_cargo ? ' · ' + l.contato_cargo : ''}</p></div>
+          <div><p class="text-[11px] text-inkmuted">E-mail</p><p class="truncate">${l.email || '—'}</p></div>
+          <div><p class="text-[11px] text-inkmuted">Telefone / WhatsApp</p><p class="font-data">${l.whatsapp || l.telefone || '—'}</p></div>
+          <div><p class="text-[11px] text-inkmuted">Orçamento estimado</p><p class="font-data">${fmtMoeda(l.orcamento_estimado)}</p></div>
+          <div><p class="text-[11px] text-inkmuted">Origem</p><p>${l.origem || '—'}</p></div>
+          <div><p class="text-[11px] text-inkmuted">Próximo contato</p><p class="font-data">${fmtData(l.proximo_contato_em)}</p></div>
+          ${l.website ? `<div class="sm:col-span-3"><p class="text-[11px] text-inkmuted">Website</p><a href="${l.website}" target="_blank" rel="noopener" class="text-volt hover:underline truncate block">${l.website}</a></div>` : ''}
+          ${l.observacoes ? `<div class="sm:col-span-3"><p class="text-[11px] text-inkmuted">Observações</p><p class="text-inkmuted">${l.observacoes}</p></div>` : ''}
+        </div>
+
+        <div class="flex flex-wrap gap-2 mb-6">
+          <button onclick="abrirLeadModal('${l.id}')" class="px-3 py-2 rounded-lg border border-panel3 text-inkmuted hover:text-ink text-xs font-medium transition-colors"><i class="fa-solid fa-pen mr-1.5"></i>Editar lead</button>
+          <button onclick="abrirInteracaoModal('${l.id}')" class="px-3 py-2 rounded-lg bg-volt text-void text-xs font-medium hover:bg-voltdim transition-colors"><i class="fa-solid fa-comment-dots mr-1.5"></i>Registrar interação</button>
+          ${l.whatsapp ? `<a href="https://wa.me/${l.whatsapp.replace(/\\D/g,'')}" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-panel3 text-inkmuted hover:text-ink text-xs font-medium transition-colors"><i class="fa-brands fa-whatsapp mr-1.5"></i>Abrir WhatsApp</a>` : ''}
+          <button onclick="excluirLead('${l.id}')" class="px-3 py-2 rounded-lg border border-panel3 text-[#F26D6D] hover:bg-[#2b1414] text-xs font-medium transition-colors ml-auto"><i class="fa-solid fa-trash-can mr-1.5"></i>Excluir</button>
+        </div>
+
+        <div>
+          <p class="text-[11px] uppercase tracking-wide text-inkmuted mb-3">Histórico de interações (${interacoes.length})</p>
+          <div class="space-y-3">
+            ${interacoes.length ? interacoes.map(i => `
+              <div class="rounded-lg border border-panel3 bg-panel2 p-3">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="flex items-center gap-2 text-sm font-medium">
+                    <i class="fa-solid ${TIPO_INTERACAO_ICON[i.tipo] || 'fa-circle-dot'} text-volt text-xs"></i>
+                    ${i.titulo || (i.tipo.charAt(0).toUpperCase() + i.tipo.slice(1))}
+                  </span>
+                  <span class="text-[11px] text-inkmuted font-data">${new Date(i.data_interacao).toLocaleDateString('pt-BR')}</span>
+                </div>
+                ${i.descricao ? `<p class="text-xs text-inkmuted">${i.descricao}</p>` : ''}
+                ${i.resultado ? `<p class="text-[11px] mt-1"><span class="text-inkmuted">Resultado:</span> ${i.resultado}</p>` : ''}
+              </div>
+            `).join('') : '<p class="text-xs text-inkmuted/60 text-center py-4">Nenhuma interação registrada ainda.</p>'}
+          </div>
+        </div>
+      `;
+    }
+
+    function fecharDetalhe() {
+      document.getElementById('detalhe-modal').classList.add('hidden');
+    }
+
+    async function excluirLead(id) {
+      if (!confirm('Tem certeza que quer excluir esse lead? Essa ação não pode ser desfeita.')) return;
+      const { error } = await apiEnviar('DELETE', null, '?id=' + encodeURIComponent(id));
+      if (error) { console.error(error); mostrarToast('Erro ao excluir.'); return; }
+      todosLeads = todosLeads.filter(l => l.id !== id);
+      delete interacoesCache[id];
+      fecharDetalhe();
+      aplicarFiltros();
+      atualizarStats();
+      mostrarToast('Lead excluído.');
+    }
+
+    // ================== MODAL LEAD (criar/editar) ==================
+    const LEAD_FIELDS = ['nome','tipo','website','instagram_url','instagram_seguidores','youtube_url','youtube_inscritos',
+      'tiktok_url','tiktok_seguidores','linkedin_url','facebook_url','contato_nome','contato_cargo','email','telefone',
+      'whatsapp','cidade','estado','nicho','interesse','orcamento_estimado','score','prioridade','status','origem',
+      'proximo_contato_em','aceita_publicidade','interesse_em_ev','observacoes'];
+
+    function abrirLeadModal(id) {
+      document.getElementById('lead-form').reset();
+      document.getElementById('lead-id').value = id || '';
+      document.getElementById('lead-modal-title').textContent = id ? 'Editar lead' : 'Novo lead';
+      document.getElementById('lead-score').value = 50;
+      document.getElementById('lead-prioridade').value = 'media';
+      document.getElementById('lead-status').value = 'novo';
+
+      if (id) {
+        const l = todosLeads.find(x => x.id === id);
+        if (l) {
+          LEAD_FIELDS.forEach(f => {
+            const el = document.getElementById('lead-' + f);
+            if (!el) return;
+            if (el.type === 'checkbox') el.checked = !!l[f];
+            else if (f === 'proximo_contato_em' && l[f]) el.value = new Date(l[f]).toISOString().split('T')[0];
+            else el.value = l[f] ?? '';
+          });
+        }
+      }
+      document.getElementById('lead-modal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function fecharLeadModal() {
+      document.getElementById('lead-modal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    async function salvarLead(event) {
+      event.preventDefault();
+      const btn = document.getElementById('lead-submit-btn');
+      const id = document.getElementById('lead-id').value;
+
+      const payload = {};
+      LEAD_FIELDS.forEach(f => {
+        const el = document.getElementById('lead-' + f);
+        if (!el) return;
+        if (el.type === 'checkbox') payload[f] = el.checked;
+        else if (['instagram_seguidores','youtube_inscritos','tiktok_seguidores','score'].includes(f)) payload[f] = el.value ? Number(el.value) : null;
+        else if (f === 'orcamento_estimado') payload[f] = el.value ? Number(el.value) : null;
+        else if (f === 'proximo_contato_em') payload[f] = el.value || null;
+        else payload[f] = el.value || null;
+      });
+
+      if (!payload.nome) { mostrarToast('Nome é obrigatório.'); return; }
+
+      btn.disabled = true;
+      btn.textContent = 'Salvando...';
+
+      let error;
+      if (id) {
+        ({ error } = await apiEnviar('PUT', { ...payload, id }));
+      } else {
+        ({ error } = await apiEnviar('POST', payload));
+      }
+
+      btn.disabled = false;
+      btn.textContent = 'Salvar lead';
+
+      if (error) { console.error(error); mostrarToast('Erro ao salvar lead.'); return; }
+
+      fecharLeadModal();
+      mostrarToast(id ? 'Lead atualizado!' : 'Lead cadastrado!');
+      await carregarLeads();
+      if (id) abrirDetalhe(id);
+    }
+
+    // ================== MODAL INTERAÇÃO ==================
+    function abrirInteracaoModal(leadId) {
+      document.getElementById('interacao-form').reset();
+      document.getElementById('interacao-lead-id').value = leadId;
+      document.getElementById('interacao-modal').classList.remove('hidden');
+    }
+
+    function fecharInteracaoModal() {
+      document.getElementById('interacao-modal').classList.add('hidden');
+    }
+
+    async function salvarInteracao(event) {
+      event.preventDefault();
+      const btn = document.getElementById('interacao-submit-btn');
+      const leadId = document.getElementById('interacao-lead-id').value;
+
+      const payload = {
+        lead_id: leadId,
+        tipo: document.getElementById('interacao-tipo').value,
+        titulo: document.getElementById('interacao-titulo').value || null,
+        descricao: document.getElementById('interacao-descricao').value || null,
+        resultado: document.getElementById('interacao-resultado').value || null,
+        proxima_acao_em: document.getElementById('interacao-proxima_acao_em').value || null
+      };
+
+      btn.disabled = true;
+      btn.textContent = 'Registrando...';
+
+      const { error } = await apiEnviar('POST', payload, '?recurso=interacoes');
+
+      if (error) {
+        console.error(error);
+        btn.disabled = false;
+        btn.textContent = 'Registrar';
+        mostrarToast('Erro ao registrar interação.');
+        return;
+      }
+
+      // Atualiza dados de acompanhamento do lead
+      const lead = todosLeads.find(l => l.id === leadId);
+      const updatePayload = {
+        ultima_atividade: new Date().toISOString(),
+        ultimo_contato_em: new Date().toISOString(),
+        tentativas_contato: (lead?.tentativas_contato || 0) + 1
+      };
+      if (payload.proxima_acao_em) updatePayload.proximo_contato_em = payload.proxima_acao_em;
+      if (lead && !lead.primeiro_contato_em) updatePayload.primeiro_contato_em = new Date().toISOString();
+
+      await apiEnviar('PUT', { ...updatePayload, id: leadId });
+
+      delete interacoesCache[leadId];
+      btn.disabled = false;
+      btn.textContent = 'Registrar';
+      fecharInteracaoModal();
+      mostrarToast('Interação registrada!');
+      await carregarLeads();
+      abrirDetalhe(leadId);
+    }
+
+    // ================== TOAST ==================
+    function mostrarToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.querySelector('div').textContent = msg;
+      toast.classList.remove('opacity-0');
+      toast.classList.add('opacity-100');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0');
+      }, 2600);
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>

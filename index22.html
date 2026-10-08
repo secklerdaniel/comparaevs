@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ComparaEVs</title>
+<meta name="description" content="Compare dados oficiais de autonomia, consumo e classificação energética (INMETRO PBEV) dos veículos elétricos vendidos no Brasil.">
+<meta property="og:title" content="Comparador PBE Veicular — Elétricos 2026">
+<meta property="og:description" content="Dados oficiais de eficiência energética veicular, comparados lado a lado.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='90'>⚡</text></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          void: '#0B0D10',
+          panel: '#14171C',
+          panel2: '#1C2026',
+          panel3: '#262B33',
+          ink: '#E8EAED',
+          inkmuted: '#8B92A0',
+          volt: '#C8FF4D',
+          voltdim: '#9FD93A'
+        },
+        fontFamily: {
+          display: ['"Space Grotesk"', 'sans-serif'],
+          body: ['Inter', 'sans-serif'],
+          data: ['"JetBrains Mono"', 'monospace']
+        }
+      }
+    }
+  };
+</script>
+
+<style>
+  * { scrollbar-color: #262B33 #14171C; }
+  body { font-family: 'Inter', system-ui, sans-serif; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .reveal { animation: fadeUp .4s cubic-bezier(.4,0,.2,1) both; }
+
+  @keyframes pulseBg {
+    0%, 100% { opacity: .5; }
+    50% { opacity: .9; }
+  }
+  .skeleton { animation: pulseBg 1.4s ease-in-out infinite; }
+
+  *:focus-visible {
+    outline: 2px solid #C8FF4D;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button { opacity: .6; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+  }
+
+  .toast {
+    transition: opacity .25s ease, transform .25s ease;
+  }
+
+  /* Controla exibição por resultado (vazio/preenchido) sem interferir
+     na visibilidade responsiva (hidden / md:block / md:hidden) */
+  .force-hidden { display: none !important; }
+</style>
+</head>
+
+<body class="bg-void text-ink min-h-screen">
+
+  <div class="max-w-screen-2xl mx-auto px-5 sm:px-6 py-8">
+
+    <!-- ===================== HEADER ===================== -->
+    <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8">
+      <div class="flex items-center gap-2.5 w-full sm:w-auto">
+        <img
+    src="./img/banner/logo.png"
+    alt="ComparaEVs"
+    class="w-12 h-12 object-contain shrink-0"
+  >
+        <div class="min-w-0">
+          <h1 class="font-display font-semibold text-lg sm:text-xl tracking-tight leading-none">ComparaEVs</h1>
+          <p class="text-[11px] text-inkmuted tracking-wide">A central de comparação de carros elétricos do Brasil</p>
+        </div>
+      </div>
+      <nav class="flex items-center justify-center sm:justify-end gap-3 w-full sm:w-auto text-xs text-inkmuted">
+        <a href="carregadores.html" onclick="trackEvento('nav_carregadores')" class="hover:text-ink transition-colors"><i class="fa-solid fa-plug-circle-bolt mr-1"></i>Carregadores</a>
+        <span class="opacity-30">·</span>
+        <a href="motos.html" onclick="trackEvento('nav_motos')" class="hover:text-ink transition-colors"><i class="fa-solid fa-motorcycle mr-1"></i>Motos</a>
+        <span class="opacity-30">·</span>
+        <a href="https://comparaevs.vercel.app/sobre.html" class="hover:text-ink transition-colors">Sobre nós</a>
+        <span class="opacity-30">·</span>
+        <a href="https://comparaevs.vercel.app/contato.html" class="hover:text-ink transition-colors">Contato</a>
+        <span class="opacity-30">·</span>
+        <a href="https://comparaevs.vercel.app/loja.html" class="hover:text-ink transition-colors">Loja</a>
+      </nav>
+    </header>
+
+    <!-- ===================== BANNER CARREGADORES ===================== -->
+    <a href="carregadores.html" onclick="trackEvento('cta_banner_carregadores')"
+      class="group flex items-center justify-between gap-4 rounded-2xl border border-panel2 bg-panel hover:border-volt/40 px-5 sm:px-6 py-4 mb-8 transition-colors">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-10 h-10 rounded-xl bg-volt/10 border border-volt/20 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-plug-circle-bolt text-volt"></i>
+        </div>
+        <div class="min-w-0">
+          <p class="font-display font-semibold text-sm sm:text-base leading-tight">Já escolheu o carro? Agora compare os carregadores (wallbox)</p>
+          <p class="text-[11px] sm:text-xs text-inkmuted truncate">Potência, preço, app, Wi-Fi e mais — lado a lado</p>
+        </div>
+      </div>
+      <span class="shrink-0 inline-flex items-center gap-1.5 text-volt text-xs sm:text-sm font-medium group-hover:gap-2.5 transition-all">
+        Comparar <i class="fa-solid fa-arrow-right text-xs"></i>
+      </span>
+    </a>
+
+    <!-- ===================== HERO ===================== -->
+    <section id="hero" class="rounded-2xl border border-panel2 bg-panel mb-8 overflow-hidden hidden">
+      <div id="anuncio-hero-master"></div>
+
+      <div class="p-6 sm:p-8">
+        <p class="text-[11px] uppercase tracking-widest text-volt font-medium mb-3">Simule seu financiamento</p>
+
+        <div class="grid sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
+          <div>
+            <label class="block text-[11px] text-inkmuted mb-1.5">Marca</label>
+            <select id="sim-marca" onchange="preencherSimuladorModelos()" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors"></select>
+          </div>
+          <div>
+            <label class="block text-[11px] text-inkmuted mb-1.5">Modelo</label>
+            <select id="sim-modelo" onchange="preencherSimuladorPreco()" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors"></select>
+          </div>
+          <div>
+            <label class="block text-[11px] text-inkmuted mb-1.5">Valor do veículo (R$)</label>
+            <input id="sim-preco" type="text" inputmode="decimal" placeholder="0,00"
+              class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+          </div>
+          <div>
+            <label class="block text-[11px] text-inkmuted mb-1.5">Entrada (R$)</label>
+            <input id="sim-entrada" type="text" inputmode="decimal" placeholder="0,00"
+              class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+          </div>
+          <div>
+            <label class="block text-[11px] text-inkmuted mb-1.5">Prazo</label>
+            <select id="sim-prazo" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+              <option value="12">12x</option>
+              <option value="24">24x</option>
+              <option value="36">36x</option>
+              <option value="48" selected>48x</option>
+              <option value="60">60x</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button onclick="calcularFinanciamento()" class="px-5 py-2.5 rounded-lg bg-volt text-void text-sm font-medium hover:bg-voltdim transition-colors">
+            Calcular financiamento
+          </button>
+          <button onclick="limparSimulacao()" class="px-5 py-2.5 rounded-lg border border-panel3 text-inkmuted hover:text-ink hover:border-ink/30 text-sm font-medium transition-colors">
+            Limpar
+          </button>
+        </div>
+
+        <div id="sim-resultado" class="hidden mt-6">
+          <div id="sim-card" class="rounded-xl border border-panel3 bg-panel2 p-6 max-w-md">
+            <div class="flex items-center gap-2 mb-4">
+              <img src="./img/banner/logo.png" alt="ComparaEVs" class="w-6 h-6 object-contain">
+              <span class="font-display font-semibold text-sm">ComparaEVs</span>
+            </div>
+            <p id="sim-card-veiculo" class="font-display font-medium text-ink text-base mb-4">—</p>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between"><span class="text-inkmuted">Valor do veículo</span><span id="sim-card-preco" class="font-data">—</span></div>
+              <div class="flex justify-between"><span class="text-inkmuted">Entrada</span><span id="sim-card-entrada" class="font-data">—</span></div>
+              <div class="flex justify-between"><span class="text-inkmuted">Valor financiado</span><span id="sim-card-financiado" class="font-data">—</span></div>
+              <div class="flex justify-between"><span class="text-inkmuted">Prazo</span><span id="sim-card-prazo" class="font-data">—</span></div>
+              <div class="flex justify-between"><span class="text-inkmuted">Taxa estimada</span><span id="sim-card-taxa" class="font-data">—</span></div>
+            </div>
+            <div class="border-t border-panel3 mt-4 pt-4">
+              <p class="text-[11px] text-inkmuted uppercase tracking-wide mb-1">Parcela estimada</p>
+              <p id="sim-card-parcela" class="font-data font-bold text-3xl text-volt">—</p>
+            </div>
+            <p class="text-[10px] text-inkmuted/70 mt-4 leading-relaxed">Estimativa com base em taxa média de mercado para financiamento de veículos elétricos. Sujeito a aprovação de crédito e condições da instituição financeira.</p>
+          </div>
+          <button onclick="baixarSimulacaoComoImagem()" class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-volt/40 text-volt hover:bg-volt hover:text-void text-xs font-medium transition-colors">
+            <i class="fa-solid fa-download"></i> Baixar como imagem
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== FILTROS ===================== -->
+    <section class="rounded-2xl border border-panel2 bg-panel p-5 sm:p-6 mb-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+        <div class="lg:col-span-2">
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Buscar</label>
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-inkmuted text-xs"></i>
+            <input id="filter-busca" type="text" placeholder="Marca ou modelo"
+              class="w-full bg-panel2 border border-panel3 rounded-lg pl-9 pr-3 py-2.5 text-sm placeholder:text-inkmuted/60 focus:border-volt/60 transition-colors">
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Marca</label>
+          <select id="filter-marca" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors"></select>
+        </div>
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Categoria</label>
+          <select id="filter-categoria" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors"></select>
+        </div>
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Propulsão</label>
+          <select id="filter-propulsao" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors"></select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 items-end">
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Autonomia ≥ (km)</label>
+          <input id="filter-autonomia" type="number" value="0" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm font-data focus:border-volt/60 transition-colors">
+        </div>
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Consumo ≤ (MJ/km)</label>
+          <input id="filter-consumo" type="number" step="0.01" value="2" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm font-data focus:border-volt/60 transition-colors">
+        </div>
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Preço até (R$)</label>
+          <input id="filter-preco" type="number" step="1000" placeholder="sem limite" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm font-data placeholder:text-inkmuted/50 focus:border-volt/60 transition-colors">
+        </div>
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">
+            Tarifa energia <i class="fa-regular fa-circle-question text-[10px]" title="Estimativa editável — ajuste para sua tarifa real"></i>
+          </label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-inkmuted text-sm">R$</span>
+            <input id="filter-tarifa" type="number" step="0.01" value="0.85" class="w-full bg-panel2 border border-panel3 rounded-lg pl-9 pr-3 py-2.5 text-sm font-data focus:border-volt/60 transition-colors">
+          </div>
+        </div>
+        <button onclick="limparFiltros()" class="h-[42px] rounded-lg border border-panel3 text-sm text-inkmuted hover:text-ink hover:border-ink/30 transition-colors">
+          Limpar filtros
+        </button>
+      </div>
+
+      <div class="mt-4 pt-4 border-t border-panel2">
+        <label class="inline-flex items-center gap-3 cursor-pointer select-none group">
+          <div class="relative">
+            <input type="checkbox" id="filter-uber" class="sr-only peer" onchange="if(this.checked) trackEvento('cta_filtro_uber'); aplicarFiltros()">
+            <div class="w-10 h-5 bg-panel3 rounded-full transition-colors peer-checked:bg-[#1a2b0e]"></div>
+            <div class="absolute left-0.5 top-0.5 w-4 h-4 bg-inkmuted rounded-full transition-all peer-checked:translate-x-5 peer-checked:bg-volt"></div>
+          </div>
+          <span class="text-sm text-inkmuted group-has-[:checked]:text-ink transition-colors">
+            Aceitos pela Uber
+            <span class="ml-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-[#1a2b0e] border border-volt/30 text-volt text-[10px] font-medium">
+              <i class="fa-brands fa-uber text-[9px]"></i> Uber
+            </span>
+          </span>
+          <span class="text-[11px] text-inkmuted/60">· verificar elegibilidade no app da Uber</span>
+        </label>
+      </div>
+    </section>
+
+    <!-- ===================== SKELETON (loading) ===================== -->
+    <div id="skeleton" class="space-y-3 mb-8">
+      <div class="h-14 bg-panel rounded-xl skeleton"></div>
+      <div class="h-14 bg-panel rounded-xl skeleton" style="animation-delay:.1s"></div>
+      <div class="h-14 bg-panel rounded-xl skeleton" style="animation-delay:.2s"></div>
+    </div>
+
+    <!-- ===================== RESULTADOS: contagem ===================== -->
+    <div id="contagem" class="hidden text-xs text-inkmuted mb-3 font-data"></div>
+
+    <!-- ===================== TABELA (desktop) ===================== -->
+    <div id="tabela-wrap" class="hidden md:block rounded-2xl border border-panel2 overflow-hidden mb-24">
+      <table class="w-full text-sm">
+        <thead class="bg-panel text-[11px] uppercase tracking-wide text-inkmuted">
+          <tr>
+            <th class="p-3 w-10"></th>
+            <th class="p-3 text-left">Veículo</th>
+            <th class="p-3 text-left">Categoria</th>
+            <th class="p-3 text-right cursor-pointer select-none" onclick="ordenarPor('Autonomia_km')">
+              Autonomia <i class="fa-solid fa-sort ml-1 text-[10px]" id="sort-icon-Autonomia_km"></i>
+            </th>
+            <th class="p-3 text-right cursor-pointer select-none" onclick="ordenarPor('Consumo_MJkm')">
+              Consumo <i class="fa-solid fa-sort ml-1 text-[10px]" id="sort-icon-Consumo_MJkm"></i>
+            </th>
+            <th class="p-3 text-right cursor-pointer select-none" onclick="ordenarPor('preco')">
+              Preço <i class="fa-solid fa-sort ml-1 text-[10px]" id="sort-icon-preco"></i>
+            </th>
+            <th class="p-3 text-right cursor-pointer select-none" onclick="ordenarPor('custo')">
+              Custo /100km <i class="fa-solid fa-sort ml-1 text-[10px]" id="sort-icon-custo"></i>
+            </th>
+            <th class="p-3 text-center w-[140px]">Selo</th>
+          </tr>
+        </thead>
+        <tbody id="tbody" class="divide-y divide-panel2"></tbody>
+      </table>
+    </div>
+
+    <!-- ===================== CARDS (mobile) ===================== -->
+    <div id="cards-wrap" class="grid md:hidden mb-24 gap-3"></div>
+
+    <!-- ===================== EMPTY STATE ===================== -->
+    <div id="empty-state" class="hidden text-center py-16 rounded-2xl border border-dashed border-panel2 mb-24">
+      <p class="text-3xl mb-3">🔍</p>
+      <p class="text-ink font-medium mb-1">Nenhum veículo encontrado</p>
+      <p class="text-inkmuted text-sm mb-5">Tente afrouxar os filtros de autonomia ou consumo.</p>
+      <button onclick="limparFiltros()" class="px-4 py-2 rounded-lg bg-volt text-void text-sm font-medium hover:bg-voltdim transition-colors">
+        Limpar filtros
+      </button>
+    </div>
+
+    <div id="anuncio-banner" class="mb-6"></div>
+
+    <!-- ===================== CONTEÚDO EDITORIAL ===================== -->
+    <section id="guia-escolha" class="rounded-2xl border border-panel2 bg-panel p-6 sm:p-8 mb-6">
+      <h2 class="font-display font-semibold text-xl sm:text-2xl mb-5">Como escolher um carro elétrico</h2>
+      <div class="space-y-5 text-sm sm:text-[15px] text-inkmuted leading-relaxed">
+        <p>Comprar um carro elétrico é diferente de comprar um carro a combustão: além do preço e do design, alguns números passam a importar muito mais. Veja os pontos que mais pesam na decisão.</p>
+
+        <div>
+          <h3 class="font-display font-medium text-ink mb-1">1. Autonomia real, não só a anunciada</h3>
+          <p>A autonomia que aparece na etiqueta é medida em ciclo de testes controlado (PBEV/INMETRO). No dia a dia, fatores como uso de ar-condicionado, peso da carga, velocidade na estrada e temperatura externa reduzem esse número. Use a autonomia oficial como referência comparativa entre modelos, não como garantia exata de quilometragem.</p>
+        </div>
+
+        <div>
+          <h3 class="font-display font-medium text-ink mb-1">2. Onde e como você vai recarregar</h3>
+          <p>Antes de pensar em autonomia máxima, pense na sua rotina: você tem garagem com tomada disponível? O prédio permite instalar um carregador? Você depende de pontos públicos no trajeto? Quem recarrega em casa todas as noites sofre muito menos com autonomia "curta" do que quem depende de carregadores públicos.</p>
+          <button onclick="abrirOrcamentoModal()" class="inline-flex items-center gap-2 mt-3 px-4 py-2 rounded-lg border border-volt/40 text-volt hover:bg-volt hover:text-void text-xs font-medium transition-colors">
+            <i class="fa-solid fa-plug-circle-bolt"></i> Quero um orçamento de instalação na minha casa
+          </button>
+        </div>
+
+        <div>
+          <h3 class="font-display font-medium text-ink mb-1">3. Consumo energético (kWh/100km)</h3>
+          <p>Assim como o consumo de combustível em km/l, o consumo elétrico (kWh/100km) indica quanta energia o carro gasta para rodar. Quanto menor esse número, mais eficiente é o veículo — e menor o custo de recarga por quilômetro rodado, independentemente do tamanho da bateria.</p>
+        </div>
+
+        <div>
+          <h3 class="font-display font-medium text-ink mb-1">4. Classificação energética PBEV/INMETRO</h3>
+          <p>O selo do Programa Brasileiro de Etiquetagem Veicular classifica os modelos de A+ (mais eficiente) a G, considerando consumo energético e autonomia testados oficialmente. É o equivalente, no elétrico, ao selo de eficiência que você já vê em geladeiras e ar-condicionados.</p>
+        </div>
+
+        <div>
+          <h3 class="font-display font-medium text-ink mb-1">5. Custo total de propriedade, não só o preço de tabela</h3>
+          <p>Carros elétricos costumam custar mais na compra, mas menos para manter: sem troca de óleo, menos peças de desgaste no motor, e custo de "combustível" (energia) normalmente mais baixo que gasolina por km rodado. Ao comparar modelos, vale somar preço + consumo estimado + manutenção projetada ao longo de alguns anos, não só o valor de entrada.</p>
+        </div>
+
+        <div>
+          <h3 class="font-display font-medium text-ink mb-1">6. Garantia da bateria</h3>
+          <p>A bateria é o componente mais caro do carro elétrico, e perde capacidade gradualmente com o tempo e os ciclos de recarga. Verifique o prazo e a cobertura de garantia específica da bateria oferecida pela marca — geralmente é mais longa que a garantia geral do veículo.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq-autonomia" class="rounded-2xl border border-panel2 bg-panel p-6 sm:p-8 mb-6">
+      <h2 class="font-display font-semibold text-xl sm:text-2xl mb-5">FAQ — Autonomia e recarga</h2>
+      <div class="space-y-3">
+        <details class="group border border-panel2 rounded-xl bg-panel2/30 p-4">
+          <summary class="cursor-pointer list-none font-medium text-ink flex items-center justify-between gap-3">
+            A autonomia anunciada pela marca é a autonomia real?
+            <i class="fa-solid fa-chevron-down text-xs text-inkmuted shrink-0 transition-transform group-open:rotate-180"></i>
+          </summary>
+          <p class="text-sm text-inkmuted mt-3 leading-relaxed">Não exatamente. A autonomia oficial (PBEV/INMETRO) é medida em condições padronizadas de teste, que servem para comparar modelos de forma justa entre si — mas no uso real, autonomia tende a variar para baixo ou para cima dependendo de clima, estilo de condução, peso e uso de ar-condicionado.</p>
+        </details>
+
+        <details class="group border border-panel2 rounded-xl bg-panel2/30 p-4">
+          <summary class="cursor-pointer list-none font-medium text-ink flex items-center justify-between gap-3">
+            Quanto tempo demora para carregar um carro elétrico?
+            <i class="fa-solid fa-chevron-down text-xs text-inkmuted shrink-0 transition-transform group-open:rotate-180"></i>
+          </summary>
+          <p class="text-sm text-inkmuted mt-3 leading-relaxed">Depende do tipo de carregador. Em tomada residencial comum, pode levar de 8 a 20 horas para carga completa. Em carregador residencial dedicado (wallbox), de 4 a 8 horas. Já em carregadores rápidos públicos (DC), é possível chegar a 80% da carga em 20 a 40 minutos, dependendo do modelo do carro e da potência do carregador.</p>
+        </details>
+
+        <details class="group border border-panel2 rounded-xl bg-panel2/30 p-4">
+          <summary class="cursor-pointer list-none font-medium text-ink flex items-center justify-between gap-3">
+            Posso carregar em uma tomada comum de 110V/220V?
+            <i class="fa-solid fa-chevron-down text-xs text-inkmuted shrink-0 transition-transform group-open:rotate-180"></i>
+          </summary>
+          <p class="text-sm text-inkmuted mt-3 leading-relaxed">Sim, a maioria dos elétricos vem com um cabo para tomada residencial — mas é a forma mais lenta de recarregar, recomendada apenas como solução ocasional. Para uso diário, o ideal é instalar um carregador dedicado (wallbox), que recarrega bem mais rápido e com mais segurança elétrica.</p>
+        </details>
+
+        <details class="group border border-panel2 rounded-xl bg-panel2/30 p-4">
+          <summary class="cursor-pointer list-none font-medium text-ink flex items-center justify-between gap-3">
+            A autonomia cai no frio ou no calor extremo?
+            <i class="fa-solid fa-chevron-down text-xs text-inkmuted shrink-0 transition-transform group-open:rotate-180"></i>
+          </summary>
+          <p class="text-sm text-inkmuted mt-3 leading-relaxed">Sim. Temperaturas muito baixas reduzem a eficiência química da bateria, e o uso do ar-condicionado (tanto para esquentar quanto para refrigerar) consome energia que sairia da mesma bateria que move o carro. No Brasil, esse efeito costuma ser menos extremo do que em países com inverno rigoroso, mas ainda é perceptível em dias muito quentes com ar-condicionado ligado o tempo todo.</p>
+        </details>
+
+        <details class="group border border-panel2 rounded-xl bg-panel2/30 p-4">
+          <summary class="cursor-pointer list-none font-medium text-ink flex items-center justify-between gap-3">
+            O que exatamente é o selo do PBEV/INMETRO?
+            <i class="fa-solid fa-chevron-down text-xs text-inkmuted shrink-0 transition-transform group-open:rotate-180"></i>
+          </summary>
+          <p class="text-sm text-inkmuted mt-3 leading-relaxed">É a Etiqueta Nacional de Conservação de Energia aplicada a veículos, emitida pelo Programa Brasileiro de Etiquetagem Veicular sob coordenação do INMETRO. Ela classifica os modelos de A+ (mais eficiente) a G, com base em testes oficiais e padronizados de consumo energético e autonomia — é a mesma lógica das etiquetas de eficiência de eletrodomésticos, aplicada a veículos.</p>
+        </details>
+
+        <details class="group border border-panel2 rounded-xl bg-panel2/30 p-4">
+          <summary class="cursor-pointer list-none font-medium text-ink flex items-center justify-between gap-3">
+            A bateria perde autonomia com o tempo de uso?
+            <i class="fa-solid fa-chevron-down text-xs text-inkmuted shrink-0 transition-transform group-open:rotate-180"></i>
+          </summary>
+          <p class="text-sm text-inkmuted mt-3 leading-relaxed">Sim, é normal e esperado — todas as baterias de íon-lítio degradam gradualmente com os ciclos de carga/descarga ao longo dos anos, reduzindo um pouco a autonomia máxima disponível. É por isso que as marcas oferecem garantias específicas (geralmente de 8 anos ou mais) cobrindo perda de capacidade da bateria além de um limite mínimo aceitável.</p>
+        </details>
+      </div>
+    </section>
+
+
+    <!-- ===================== SUGERIR CORREÇÃO ===================== -->
+    <section class="rounded-2xl border border-panel2 bg-panel p-5 sm:p-6 mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
+      <div class="flex items-center gap-3 flex-1 min-w-0">
+        <div class="w-9 h-9 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-triangle-exclamation text-amber-400 text-sm"></i>
+        </div>
+        <div class="min-w-0">
+          <p class="text-sm font-medium text-ink">Encontrou um erro ou tem uma informação mais atualizada?</p>
+          <p class="text-[11px] text-inkmuted">Clique aqui para sugerir uma correção e ajude o ComparaEVs a manter os dados precisos.</p>
+        </div>
+      </div>
+      <button onclick="abrirCorrecaoModal()" class="shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-amber-500/30 text-amber-400 hover:bg-amber-500/10 text-sm font-medium transition-colors">
+        <i class="fa-solid fa-pen-to-square text-xs"></i> Sugerir correção
+      </button>
+    </section>
+    <footer class="text-center text-[11px] text-inkmuted pb-6">
+      <div class="flex items-center justify-center gap-3 mb-3 flex-wrap">
+        <a href="carregadores.html" class="hover:text-ink transition-colors">Carregadores</a>
+        <span class="opacity-30">·</span>
+        <a href="motos.html" class="hover:text-ink transition-colors">Motos</a>
+        <span class="opacity-30">·</span>
+        <a href="sobre.html" class="hover:text-ink transition-colors">Sobre nós</a>
+        <span class="opacity-30">·</span>
+        <a href="contato.html" class="hover:text-ink transition-colors">Contato</a>
+        <span class="opacity-30">·</span>
+        <a href="privacidade.html" class="hover:text-ink transition-colors">Política de Privacidade</a>
+        <span class="opacity-30">·</span>
+        <a href="loja.html" class="hover:text-ink transition-colors">Loja</a>
+      </div>
+      Fonte: Programa Brasileiro de Etiquetagem Veicular (PBEV) — INMETRO. Valores de custo são estimativas editáveis.
+    </footer>
+  </div>
+
+  <!-- ===================== BARRA FLUTUANTE DE COMPARAÇÃO ===================== -->
+  <div id="compare-bar" class="fixed left-1/2 -translate-x-1/2 bottom-5 z-40 hidden">
+    <div class="flex items-center gap-4 bg-panel2 border border-panel3 rounded-full pl-5 pr-2 py-2 shadow-2xl shadow-black/50">
+      <span class="text-sm"><span id="compare-count" class="font-data text-volt font-bold">0</span> selecionado(s)</span>
+      <button onclick="abrirComparacao()" class="px-4 py-2 rounded-full bg-volt text-void text-sm font-medium hover:bg-voltdim transition-colors">
+        Comparar
+      </button>
+      <button onclick="limparComparacao()" class="w-9 h-9 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel3 transition-colors" title="Limpar seleção">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+  </div>
+
+
+  <!-- ===================== MODAL NEWSLETTER (EXIT INTENT) ===================== -->
+  <div id="newsletter-modal" class="fixed inset-0 z-[60] hidden">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="fecharNewsletterModal()"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+      <div class="relative bg-panel border border-panel2 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md overflow-hidden">
+        <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-volt/0 via-volt to-volt/0"></div>
+        <button onclick="fecharNewsletterModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel2 transition-colors z-10">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+        <div class="p-6 sm:p-8">
+          <div class="w-12 h-12 rounded-xl bg-volt/10 border border-volt/20 flex items-center justify-center mb-5">
+            <i class="fa-solid fa-bolt text-volt text-xl"></i>
+          </div>
+          <h2 class="font-display font-bold text-xl sm:text-2xl mb-2">Fique por dentro do mundo EV</h2>
+          <p class="text-inkmuted text-sm mb-6 leading-relaxed">Novidades, lançamentos e atualizações de preços direto na sua caixa de entrada. Sem spam.</p>
+          <div class="flex gap-2">
+            <input id="newsletter-email" type="email" placeholder="seu@email.com" class="flex-1 bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink placeholder:text-inkmuted/50 focus:outline-none focus:border-volt/60 transition-colors">
+            <button onclick="enviarNewsletter()" id="newsletter-btn" class="px-4 py-2.5 rounded-lg bg-volt text-void text-sm font-medium hover:bg-voltdim transition-colors whitespace-nowrap disabled:opacity-60">
+              Assinar
+            </button>
+          </div>
+          <button onclick="fecharNewsletterModal()" class="mt-4 w-full text-center text-[11px] text-inkmuted/60 hover:text-inkmuted transition-colors">Não, obrigado</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL SUGERIR CORREÇÃO ===================== -->
+  <div id="correcao-modal" class="fixed inset-0 z-[60] hidden">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="fecharCorrecaoModal()"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+      <div class="bg-panel border border-panel2 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[92vh] overflow-y-auto">
+        <div class="flex items-start justify-between p-5 border-b border-panel2 sticky top-0 bg-panel">
+          <div class="flex items-center gap-2.5">
+            <i class="fa-solid fa-triangle-exclamation text-amber-400"></i>
+            <div>
+              <h2 class="font-display font-semibold text-base">Sugerir Correção</h2>
+              <p class="text-[11px] text-inkmuted">Encontrou algo desatualizado? Ajude-nos a manter os dados precisos.</p>
+            </div>
+          </div>
+          <button onclick="fecharCorrecaoModal()" class="w-8 h-8 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel2 transition-colors shrink-0 mt-0.5">
+            <i class="fa-solid fa-xmark text-sm"></i>
+          </button>
+        </div>
+        <div class="p-5 space-y-4">
+          <div>
+            <label class="block text-xs text-inkmuted mb-2">Categoria do Erro</label>
+            <div class="flex flex-wrap gap-2" id="correcao-categorias">
+              <button onclick="selecionarCategoriaCorrecao(this)" data-cat="Preço" class="correcao-cat px-3 py-1.5 rounded-lg border border-panel3 text-inkmuted text-xs hover:border-amber-500/40 hover:text-amber-400 transition-colors">Preço</button>
+              <button onclick="selecionarCategoriaCorrecao(this)" data-cat="Autonomia / Bateria" class="correcao-cat px-3 py-1.5 rounded-lg border border-panel3 text-inkmuted text-xs hover:border-amber-500/40 hover:text-amber-400 transition-colors">Autonomia / Bateria</button>
+              <button onclick="selecionarCategoriaCorrecao(this)" data-cat="Dados Técnicos" class="correcao-cat px-3 py-1.5 rounded-lg border border-panel3 text-inkmuted text-xs hover:border-amber-500/40 hover:text-amber-400 transition-colors">Dados Técnicos</button>
+              <button onclick="selecionarCategoriaCorrecao(this)" data-cat="Link Quebrado" class="correcao-cat px-3 py-1.5 rounded-lg border border-panel3 text-inkmuted text-xs hover:border-amber-500/40 hover:text-amber-400 transition-colors">Link Quebrado</button>
+              <button onclick="selecionarCategoriaCorrecao(this)" data-cat="Outros" class="correcao-cat px-3 py-1.5 rounded-lg border border-panel3 text-inkmuted text-xs hover:border-amber-500/40 hover:text-amber-400 transition-colors">Outros</button>
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">O que está errado e qual a informação correta?</label>
+            <textarea id="correcao-descricao" rows="4" placeholder="Ex: O preço do modelo X está desatualizado. O valor correto é R$ XX.XXX..." class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink placeholder:text-inkmuted/40 focus:outline-none focus:border-amber-500/50 transition-colors resize-none"></textarea>
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">E-mail <span class="text-inkmuted/60">(opcional)</span></label>
+            <input id="correcao-email" type="email" placeholder="Receba um agradecimento quando corrigirmos" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink placeholder:text-inkmuted/40 focus:outline-none focus:border-amber-500/50 transition-colors">
+          </div>
+          <button onclick="enviarCorrecao()" id="correcao-btn" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-amber-500 text-void text-sm font-medium hover:bg-amber-400 transition-colors disabled:opacity-60">
+            <i class="fa-solid fa-paper-plane text-xs"></i> Enviar Sugestão
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ===================== TOAST ===================== -->
+  <div id="toast" class="toast fixed left-1/2 -translate-x-1/2 bottom-24 z-50 opacity-0 pointer-events-none">
+    <div class="bg-panel3 border border-panel3 text-ink text-sm px-4 py-2.5 rounded-lg shadow-xl"></div>
+  </div>
+
+  <!-- ===================== MODAL DE COMPARAÇÃO ===================== -->
+  <div id="compare-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/70" onclick="fecharComparacao()"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+      <div class="bg-panel border border-panel2 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-4xl max-h-[88vh] overflow-y-auto">
+        <div class="flex items-center justify-between p-5 border-b border-panel2 sticky top-0 bg-panel">
+          <h2 class="font-display font-semibold text-lg">Comparação</h2>
+          <div class="flex items-center gap-2">
+            <button onclick="compartilharComparacao()" id="btn-compartilhar"
+              class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-panel3 text-inkmuted hover:text-volt hover:border-volt/50 text-xs font-medium transition-colors">
+              <i class="fa-solid fa-link"></i>
+              <span id="btn-compartilhar-label">Compartilhar</span>
+            </button>
+            <button onclick="fecharComparacao()" class="w-9 h-9 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel2 transition-colors">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>
+        <div id="compare-content" class="p-5 sm:p-6"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL DE LEAD (PROPOSTA) ===================== -->
+  <div id="lead-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/70" onclick="fecharLeadModal()"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+      <div class="bg-panel border border-panel2 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[92vh] overflow-y-auto">
+        <div class="flex items-center justify-between p-5 border-b border-panel2 sticky top-0 bg-panel">
+          <div>
+            <h2 class="font-display font-semibold text-lg">Quero receber uma proposta</h2>
+            <p id="lead-modal-veiculo" class="text-xs text-inkmuted mt-0.5"></p>
+          </div>
+          <button onclick="fecharLeadModal()" class="w-9 h-9 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel2 transition-colors shrink-0">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <form id="lead-form" onsubmit="enviarLead(event)" class="p-5 sm:p-6 space-y-4">
+          <input type="hidden" id="lead-veiculo-id">
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">Nome completo</label>
+            <input type="text" id="lead-nome" required
+              class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink placeholder:text-inkmuted/60 focus:outline-none focus:border-volt transition-colors"
+              placeholder="Seu nome">
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">WhatsApp</label>
+            <input type="tel" id="lead-whatsapp" required
+              class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink placeholder:text-inkmuted/60 focus:outline-none focus:border-volt transition-colors"
+              placeholder="(54) 99999-9999">
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">E-mail (opcional)</label>
+            <input type="email" id="lead-email"
+              class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink placeholder:text-inkmuted/60 focus:outline-none focus:border-volt transition-colors"
+              placeholder="voce@email.com">
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">Cidade / UF (opcional)</label>
+            <input type="text" id="lead-cidade"
+              class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink placeholder:text-inkmuted/60 focus:outline-none focus:border-volt transition-colors"
+              placeholder="Gramado / RS">
+          </div>
+          <button type="submit" id="lead-submit-btn"
+            class="w-full px-4 py-3 rounded-lg bg-volt text-void text-sm font-medium hover:bg-voltdim transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+            Quero receber a proposta
+          </button>
+          <p class="text-[11px] text-inkmuted/70 text-center leading-relaxed">Seus dados serão compartilhados com uma concessionária parceira pra contato sobre este veículo.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL DE ORÇAMENTO (INSTALAÇÃO WALLBOX) ===================== -->
+  <div id="orcamento-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/70" onclick="fecharOrcamentoModal()"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+      <div class="bg-panel border border-panel2 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[92vh] overflow-y-auto">
+        <div class="flex items-center justify-between p-5 border-b border-panel2 sticky top-0 bg-panel">
+          <div>
+            <h2 class="font-display font-semibold text-lg">Orçamento de instalação</h2>
+            <p class="text-xs text-inkmuted mt-0.5">Sem compromisso · resposta de instalador parceiro</p>
+          </div>
+          <button onclick="fecharOrcamentoModal()" class="w-9 h-9 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel2 transition-colors shrink-0">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <form id="orcamento-form" onsubmit="enviarOrcamento(event)" class="p-5 sm:p-6 space-y-4">
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">Nome completo</label>
+            <input type="text" id="orcamento-nome" required
+              class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink placeholder:text-inkmuted/60 focus:outline-none focus:border-volt transition-colors"
+              placeholder="Seu nome">
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">WhatsApp</label>
+            <input type="tel" id="orcamento-telefone" required
+              class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink placeholder:text-inkmuted/60 focus:outline-none focus:border-volt transition-colors"
+              placeholder="(54) 99999-9999">
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">CEP</label>
+            <input type="text" id="orcamento-cep" required inputmode="numeric" maxlength="9"
+              class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink placeholder:text-inkmuted/60 focus:outline-none focus:border-volt transition-colors"
+              placeholder="95670-000">
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">Tipo de imóvel</label>
+            <select id="orcamento-imovel" required
+              class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-volt transition-colors">
+              <option value="" disabled selected>Selecione</option>
+              <option value="Casa">Casa</option>
+              <option value="Apartamento / Condomínio">Apartamento / Condomínio</option>
+              <option value="Comercial">Comercial</option>
+            </select>
+          </div>
+          <button type="submit" id="orcamento-submit-btn"
+            class="w-full px-4 py-3 rounded-lg bg-volt text-void text-sm font-medium hover:bg-voltdim transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+            Solicitar orçamento
+          </button>
+          <p class="text-[11px] text-inkmuted/70 text-center leading-relaxed">Seus dados serão compartilhados com um instalador parceiro homologado pra contato.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ================== CONFIGURAÇÃO ==================
+    const supabaseUrl = 'https://pndvbbwkjiuzfptbpfcz.supabase.co';
+    const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBuZHZiYndraml1emZwdGJwZmN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwMDMyMTUsImV4cCI6MjA5MDU3OTIxNX0.SaWp8Dx0fPHsYdvoSzYfPk8A5xg-qW4FTsgxmM8s1tM';
+
+    let supabaseClient;
+    let todosVeiculos = [];
+    let filtrados = [];
+    const selecionados = new Set();
+    const MAX_COMPARACAO = 3;
+
+    let sortState = { coluna: 'Autonomia_km', dir: 'desc' };
+
+    const ORDEM_CLASSES = ['A+', 'A', 'B', 'C', 'D', 'E', 'F', 'G'];
+    let seloCounter = 0;
+
+    // ================== PUBLICIDADE / PATROCÍNIO ==================
+    // true = mostra placeholders nos espaços vazios (útil enquanto não há patrocinador).
+    // Mude para false antes de publicar se quiser que os slots vazios simplesmente não apareçam.
+    const MOSTRAR_PLACEHOLDER_ANUNCIO = true;
+
+    const PUBLICIDADE = {
+
+      heroMaster: [
+        { nome: '', logoUrl: '', headline: 'Onde o lead qualificado encontra a solução premium: destaque sua marca para quem já decidiu evoluir.', imagem: './img/banner/master.png', link: 'https://wa.me/5511981058013' },
+        { nome: '', logoUrl: '', headline: 'Seu produto, nosso público: visibilidade qualificada para quem busca segurança e informação', imagem: './img/banner/master2.png', link: 'https://wa.me/5511981058013' },
+        { nome: '', logoUrl: '', headline: 'A vitrine do sucesso: conecte sua marca ao motorista que busca upgrade de status e rentabilidade máxima.', imagem: './img/banner/master3.png', link: 'https://wa.me/5511981058013' }
+      ],
+
+      banner: { titulo: 'A última marca que ele vê, é a primeira que ele lembra: assegure seu lugar na base da jornada de decisão', subtitulo: 'Zona de Conversão Final', cta: 'Compre agora', link: 'https://wa.me/5511981058013', imagemUrl: '' },
+
+      nativoIntervalo: 12, // a cada N veículos na lista, insere uma linha/card patrocinado
+      nativo: { marca: 'Linha Patrocinada', modelo: 'Garanta visibilidade máxima onde o motorista decide a compra.', cta: 'Ver oferta', link: 'https://wa.me/5511981058013' },
+
+      ctaComparacao: [
+        { label: 'Cotar seguro para estes modelos', link: null },
+        { label: 'Simular financiamento', link: null }
+      ]
+    };
+
+    // ================== INIT ==================
+    let patrocinadoresDB = { hero_master: [], banner: null, nativo: null };
+
+    async function initSupabase() {
+      supabaseClient = supabase.createClient(supabaseUrl, supabaseAnonKey);
+      trackEvento('pageview');
+      await Promise.all([carregarVeiculos(), carregarPatrocinadores()]);
+    }
+
+    // ================== TRACKING DE EVENTOS ==================
+    function trackEvento(tipo_evento, opcoes) {
+      opcoes = opcoes || {};
+      try {
+        supabaseClient.from('eventos_cliques').insert([{
+          tipo_evento,
+          veiculo_id: opcoes.veiculo_id || null,
+          patrocinador_id: opcoes.patrocinador_id || null,
+          detalhe: opcoes.detalhe || null,
+          pagina: window.location.pathname
+        }]).then(({ error }) => { if (error) console.warn('track falhou:', error); });
+      } catch (e) {
+        console.warn('track falhou:', e);
+      }
+    }
+
+    // ================== PATROCINADORES (SUPABASE) ==================
+    async function carregarPatrocinadores() {
+      const { data, error } = await supabaseClient
+        .from('patrocinadores_slots')
+        .select('*')
+        .eq('ativo', true)
+        .order('ordem', { ascending: true });
+
+      if (error) {
+        console.warn('Erro ao carregar patrocinadores, usando fallback estático.', error);
+        return;
+      }
+
+      const lista = data || [];
+      patrocinadoresDB.hero_master = lista.filter(p => p.tipo === 'hero_master');
+      patrocinadoresDB.banner = lista.find(p => p.tipo === 'banner') || null;
+      patrocinadoresDB.nativo = lista.find(p => p.tipo === 'nativo') || null;
+    }
+
+    async function carregarVeiculos() {
+      const { data, error } = await supabaseClient
+        .from('pbe_veiculos_eletricos')
+        .select('*')
+        .order('Autonomia_km', { ascending: false });
+
+      document.getElementById('skeleton').classList.add('hidden');
+
+      if (error) {
+        console.error(error);
+        mostrarToast('Erro ao carregar dados do Supabase. Veja o console.');
+        return;
+      }
+
+      todosVeiculos = data || [];
+      preencherFiltros();
+      preencherSimuladorVeiculos();
+      renderHero();
+      renderAnuncioHeroMaster();
+      renderAnuncioBanner();
+      aplicarFiltros();
+      lerComparacaoURL();
+    }
+
+    // ================== HELPERS NUMÉRICOS ==================
+    function fmtKm(v) {
+      if (v === null || v === undefined || v === '') return '—';
+      return Number(v).toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+    }
+    function fmtConsumo(v) {
+      if (v === null || v === undefined || v === '') return '—';
+      return Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    function fmtMoeda(v) {
+      return Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+    function fmtPreco(v) {
+      if (v === null || v === undefined || v === '') return 'Consulte';
+      return fmtMoeda(v);
+    }
+    function tarifaAtual() {
+      return Number(document.getElementById('filter-tarifa').value) || 0;
+    }
+    function custoPor100km(consumoMJkm) {
+      if (consumoMJkm === null || consumoMJkm === undefined) return 0;
+      const consumoKWhKm = Number(consumoMJkm) / 3.6;
+      return consumoKWhKm * tarifaAtual() * 100;
+    }
+
+    // ================== SELO PBE (elemento de assinatura) ==================
+    function renderSelo(classeRaw, tamanho) {
+      const classe = (classeRaw || '').toString().trim().toUpperCase();
+      let idx = ORDEM_CLASSES.indexOf(classe);
+      if (idx === -1) idx = Math.round((ORDEM_CLASSES.length - 1) / 2);
+      const pct = idx / (ORDEM_CLASSES.length - 1);
+
+      const barX = 6, barW = 248, barY = 38, barH = 14;
+      const pointerX = barX + pct * barW;
+      const chipX = Math.min(238, Math.max(22, pointerX));
+      const gradId = 'grad-selo-' + (seloCounter++);
+      const alturaSvg = 74;
+
+      const legenda = tamanho === 'lg'
+        ? `<p class="text-[10px] uppercase tracking-widest text-inkmuted text-center mt-1">Classificação geral PBEV</p>`
+        : '';
+
+      return `
+        <svg viewBox="0 0 260 ${alturaSvg}" class="w-full h-auto" role="img" aria-label="Classificação energética: ${classeRaw || 'não informada'}">
+          <defs>
+            <linearGradient id="${gradId}" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#2E7D32"/>
+              <stop offset="20%" stop-color="#66BB6A"/>
+              <stop offset="40%" stop-color="#C8FF4D"/>
+              <stop offset="60%" stop-color="#FFC107"/>
+              <stop offset="80%" stop-color="#FB8C00"/>
+              <stop offset="100%" stop-color="#E53935"/>
+            </linearGradient>
+          </defs>
+          <rect x="${barX}" y="${barY}" width="${barW}" height="${barH}" rx="7" fill="url(#${gradId})"/>
+          <polygon points="${pointerX - 7},30 ${pointerX + 7},30 ${pointerX},40" fill="#E8EAED"/>
+          <rect x="${chipX - 16}" y="2" width="32" height="22" rx="6" fill="#14171C" stroke="#E8EAED" stroke-width="1"/>
+          <text x="${chipX}" y="18" text-anchor="middle" font-family="'Space Grotesk', sans-serif" font-size="13" font-weight="700" fill="#E8EAED">${(classeRaw || '?').toString()}</text>
+        </svg>
+        ${legenda}
+      `;
+    }
+
+    // ================== HERO ==================
+    function renderHero() {
+      document.getElementById('hero').classList.remove('hidden');
+    }
+
+    // ================== SIMULADOR DE FINANCIAMENTO ==================
+    const TAXA_MENSAL_FINANCIAMENTO = 0.0105; // ~13,4% a.a. — média de mercado p/ financiamento verde de elétricos
+
+    function preencherSimuladorVeiculos() {
+      const selectMarca = document.getElementById('sim-marca');
+      const marcas = [...new Set(todosVeiculos.filter(v => v.preco).map(v => v.Marca))].sort((a, b) => a.localeCompare(b));
+      selectMarca.innerHTML = marcas.map(m => `<option value="${m}">${m}</option>`).join('');
+      preencherSimuladorModelos();
+    }
+
+    function preencherSimuladorModelos() {
+      const marca = document.getElementById('sim-marca').value;
+      const selectModelo = document.getElementById('sim-modelo');
+      const modelos = todosVeiculos
+        .filter(v => v.preco && v.Marca === marca)
+        .sort((a, b) => a.Modelo_Versao.localeCompare(b.Modelo_Versao));
+      selectModelo.innerHTML = modelos.map(v => `<option value="${v.id}">${v.Modelo_Versao}</option>`).join('');
+      preencherSimuladorPreco();
+    }
+
+    function preencherSimuladorPreco() {
+      const id = Number(document.getElementById('sim-modelo').value);
+      const v = todosVeiculos.find(x => x.id === id);
+      document.getElementById('sim-preco').value = v ? Number(v.preco).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '';
+    }
+
+    function parseMoeda(str) {
+      if (!str) return 0;
+      const limpo = String(str).replace(/[^\d,]/g, '').replace(',', '.');
+      return parseFloat(limpo) || 0;
+    }
+
+    function calcularFinanciamento() {
+      trackEvento('cta_financiamento_simular');
+      const id = Number(document.getElementById('sim-modelo').value);
+      const v = todosVeiculos.find(x => x.id === id);
+      const nomeVeiculo = v ? `${v.Marca} ${v.Modelo_Versao}` : (document.getElementById('sim-marca').value || 'Veículo selecionado');
+
+      const preco = parseMoeda(document.getElementById('sim-preco').value);
+      const entrada = parseMoeda(document.getElementById('sim-entrada').value);
+      const prazo = Number(document.getElementById('sim-prazo').value);
+
+      if (!preco) {
+        mostrarToast('Informe o valor do veículo pra continuar.');
+        return;
+      }
+      if (entrada < 0 || entrada >= preco) {
+        mostrarToast('A entrada precisa ser menor que o valor do veículo.');
+        return;
+      }
+
+      const i = TAXA_MENSAL_FINANCIAMENTO;
+      const financiado = preco - entrada;
+      const parcela = financiado * (i / (1 - Math.pow(1 + i, -prazo)));
+
+      document.getElementById('sim-card-veiculo').textContent = nomeVeiculo;
+      document.getElementById('sim-card-preco').textContent = fmtMoeda(preco);
+      document.getElementById('sim-card-entrada').textContent = fmtMoeda(entrada);
+      document.getElementById('sim-card-financiado').textContent = fmtMoeda(financiado);
+      document.getElementById('sim-card-prazo').textContent = `${prazo}x`;
+      document.getElementById('sim-card-taxa').textContent = `${(i * 100).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}% a.m.`;
+      document.getElementById('sim-card-parcela').textContent = `${fmtMoeda(parcela)} /mês`;
+
+      const resultado = document.getElementById('sim-resultado');
+      resultado.classList.remove('hidden');
+      if (resultado.scrollIntoView) resultado.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function limparSimulacao() {
+      document.getElementById('sim-marca').selectedIndex = 0;
+      preencherSimuladorModelos();
+      document.getElementById('sim-entrada').value = '';
+      document.getElementById('sim-prazo').value = '48';
+
+      const resultado = document.getElementById('sim-resultado');
+      resultado.classList.add('hidden');
+      ['sim-card-veiculo', 'sim-card-preco', 'sim-card-entrada', 'sim-card-financiado', 'sim-card-prazo', 'sim-card-taxa', 'sim-card-parcela']
+        .forEach(id => document.getElementById(id).textContent = '—');
+    }
+
+    function baixarSimulacaoComoImagem() {
+      const veiculo = document.getElementById('sim-card-veiculo').textContent;
+      if (!veiculo || veiculo === '—') {
+        mostrarToast('Calcule uma simulação antes de baixar.');
+        return;
+      }
+
+      const dados = {
+        veiculo,
+        preco: document.getElementById('sim-card-preco').textContent,
+        entrada: document.getElementById('sim-card-entrada').textContent,
+        financiado: document.getElementById('sim-card-financiado').textContent,
+        prazo: document.getElementById('sim-card-prazo').textContent,
+        taxa: document.getElementById('sim-card-taxa').textContent,
+        parcela: document.getElementById('sim-card-parcela').textContent,
+      };
+
+      const desenhar = () => {
+        try {
+          desenharCardSimulacao(dados);
+        } catch (err) {
+          console.error(err);
+          mostrarToast('Erro ao gerar a imagem. Tenta novamente.');
+        }
+      };
+
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(desenhar).catch(desenhar);
+      } else {
+        desenhar();
+      }
+    }
+
+    function desenharCardSimulacao(dados) {
+      const W = 640, H = 560, escala = 2;
+      const canvas = document.createElement('canvas');
+      canvas.width = W * escala;
+      canvas.height = H * escala;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(escala, escala);
+
+      // fundo
+      ctx.fillStyle = '#1C2026';
+      caminhoRetanguloArredondado(ctx, 0, 0, W, H, 20);
+      ctx.fill();
+
+      let y = 56;
+      ctx.textBaseline = 'alphabetic';
+
+      ctx.fillStyle = '#C8FF4D';
+      ctx.font = '600 18px "Space Grotesk", Arial, sans-serif';
+      ctx.fillText('⚡ ComparaEVs', 40, y);
+
+      y += 46;
+      ctx.fillStyle = '#E8EAED';
+      ctx.font = '600 22px "Space Grotesk", Arial, sans-serif';
+      ctx.fillText(dados.veiculo, 40, y);
+
+      y += 44;
+      const linhas = [
+        ['Valor do veículo', dados.preco],
+        ['Entrada', dados.entrada],
+        ['Valor financiado', dados.financiado],
+        ['Prazo', dados.prazo],
+        ['Taxa estimada', dados.taxa],
+      ];
+      linhas.forEach(([label, valor]) => {
+        ctx.fillStyle = '#8B92A0';
+        ctx.font = '400 14px Inter, Arial, sans-serif';
+        ctx.fillText(label, 40, y);
+
+        ctx.fillStyle = '#E8EAED';
+        ctx.font = '600 14px "JetBrains Mono", monospace';
+        const largura = ctx.measureText(valor).width;
+        ctx.fillText(valor, W - 40 - largura, y);
+
+        y += 32;
+      });
+
+      y += 8;
+      ctx.strokeStyle = '#262B33';
+      ctx.beginPath();
+      ctx.moveTo(40, y);
+      ctx.lineTo(W - 40, y);
+      ctx.stroke();
+
+      y += 38;
+      ctx.fillStyle = '#8B92A0';
+      ctx.font = '600 11px Inter, Arial, sans-serif';
+      ctx.fillText('PARCELA ESTIMADA', 40, y);
+
+      y += 44;
+      ctx.fillStyle = '#C8FF4D';
+      ctx.font = '700 34px "JetBrains Mono", monospace';
+      ctx.fillText(dados.parcela, 40, y);
+
+      y += 36;
+      ctx.fillStyle = '#8B92A0';
+      ctx.font = '400 11px Inter, Arial, sans-serif';
+      quebrarTextoCanvas(
+        ctx,
+        'Estimativa com base em taxa média de mercado para financiamento de veículos elétricos. Sujeito a aprovação de crédito e condições da instituição financeira.',
+        40, y, W - 80, 16
+      );
+
+      const link = document.createElement('a');
+      link.download = 'simulacao-financiamento-comparaevs.png';
+      link.href = canvas.toDataURL('image/png');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function caminhoRetanguloArredondado(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    function quebrarTextoCanvas(ctx, texto, x, y, larguraMax, alturaLinha) {
+      const palavras = texto.split(' ');
+      let linha = '';
+      for (let n = 0; n < palavras.length; n++) {
+        const testeLinha = linha + palavras[n] + ' ';
+        if (ctx.measureText(testeLinha).width > larguraMax && n > 0) {
+          ctx.fillText(linha, x, y);
+          linha = palavras[n] + ' ';
+          y += alturaLinha;
+        } else {
+          linha = testeLinha;
+        }
+      }
+      ctx.fillText(linha, x, y);
+    }
+
+    // ================== PUBLICIDADE: RENDER ==================
+    let heroMasterIntervalo = null;
+
+    function renderAnuncioHeroMaster() {
+      const slot = document.getElementById('anuncio-hero-master');
+      const lista = patrocinadoresDB.hero_master;
+
+      if (heroMasterIntervalo) {
+        clearInterval(heroMasterIntervalo);
+        heroMasterIntervalo = null;
+      }
+
+      if (!lista || !lista.length) {
+        slot.innerHTML = MOSTRAR_PLACEHOLDER_ANUNCIO
+          ? `<div class="border-b border-dashed border-panel3 py-5 px-6 text-center text-inkmuted text-xs">
+               <i class="fa-solid fa-crown mb-1 block text-base" style="color:#C8FF4D"></i>
+               Espaço do patrocinador master (cota máxima · banner no topo do hero)
+             </div>`
+          : '';
+        return;
+      }
+
+      slot.innerHTML = `
+  <div class="relative border-b border-panel2 overflow-hidden h-[260px] sm:h-[360px] lg:h-[440px]">
+    ${lista.map((cfg, i) => `
+      <a href="${cfg.link || '#'}" target="_blank" rel="noopener sponsored"
+         onclick="trackEvento('cta_patrocinador_hero', {patrocinador_id: ${cfg.id}, detalhe: '${(cfg.nome || '').replace(/'/g, "\\'")}'})"
+         class="hero-master-slide absolute inset-0 transition-opacity duration-1000 ease-in-out ${i === 0 ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'}"
+         style="background-image:url('${cfg.imagem || ''}'); background-size:cover; background-position:center;">
+        <div class="absolute bottom-4 left-4 z-10 flex items-center gap-3 px-4 py-2.5 rounded-xl bg-black/55 backdrop-blur-sm">
+          <div>
+            <p class="text-[10px] uppercase tracking-widest text-volt mb-0.5">${cfg.nome || 'Patrocinado'}</p>
+            <p class="font-display font-semibold text-sm sm:text-base text-white">${cfg.headline || ''}</p>
+          </div>
+        </div>
+      </a>
+    `).join('')}
+    ${lista.length > 1 ? `
+    <div class="absolute bottom-3 right-4 z-20 flex gap-1.5">
+      ${lista.map((_, i) => `<span class="hero-master-dot w-1.5 h-1.5 rounded-full transition-colors duration-300 ${i === 0 ? 'bg-volt' : 'bg-white/30'}"></span>`).join('')}
+    </div>` : ''}
+  </div>
+`;
+
+      if (lista.length > 1) {
+        const slides = slot.querySelectorAll('.hero-master-slide');
+        const dots = slot.querySelectorAll('.hero-master-dot');
+        let atual = 0;
+        heroMasterIntervalo = setInterval(() => {
+          slides[atual].classList.remove('opacity-100', 'z-10', 'pointer-events-auto');
+          slides[atual].classList.add('opacity-0', 'z-0', 'pointer-events-none');
+          dots[atual]?.classList.remove('bg-volt');
+          dots[atual]?.classList.add('bg-white/30');
+
+          atual = (atual + 1) % slides.length;
+
+          slides[atual].classList.remove('opacity-0', 'z-0', 'pointer-events-none');
+          slides[atual].classList.add('opacity-100', 'z-10', 'pointer-events-auto');
+          dots[atual]?.classList.remove('bg-white/30');
+          dots[atual]?.classList.add('bg-volt');
+        }, 5000);
+      }
+    }
+
+    function renderAnuncioBanner() {
+      const slot = document.getElementById('anuncio-banner');
+      const cfg = patrocinadoresDB.banner;
+
+      if (!cfg) {
+        slot.innerHTML = MOSTRAR_PLACEHOLDER_ANUNCIO
+          ? `<div class="rounded-2xl border border-dashed border-panel3 py-8 px-6 text-center text-inkmuted text-sm">
+               <i class="fa-regular fa-rectangle-ad mb-1 text-lg block"></i>
+               Espaço de banner patrocinado (ex: financiamento, seguro, wallbox)
+             </div>`
+          : '';
+        return;
+      }
+
+      slot.innerHTML = `
+        <a href="${cfg.link || '#'}" target="_blank" rel="noopener sponsored"
+           onclick="trackEvento('cta_patrocinador_banner', {patrocinador_id: ${cfg.id}, detalhe: '${(cfg.nome || '').replace(/'/g, "\\'")}'})"
+           class="relative block rounded-2xl border border-panel2 overflow-hidden hover:border-volt/40 transition-colors"
+           style="${cfg.imagem ? `background-image:url('${cfg.imagem}'); background-size:cover; background-position:center;` : ''}">
+          <div class="absolute inset-0" style="${cfg.imagem
+            ? 'background:linear-gradient(90deg, rgba(11,13,16,.9) 0%, rgba(11,13,16,.45) 60%, rgba(11,13,16,.1) 100%)'
+            : 'background:linear-gradient(90deg, #14171C 0%, #1C2026 100%)'}"></div>
+          <div class="relative z-10 flex flex-wrap items-center justify-between gap-4 p-6 sm:p-7">
+            <div>
+              <p class="text-[10px] uppercase tracking-widest text-volt mb-1">${cfg.nome || 'Patrocinado'}</p>
+              <p class="font-display font-semibold text-lg">${cfg.headline || ''}</p>
+              <p class="text-inkmuted text-sm">${cfg.subtitulo || ''}</p>
+            </div>
+            <span class="px-4 py-2 rounded-lg bg-volt text-void text-sm font-medium whitespace-nowrap">${cfg.cta || 'Saiba mais'}</span>
+          </div>
+        </a>
+      `;
+    }
+
+    function htmlNativoTabela() {
+      const cfg = patrocinadoresDB.nativo;
+      if (!cfg && !MOSTRAR_PLACEHOLDER_ANUNCIO) return '';
+
+      if (!cfg) {
+        return `
+          <tr>
+            <td colspan="8" class="p-4">
+              <div class="rounded-xl border border-dashed border-panel3 p-3 text-center text-inkmuted text-xs">
+                espaço de linha patrocinada (a cada ${PUBLICIDADE.nativoIntervalo} veículos)
+              </div>
+            </td>
+          </tr>
+        `;
+      }
+
+      return `
+        <tr class="bg-white shadow-sm">
+          <td class="p-3"></td>
+          <td class="p-3" colspan="2">
+            <p class="text-[10px] uppercase tracking-wide text-red-600 font-semibold mb-0.5">${cfg.nome || 'Patrocinado'}</p>
+            <p class="font-medium text-gray-900">${cfg.headline || ''}</p>
+          </td>
+          <td colspan="5" class="p-3 text-right">
+            <a href="${cfg.link || '#'}" target="_blank" rel="noopener sponsored"
+               onclick="trackEvento('cta_patrocinador_nativo', {patrocinador_id: ${cfg.id}, detalhe: '${(cfg.nome || '').replace(/'/g, "\\'")}'})"
+               class="inline-block px-3 py-1.5 rounded-lg bg-red-600 hover:bg-gray-800 text-white text-xs font-medium transition-colors duration-200">${cfg.cta || 'Ver oferta'}</a>
+          </td>
+        </tr>
+      `;
+    }
+
+    function htmlNativoCard() {
+      const cfg = patrocinadoresDB.nativo;
+      if (!cfg && !MOSTRAR_PLACEHOLDER_ANUNCIO) return '';
+
+      if (!cfg) {
+        return `
+          <div class="rounded-xl border border-dashed border-panel3 p-4 text-center text-inkmuted text-xs">
+            espaço de card patrocinado (a cada ${PUBLICIDADE.nativoIntervalo} veículos)
+          </div>
+        `;
+      }
+
+      return `
+        <div class="rounded-xl border border-gray-200 bg-white shadow-sm p-4">
+          <p class="text-[10px] uppercase tracking-wide text-red-600 font-semibold mb-1">${cfg.nome || 'Patrocinado'}</p>
+          <p class="font-medium text-gray-900 mb-3">${cfg.headline || ''}</p>
+          <a href="${cfg.link || '#'}" target="_blank" rel="noopener sponsored"
+             onclick="trackEvento('cta_patrocinador_nativo', {patrocinador_id: ${cfg.id}, detalhe: '${(cfg.nome || '').replace(/'/g, "\\'")}'})"
+             class="inline-block px-4 py-2 rounded-lg bg-red-600 hover:bg-gray-800 text-white text-sm font-medium transition-colors duration-200">${cfg.cta || 'Ver oferta'}</a>
+        </div>
+      `;
+    }
+
+    function inserirAnuncioNativo(itens, htmlAnuncio) {
+      const intervalo = PUBLICIDADE.nativoIntervalo;
+      if (!htmlAnuncio || !intervalo || itens.length < intervalo) return itens.join('');
+      const copia = [...itens];
+      // insere o anúncio a cada N itens, considerando o deslocamento
+      // causado pelas inserções anteriores (cada uma soma +1 ao array)
+      for (let i = intervalo; i < copia.length; i += intervalo + 1) {
+        copia.splice(i, 0, htmlAnuncio);
+      }
+      return copia.join('');
+    }
+
+    // ================== FILTROS ==================
+    function preencherFiltros() {
+      const marcas = [...new Set(todosVeiculos.map(v => v.Marca))].sort();
+      const categorias = [...new Set(todosVeiculos.map(v => v.Categoria))].sort();
+      const propulsoes = [...new Set(todosVeiculos.map(v => v.Propulsao).filter(Boolean))].sort();
+
+      document.getElementById('filter-marca').innerHTML =
+        '<option value="">Todas as marcas</option>' + marcas.map(m => `<option value="${m}">${m}</option>`).join('');
+
+      document.getElementById('filter-categoria').innerHTML =
+        '<option value="">Todas as categorias</option>' + categorias.map(c => `<option value="${c}">${c}</option>`).join('');
+
+      document.getElementById('filter-propulsao').innerHTML =
+        '<option value="">Toda propulsão</option>' + propulsoes.map(p => `<option value="${p}">${p}</option>`).join('');
+
+      document.getElementById('filter-busca').addEventListener('input', debounce(aplicarFiltros, 200));
+
+      ['filter-marca', 'filter-categoria', 'filter-propulsao', 'filter-autonomia', 'filter-consumo', 'filter-preco'].forEach(id => {
+        document.getElementById(id).addEventListener('change', aplicarFiltros);
+        document.getElementById(id).addEventListener('input', debounce(aplicarFiltros, 250));
+      });
+      document.getElementById('filter-tarifa').addEventListener('input', debounce(() => renderResultados(), 200));
+    }
+
+    function debounce(fn, ms) {
+      let t;
+      return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+    }
+
+    function limparFiltros() {
+      document.getElementById('filter-busca').value = '';
+      document.getElementById('filter-marca').value = '';
+      document.getElementById('filter-categoria').value = '';
+      document.getElementById('filter-propulsao').value = '';
+      document.getElementById('filter-autonomia').value = 0;
+      document.getElementById('filter-consumo').value = 2;
+      document.getElementById('filter-preco').value = '';
+      document.getElementById('filter-uber').checked = false;
+      aplicarFiltros();
+    }
+
+    function aplicarFiltros() {
+      const busca = document.getElementById('filter-busca').value.trim().toLowerCase();
+      const marca = document.getElementById('filter-marca').value;
+      const categoria = document.getElementById('filter-categoria').value;
+      const propulsao = document.getElementById('filter-propulsao').value;
+      const autonomiaMin = Number(document.getElementById('filter-autonomia').value) || 0;
+      const consumoMax = Number(document.getElementById('filter-consumo').value) || 999;
+      const precoMaxInput = document.getElementById('filter-preco').value;
+      const precoMax = precoMaxInput === '' ? null : Number(precoMaxInput);
+      const apenasUber = document.getElementById('filter-uber').checked;
+
+      filtrados = todosVeiculos.filter(v => {
+        const texto = `${v.Marca} ${v.Modelo_Versao}`.toLowerCase();
+        return (!busca || texto.includes(busca)) &&
+               (!marca || v.Marca === marca) &&
+               (!categoria || v.Categoria === categoria) &&
+               (!propulsao || v.Propulsao === propulsao) &&
+               (Number(v.Autonomia_km) >= autonomiaMin) &&
+               (Number(v.Consumo_MJkm) <= consumoMax) &&
+               (precoMax === null || v.preco === null || v.preco === undefined || Number(v.preco) <= precoMax) &&
+               (!apenasUber || v.Uber === true);
+      });
+
+      ordenarLista();
+      renderResultados();
+    }
+
+    // ================== ORDENAÇÃO ==================
+    function ordenarPor(coluna) {
+      if (sortState.coluna === coluna) {
+        sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortState.coluna = coluna;
+        sortState.dir = (coluna === 'custo' || coluna === 'preco') ? 'asc' : 'desc';
+      }
+      ordenarLista();
+      renderResultados();
+    }
+
+    function ordenarLista() {
+      const { coluna, dir } = sortState;
+      filtrados.sort((a, b) => {
+        const va = coluna === 'custo' ? custoPor100km(a.Consumo_MJkm) : Number(a[coluna]);
+        const vb = coluna === 'custo' ? custoPor100km(b.Consumo_MJkm) : Number(b[coluna]);
+        return dir === 'asc' ? va - vb : vb - va;
+      });
+    }
+
+    function atualizarIconesOrdenacao() {
+      ['Autonomia_km', 'Consumo_MJkm', 'preco', 'custo'].forEach(col => {
+        const icon = document.getElementById('sort-icon-' + col);
+        if (!icon) return;
+        if (sortState.coluna === col) {
+          icon.className = `fa-solid fa-sort-${sortState.dir === 'asc' ? 'up' : 'down'} ml-1 text-[10px] text-volt`;
+        } else {
+          icon.className = 'fa-solid fa-sort ml-1 text-[10px] text-inkmuted/50';
+        }
+      });
+    }
+
+    // ================== RENDER RESULTADOS ==================
+    function renderResultados() {
+      const contagem = document.getElementById('contagem');
+      const tabelaWrap = document.getElementById('tabela-wrap');
+      const cardsWrap = document.getElementById('cards-wrap');
+      const emptyState = document.getElementById('empty-state');
+
+      if (!filtrados.length) {
+        tabelaWrap.classList.add('force-hidden');
+        cardsWrap.classList.add('force-hidden');
+        contagem.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      contagem.classList.remove('hidden');
+      contagem.textContent = `${filtrados.length} veículo(s) encontrado(s)`;
+
+      // --- Tabela (desktop) ---
+      tabelaWrap.classList.remove('force-hidden');
+      const tbody = document.getElementById('tbody');
+      const linhasTabela = filtrados.map((v, i) => linhaTabela(v, i));
+      tbody.innerHTML = inserirAnuncioNativo(linhasTabela, htmlNativoTabela());
+
+      // --- Cards (mobile) ---
+      cardsWrap.classList.remove('force-hidden');
+      const cardsMobile = filtrados.map((v, i) => cardMobile(v, i));
+      cardsWrap.innerHTML = inserirAnuncioNativo(cardsMobile, htmlNativoCard());
+
+      atualizarIconesOrdenacao();
+    }
+
+    function linhaTabela(v, i) {
+      const selecionado = selecionados.has(v.id);
+      const custo = custoPor100km(v.Consumo_MJkm);
+      return `
+        <tr class="hover:bg-panel/60 transition-colors reveal" style="animation-delay:${Math.min(i, 8) * 25}ms">
+          <td class="p-3 text-center">
+            <button onclick="toggleSelecionado(${v.id})"
+              class="w-6 h-6 rounded-md border flex items-center justify-center transition-colors
+                ${selecionado ? 'bg-volt border-volt text-void' : 'border-panel3 text-transparent hover:border-inkmuted'}">
+              <i class="fa-solid fa-check text-[10px]"></i>
+            </button>
+          </td>
+          <td class="p-3">
+            <p class="font-medium">
+              ${v.Marca} ${v.Modelo_Versao}
+              ${v.ano ? `<span class="text-inkmuted text-xs font-data">· ${v.ano}</span>` : ''}
+              ${v.site ? `<a href="${v.site}" target="_blank" rel="noopener" onclick="trackEvento('cta_site_oferta', {veiculo_id: ${v.id}})" class="inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded border border-panel3 text-inkmuted hover:text-volt hover:border-volt/50 text-[10px] transition-colors" title="Ver oferta no site"><i class="fa-solid fa-globe"></i> site</a>` : ''}
+              ${v.Uber ? `<span class="inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded border border-volt/30 bg-[#1a2b0e] text-volt text-[10px] font-medium" title="Modelo aceito pela Uber (verifique critérios no app)"><i class="fa-brands fa-uber text-[9px]"></i> Uber</span>` : ''}
+              <button onclick="trackEvento('cta_proposta', {veiculo_id: ${v.id}}); abrirLeadModal(${v.id})" class="inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded border border-volt/40 text-volt hover:bg-volt hover:text-void text-[10px] transition-colors" title="Quero receber proposta">
+                <i class="fa-solid fa-envelope"></i> proposta
+              </button>
+            </p>
+          </td>
+          <td class="p-3">
+            <span class="inline-block px-2 py-0.5 bg-panel2 text-inkmuted text-[11px] uppercase tracking-wide rounded-full">${v.Categoria || '—'}</span>
+          </td>
+          <td class="p-3 text-right">
+            <p class="font-data font-semibold text-volt">${fmtKm(v.Autonomia_km)} km</p>
+            <p class="text-[11px] text-inkmuted font-data">cid. ${fmtKm(v.Cidade_kmLe)} · estr. ${fmtKm(v.Estrada_kmLe)}</p>
+          </td>
+          <td class="p-3 text-right font-data">${fmtConsumo(v.Consumo_MJkm)} <span class="text-inkmuted text-[11px]">MJ/km</span></td>
+          <td class="p-3 text-right font-data">${fmtPreco(v.preco)}</td>
+          <td class="p-3 text-right font-data">${fmtMoeda(custo)}</td>
+          <td class="p-3 w-[140px]">${renderSelo(v.Class_Geral, 'sm')}</td>
+        </tr>
+      `;
+    }
+
+    function cardMobile(v, i) {
+      const selecionado = selecionados.has(v.id);
+      const custo = custoPor100km(v.Consumo_MJkm);
+      return `
+        <div class="rounded-xl border border-panel2 bg-panel p-4 reveal" style="animation-delay:${Math.min(i, 8) * 25}ms">
+          <div class="flex items-start justify-between gap-3 mb-3">
+            <div>
+              <p class="font-medium leading-tight">
+                ${v.Marca} ${v.Modelo_Versao}
+                ${v.ano ? `<span class="text-inkmuted text-xs font-data">· ${v.ano}</span>` : ''}
+                ${v.site ? `<a href="${v.site}" target="_blank" rel="noopener" onclick="trackEvento('cta_site_oferta', {veiculo_id: ${v.id}})" class="inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded border border-panel3 text-inkmuted hover:text-volt hover:border-volt/50 text-[10px] transition-colors" title="Ver oferta no site"><i class="fa-solid fa-globe"></i> site</a>` : ''}
+              </p>
+              <div class="flex items-center gap-2 flex-wrap mt-1">
+                <span class="inline-block px-2 py-0.5 bg-panel2 text-inkmuted text-[11px] uppercase tracking-wide rounded-full">${v.Categoria || '—'}</span>
+                ${v.Uber ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-volt/30 bg-[#1a2b0e] text-volt text-[10px] font-medium"><i class="fa-brands fa-uber text-[9px]"></i> Uber</span>` : ''}
+              </div>
+            </div>
+            <button onclick="toggleSelecionado(${v.id})"
+              class="w-8 h-8 rounded-lg border flex items-center justify-center transition-colors shrink-0
+                ${selecionado ? 'bg-volt border-volt text-void' : 'border-panel3 text-inkmuted'}">
+              <i class="fa-solid fa-check text-xs"></i>
+            </button>
+          </div>
+
+          <div class="flex items-baseline gap-1.5 mb-0.5">
+            <span class="font-data font-bold text-2xl text-volt">${fmtKm(v.Autonomia_km)}</span>
+            <span class="text-inkmuted text-sm">km de autonomia</span>
+          </div>
+          <p class="text-[11px] text-inkmuted font-data mb-3">cidade ${fmtKm(v.Cidade_kmLe)} km · estrada ${fmtKm(v.Estrada_kmLe)} km</p>
+
+          <div class="grid grid-cols-3 gap-3 mb-3 text-sm">
+            <div>
+              <p class="text-[11px] text-inkmuted">Consumo</p>
+              <p class="font-data">${fmtConsumo(v.Consumo_MJkm)} MJ/km</p>
+            </div>
+            <div>
+              <p class="text-[11px] text-inkmuted">Preço</p>
+              <p class="font-data">${fmtPreco(v.preco)}</p>
+            </div>
+            <div>
+              <p class="text-[11px] text-inkmuted">Custo /100km</p>
+              <p class="font-data">${fmtMoeda(custo)}</p>
+            </div>
+          </div>
+
+          <div class="w-32">${renderSelo(v.Class_Geral, 'sm')}</div>
+
+          <button onclick="trackEvento('cta_proposta', {veiculo_id: ${v.id}}); abrirLeadModal(${v.id})" class="w-full mt-3 px-3 py-2.5 rounded-lg border border-volt/40 text-volt hover:bg-volt hover:text-void text-xs font-medium transition-colors flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-envelope"></i> Quero receber proposta
+          </button>
+        </div>
+      `;
+    }
+
+    // ================== COMPARAÇÃO ==================
+    function toggleSelecionado(id) {
+      if (selecionados.has(id)) {
+        selecionados.delete(id);
+      } else {
+        if (selecionados.size >= MAX_COMPARACAO) {
+          mostrarToast(`Selecione no máximo ${MAX_COMPARACAO} veículos para comparar.`);
+          return;
+        }
+        selecionados.add(id);
+      }
+      renderResultados();
+      atualizarBarraComparacao();
+    }
+
+    function limparComparacao() {
+      selecionados.clear();
+      renderResultados();
+      atualizarBarraComparacao();
+    }
+
+    function atualizarBarraComparacao() {
+      const bar = document.getElementById('compare-bar');
+      document.getElementById('compare-count').textContent = selecionados.size;
+      bar.classList.toggle('hidden', selecionados.size === 0);
+    }
+
+    const CORES_FICHA = [
+      { borda: '#C8FF4D', fundo: '#1A2B0E' }, // volt (marca)
+      { borda: '#5EC8F2', fundo: '#0E222B' }, // azul elétrico
+      { borda: '#C792EA', fundo: '#241A2B' }  // violeta
+    ];
+
+    function linhasFichaTecnica(v) {
+      return [
+        { icon: 'fa-folder', label: 'Categoria', valor: v.Categoria || '—' },
+        { icon: 'fa-tag', label: 'Marca', valor: v.Marca || '—' },
+        { icon: 'fa-car-side', label: 'Modelo / Versão', valor: v.Modelo_Versao || '—' },
+        { icon: 'fa-bolt', label: 'Propulsão', valor: v.Propulsao || '—' },
+        { icon: 'fa-snowflake', label: 'Transmissão', valor: v.Transmissao || '—' },
+        { icon: 'fa-compass', label: 'Direção', valor: v.Direcao || '—' },
+        { icon: 'fa-gas-pump', label: 'Combustível', valor: v.Combustivel || '—' },
+        { icon: 'fa-building', label: 'Cidade (km/L.e)', valor: fmtKm(v.Cidade_kmLe) },
+        { icon: 'fa-road', label: 'Estrada (km/L.e)', valor: fmtKm(v.Estrada_kmLe) },
+        { icon: 'fa-bolt', label: 'Consumo (MJ/km)', valor: fmtConsumo(v.Consumo_MJkm) },
+        { icon: 'fa-route', label: 'Autonomia (km)', valor: fmtKm(v.Autonomia_km) },
+        { icon: 'fa-sack-dollar', label: 'Preço', valor: fmtPreco(v.preco) }
+      ];
+    }
+
+    function fichaTecnicaHTML(v, idx) {
+      const cor = CORES_FICHA[idx % CORES_FICHA.length];
+      const linhasHtml = linhasFichaTecnica(v).map((l, i) => `
+        <div class="flex items-center gap-2.5 px-3 py-2 text-sm ${i % 2 === 0 ? 'bg-panel2/30' : ''}">
+          <i class="fa-solid ${l.icon} w-4 text-center text-[12px]" style="color:${cor.borda}"></i>
+          <span class="text-inkmuted flex-1">${l.label}</span>
+          <span class="font-medium text-right">${l.valor}</span>
+        </div>
+      `).join('');
+
+      return `
+        <div class="rounded-2xl overflow-hidden border-2" style="border-color:${cor.borda}">
+          <div class="px-4 py-3 text-center" style="background:${cor.fundo}">
+            <p class="font-display font-bold text-base tracking-wide" style="color:${cor.borda}">${(v.Marca || '').toUpperCase()}</p>
+            <p class="text-inkmuted text-xs">${v.Modelo_Versao || ''}</p>
+          </div>
+          <div class="divide-y divide-panel3/40">${linhasHtml}</div>
+          <div class="grid grid-cols-2 gap-px" style="background:${cor.fundo}">
+            <div class="text-center py-3">
+              <p class="text-[10px] uppercase tracking-wide text-inkmuted mb-1">Class. Cat.</p>
+              <p class="font-display font-bold text-2xl" style="color:${cor.borda}">${v.Class_Cat || '—'}</p>
+            </div>
+            <div class="text-center py-3">
+              <p class="text-[10px] uppercase tracking-wide text-inkmuted mb-1">Class. Geral</p>
+              <p class="font-display font-bold text-2xl" style="color:${cor.borda}">${v.Class_Geral || '—'}</p>
+            </div>
+          </div>
+          <div class="p-3 bg-panel space-y-2">
+            ${v.site ? `<a href="${v.site}" target="_blank" rel="noopener" class="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors" style="background:${cor.borda};color:#0B0D10">
+              <i class="fa-solid fa-globe"></i> Ver oferta no site
+            </a>` : ''}
+            <button onclick="toggleSelecionado(${v.id}); abrirComparacao();" class="w-full text-center text-[11px] text-inkmuted hover:text-ink transition-colors">
+              <i class="fa-solid fa-trash-can mr-1"></i> remover da comparação
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function compartilharComparacao() {
+      if (!selecionados.size) return;
+      trackEvento('cta_compartilhar_comparacao', { detalhe: [...selecionados].join(',') });
+      const ids = [...selecionados].join(',');
+      const url = new URL(window.location.href);
+      url.searchParams.set('comparar', ids);
+      navigator.clipboard.writeText(url.toString()).then(() => {
+        const label = document.getElementById('btn-compartilhar-label');
+        const btn = document.getElementById('btn-compartilhar');
+        label.textContent = 'Link copiado!';
+        btn.classList.add('text-volt', 'border-volt/50');
+        btn.classList.remove('text-inkmuted', 'border-panel3');
+        setTimeout(() => {
+          label.textContent = 'Compartilhar';
+          btn.classList.remove('text-volt', 'border-volt/50');
+          btn.classList.add('text-inkmuted', 'border-panel3');
+        }, 2500);
+      }).catch(() => {
+        mostrarToast('Não foi possível copiar. Tente manualmente.');
+      });
+    }
+
+    function lerComparacaoURL() {
+      const params = new URLSearchParams(window.location.search);
+      const comparar = params.get('comparar');
+      if (!comparar) return;
+      const ids = comparar.split(',').map(Number).filter(Boolean);
+      if (!ids.length) return;
+      ids.forEach(id => selecionados.add(id));
+      atualizarBarraComparacao();
+      // aguarda os dados carregarem antes de abrir o modal
+      const tentativa = setInterval(() => {
+        if (todosVeiculos.length) {
+          clearInterval(tentativa);
+          // filtra apenas IDs válidos
+          const validos = ids.filter(id => todosVeiculos.some(v => v.id === id));
+          selecionados.clear();
+          validos.forEach(id => selecionados.add(id));
+          atualizarBarraComparacao();
+          if (selecionados.size) abrirComparacao();
+        }
+      }, 100);
+    }
+
+    function abrirComparacao() {
+      if (!selecionados.size) return;
+      trackEvento('cta_comparar', { detalhe: [...selecionados].join(',') });
+      const veiculos = todosVeiculos.filter(v => selecionados.has(v.id));
+      const colunas = veiculos.map((v, idx) => fichaTecnicaHTML(v, idx)).join('');
+
+      const ctas = (PUBLICIDADE.ctaComparacao || [])
+        .filter(c => c.link || MOSTRAR_PLACEHOLDER_ANUNCIO)
+        .map(c => c.link
+          ? `<a href="${c.link}" target="_blank" rel="noopener sponsored" class="px-4 py-2.5 rounded-lg bg-panel2 border border-panel3 hover:border-volt/50 text-sm transition-colors">${c.label}</a>`
+          : `<span class="px-4 py-2.5 rounded-lg border border-dashed border-panel3 text-sm text-inkmuted">${c.label} (configurar link)</span>`
+        ).join('');
+
+      document.getElementById('compare-content').innerHTML = `
+        <div class="grid gap-4 mb-5 sm:grid-cols-2 lg:grid-cols-${veiculos.length}">${colunas}</div>
+        ${ctas ? `<div class="flex flex-wrap gap-3 pt-4 border-t border-panel2">${ctas}</div>` : ''}
+      `;
+      document.getElementById('compare-modal').classList.remove('hidden');
+    }
+
+    function fecharComparacao() {
+      document.getElementById('compare-modal').classList.add('hidden');
+    }
+
+    // ================== LEAD: PROPOSTA DE CONCESSIONÁRIA ==================
+    function abrirLeadModal(id) {
+      const v = todosVeiculos.find(x => x.id === id);
+      if (!v) return;
+      document.getElementById('lead-form').reset();
+      document.getElementById('lead-veiculo-id').value = id;
+      document.getElementById('lead-modal-veiculo').textContent = `${v.Marca} ${v.Modelo_Versao}`;
+      document.getElementById('lead-modal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function fecharLeadModal() {
+      document.getElementById('lead-modal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    async function enviarLead(event) {
+      event.preventDefault();
+      const btn = document.getElementById('lead-submit-btn');
+      const id = Number(document.getElementById('lead-veiculo-id').value);
+      const v = todosVeiculos.find(x => x.id === id);
+
+      const nome = document.getElementById('lead-nome').value.trim();
+      const whatsapp = document.getElementById('lead-whatsapp').value.trim();
+      const email = document.getElementById('lead-email').value.trim();
+      const cidade = document.getElementById('lead-cidade').value.trim();
+
+      if (!nome || !whatsapp) {
+        mostrarToast('Preencha nome e WhatsApp pra continuar.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+
+      const { error } = await supabaseClient.from('leads_propostas').insert([{
+        nome,
+        whatsapp,
+        email: email || null,
+        cidade: cidade || null,
+        veiculo_id: id || null,
+        veiculo_marca: v ? v.Marca : null,
+        veiculo_modelo: v ? v.Modelo_Versao : null,
+        origem: 'comparador'
+      }]);
+
+      btn.disabled = false;
+      btn.textContent = 'Quero receber a proposta';
+
+      if (error) {
+        console.error(error);
+        mostrarToast('Erro ao enviar. Tenta novamente em alguns instantes.');
+        return;
+      }
+
+      fecharLeadModal();
+      trackEvento('lead_proposta', { veiculo_id: id || null });
+      mostrarToast('Recebemos seu interesse! Em breve uma concessionária parceira entra em contato.');
+    }
+
+    // ================== ORÇAMENTO: INSTALAÇÃO DE WALLBOX ==================
+    function abrirOrcamentoModal() {
+      document.getElementById('orcamento-form').reset();
+      document.getElementById('orcamento-modal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function fecharOrcamentoModal() {
+      document.getElementById('orcamento-modal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    async function enviarOrcamento(event) {
+      event.preventDefault();
+      const btn = document.getElementById('orcamento-submit-btn');
+
+      const nome = document.getElementById('orcamento-nome').value.trim();
+      const telefone = document.getElementById('orcamento-telefone').value.trim();
+      const cep = document.getElementById('orcamento-cep').value.trim();
+      const tipoImovel = document.getElementById('orcamento-imovel').value;
+
+      if (!nome || !telefone || !cep || !tipoImovel) {
+        mostrarToast('Preencha todos os campos pra continuar.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+
+      const { error } = await supabaseClient.from('leads_instalacao').insert([{
+        nome,
+        telefone,
+        cep,
+        tipo_imovel: tipoImovel,
+        origem: 'guia-como-escolher'
+      }]);
+
+      btn.disabled = false;
+      btn.textContent = 'Solicitar orçamento';
+
+      if (error) {
+        console.error(error);
+        mostrarToast('Erro ao enviar. Tenta novamente em alguns instantes.');
+        return;
+      }
+
+      fecharOrcamentoModal();
+      trackEvento('lead_orcamento_wallbox');
+      mostrarToast('Recebemos seu pedido! Um instalador parceiro vai te contatar em breve.');
+    }
+
+    // ================== TOAST ==================
+    function mostrarToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.querySelector('div').textContent = msg;
+      toast.classList.remove('opacity-0');
+      toast.classList.add('opacity-100');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0');
+      }, 2600);
+    }
+
+
+    // ================== NEWSLETTER (EXIT INTENT) ==================
+    let newsletterMostrado = false;
+
+    function initExitIntent() {
+      document.addEventListener("mouseleave", function(e) {
+        if (e.clientY <= 0 && !newsletterMostrado && !sessionStorage.getItem("newsletter_dispensado")) {
+          newsletterMostrado = true;
+          document.getElementById("newsletter-modal").classList.remove("hidden");
+          document.body.style.overflow = "hidden";
+        }
+      });
+    }
+
+    function fecharNewsletterModal() {
+      document.getElementById("newsletter-modal").classList.add("hidden");
+      document.body.style.overflow = "";
+      sessionStorage.setItem("newsletter_dispensado", "1");
+    }
+
+    async function enviarNewsletter() {
+      const email = document.getElementById("newsletter-email").value.trim();
+      const btn = document.getElementById("newsletter-btn");
+      if (!email || !email.includes("@")) { mostrarToast("Informe um e-mail válido."); return; }
+      btn.disabled = true;
+      btn.textContent = "Enviando...";
+      const { error } = await supabaseClient.from("newsletter_leads").insert([{ email, origem: "exit_intent" }]);
+      btn.disabled = false;
+      if (error) { btn.textContent = "Assinar"; mostrarToast("Erro ao cadastrar. Tente novamente."); return; }
+      trackEvento('lead_newsletter');
+      fecharNewsletterModal();
+      mostrarToast("Ótimo! Você está na lista. 🎉");
+    }
+
+    // ================== MODAL SUGERIR CORREÇÃO ==================
+    let categoriaSelecionada = "";
+
+    function abrirCorrecaoModal() {
+      categoriaSelecionada = "";
+      document.getElementById("correcao-descricao").value = "";
+      document.getElementById("correcao-email").value = "";
+      document.querySelectorAll(".correcao-cat").forEach(b => {
+        b.classList.remove("border-amber-500", "text-amber-400", "bg-amber-500/10");
+        b.classList.add("border-panel3", "text-inkmuted");
+      });
+      document.getElementById("correcao-modal").classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+    }
+
+    function fecharCorrecaoModal() {
+      document.getElementById("correcao-modal").classList.add("hidden");
+      document.body.style.overflow = "";
+    }
+
+    function selecionarCategoriaCorrecao(btn) {
+      document.querySelectorAll(".correcao-cat").forEach(b => {
+        b.classList.remove("border-amber-500", "text-amber-400", "bg-amber-500/10");
+        b.classList.add("border-panel3", "text-inkmuted");
+      });
+      btn.classList.remove("border-panel3", "text-inkmuted");
+      btn.classList.add("border-amber-500", "text-amber-400", "bg-amber-500/10");
+      categoriaSelecionada = btn.dataset.cat;
+    }
+
+    async function enviarCorrecao() {
+      const descricao = document.getElementById("correcao-descricao").value.trim();
+      const email = document.getElementById("correcao-email").value.trim();
+      const btn = document.getElementById("correcao-btn");
+      if (!descricao) { mostrarToast("Descreva o erro antes de enviar."); return; }
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i> Enviando...';
+      const { error } = await supabaseClient.from("sugestoes_correcao").insert([{
+        categoria: categoriaSelecionada || "Outros",
+        descricao,
+        email: email || null,
+        origem: "comparaevs"
+      }]);
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-paper-plane text-xs"></i> Enviar Sugestão';
+      if (error) { mostrarToast("Erro ao enviar. Tente novamente."); return; }
+      trackEvento('lead_correcao', { detalhe: categoriaSelecionada || 'Outros' });
+      fecharCorrecaoModal();
+      mostrarToast("Obrigado pela contribuição! Vamos verificar em breve.");
+    }
+    // Iniciar
+    window.onload = function() { initSupabase(); initExitIntent(); };
+  </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+.vercel
+node_modules
+
+# Segredos — nunca versionar
+.env
+.env.local
+.env.*.local
+*.key
+*api-key*.txt
+
+# Material solto (áudios, rascunhos)
+*.m4a
+*.wav
+*.docx

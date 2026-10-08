@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comparador de Carregadores (Wallbox) — ComparaEVs</title>
+<meta name="description" content="Compare carregadores residenciais (wallbox) para carros elétricos: potência, amperagem, fases, preço e recursos, lado a lado.">
+<meta property="og:title" content="Comparador de Carregadores — ComparaEVs">
+<meta property="og:description" content="Escolha o wallbox ideal para o seu carro elétrico comparando potência, preço e recursos.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.85em' font-size='90'>⚡</text></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          void: '#0B0D10',
+          panel: '#14171C',
+          panel2: '#1C2026',
+          panel3: '#262B33',
+          ink: '#E8EAED',
+          inkmuted: '#8B92A0',
+          volt: '#C8FF4D',
+          voltdim: '#9FD93A'
+        },
+        fontFamily: {
+          display: ['"Space Grotesk"', 'sans-serif'],
+          body: ['Inter', 'sans-serif'],
+          data: ['"JetBrains Mono"', 'monospace']
+        }
+      }
+    }
+  };
+</script>
+
+<style>
+  * { scrollbar-color: #262B33 #14171C; }
+  body { font-family: 'Inter', system-ui, sans-serif; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .reveal { animation: fadeUp .4s cubic-bezier(.4,0,.2,1) both; }
+
+  @keyframes pulseBg {
+    0%, 100% { opacity: .5; }
+    50% { opacity: .9; }
+  }
+  .skeleton { animation: pulseBg 1.4s ease-in-out infinite; }
+
+  *:focus-visible {
+    outline: 2px solid #C8FF4D;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  input[type="number"]::-webkit-inner-spin-button { opacity: .6; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .001ms !important;
+    }
+  }
+
+  .toast {
+    transition: opacity .25s ease, transform .25s ease;
+  }
+
+  .force-hidden { display: none !important; }
+</style>
+<style>
+  /* Celular: um respiro só. Antes eram 20px de margem do site + 20-24px dentro de cada
+     seção com borda (conteúdo a 41-45px da borda da tela, tudo espremido). */
+  @media (max-width: 639px) {
+    .max-w-screen-2xl.mx-auto { padding-left: 12px !important; padding-right: 12px !important; }
+    .max-w-screen-2xl.mx-auto [class~="p-5"],
+    .max-w-screen-2xl.mx-auto [class~="p-6"],
+    .max-w-screen-2xl.mx-auto [class~="p-8"] { padding: 16px !important; }
+  }
+</style>
+</head>
+
+<body class="bg-void text-ink min-h-screen">
+
+  <div class="max-w-screen-2xl mx-auto px-5 sm:px-6 py-8">
+
+    <!-- ===================== HEADER ===================== -->
+    <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-8">
+      <a href="index.html" class="flex items-center gap-2.5 w-full sm:w-auto">
+        <img src="./img/banner/logo.png" alt="ComparaEVs" class="w-12 h-12 object-contain shrink-0">
+        <div class="min-w-0">
+          <h1 class="font-display font-semibold text-lg sm:text-xl tracking-tight leading-none">ComparaEVs</h1>
+          <p class="text-[11px] text-inkmuted tracking-wide">Comparador de carregadores (wallbox)</p>
+        </div>
+      </a>
+      <nav class="flex items-center justify-center sm:justify-end gap-3 w-full sm:w-auto text-xs text-inkmuted">
+        <a href="index.html" class="hover:text-ink transition-colors"><i class="fa-solid fa-car-side mr-1"></i>Comparar veículos</a>
+        <span class="opacity-30">·</span>
+        <a href="https://comparaevs.vercel.app/sobre.html" class="hover:text-ink transition-colors">Sobre nós</a>
+        <span class="opacity-30">·</span>
+        <a href="https://comparaevs.vercel.app/contato.html" class="hover:text-ink transition-colors">Contato</a>
+        <span class="opacity-30">·</span>
+        <a href="https://comparaevs.vercel.app/loja.html" class="hover:text-ink transition-colors">Loja</a>
+      </nav>
+    </header>
+
+    <!-- ===================== HERO ===================== -->
+    <section class="rounded-2xl border border-panel2 bg-panel mb-8 p-6 sm:p-8">
+      <p class="text-[11px] uppercase tracking-widest text-volt font-medium mb-2">Carregadores residenciais</p>
+      <h2 class="font-display font-bold text-2xl sm:text-3xl tracking-tight mb-2">Qual wallbox combina com o seu elétrico?</h2>
+      <p class="text-sm text-inkmuted max-w-2xl leading-relaxed mb-5">Compare potência, amperagem, tipo de instalação (mono ou trifásico), preço e recursos (app, Wi-Fi, RFID, cabo incluso) de carregadores vendidos no Brasil. Selecione até 3 para comparar lado a lado.</p>
+      <button onclick="abrirOrcamentoModal()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-volt text-void text-sm font-medium hover:bg-voltdim transition-colors">
+        <i class="fa-solid fa-screwdriver-wrench"></i> Solicitar orçamento de instalação
+      </button>
+    </section>
+
+    <!-- ===================== FILTROS ===================== -->
+    <section class="rounded-2xl border border-panel2 bg-panel p-5 sm:p-6 mb-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div class="lg:col-span-2">
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Buscar</label>
+          <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-inkmuted text-xs"></i>
+            <input id="filter-busca" type="text" placeholder="Marca ou modelo"
+              class="w-full bg-panel2 border border-panel3 rounded-lg pl-9 pr-3 py-2.5 text-sm placeholder:text-inkmuted/60 focus:border-volt/60 transition-colors">
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Marca</label>
+          <select id="filter-marca" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors"></select>
+        </div>
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Fases</label>
+          <select id="filter-fases" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm focus:border-volt/60 transition-colors">
+            <option value="">Todas</option>
+            <option value="Monofásico">Monofásico</option>
+            <option value="Trifásico">Trifásico</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 items-end">
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Potência mín. (kW)</label>
+          <input id="filter-potencia" type="number" step="0.1" value="0" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm font-data focus:border-volt/60 transition-colors">
+        </div>
+        <div>
+          <label class="block text-[11px] uppercase tracking-wide text-inkmuted mb-1.5">Preço até (R$)</label>
+          <input id="filter-preco" type="number" step="500" placeholder="sem limite" class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm font-data placeholder:text-inkmuted/50 focus:border-volt/60 transition-colors">
+        </div>
+        <div class="flex items-center gap-3 pb-2">
+          <label class="inline-flex items-center gap-3 cursor-pointer select-none group">
+            <div class="relative">
+              <input type="checkbox" id="filter-app" class="sr-only peer" onchange="aplicarFiltros()">
+              <div class="w-10 h-5 bg-panel3 rounded-full transition-colors peer-checked:bg-[#1a2b0e]"></div>
+              <div class="absolute left-0.5 top-0.5 w-4 h-4 bg-inkmuted rounded-full transition-all peer-checked:translate-x-5 peer-checked:bg-volt"></div>
+            </div>
+            <span class="text-sm text-inkmuted group-has-[:checked]:text-ink transition-colors">Com app</span>
+          </label>
+        </div>
+        <button onclick="limparFiltros()" class="h-[42px] rounded-lg border border-panel3 text-sm text-inkmuted hover:text-ink hover:border-ink/30 transition-colors">
+          Limpar filtros
+        </button>
+      </div>
+    </section>
+
+    <!-- ===================== SKELETON (loading) ===================== -->
+    <div id="skeleton" class="space-y-3 mb-8">
+      <div class="h-14 bg-panel rounded-xl skeleton"></div>
+      <div class="h-14 bg-panel rounded-xl skeleton" style="animation-delay:.1s"></div>
+      <div class="h-14 bg-panel rounded-xl skeleton" style="animation-delay:.2s"></div>
+    </div>
+
+    <!-- ===================== CONTAGEM ===================== -->
+    <p id="contagem" class="text-xs text-inkmuted mb-3 hidden"></p>
+
+    <!-- ===================== EMPTY STATE ===================== -->
+    <div id="empty-state" class="hidden text-center py-16 text-inkmuted">
+      <i class="fa-solid fa-plug-circle-xmark text-3xl mb-3 opacity-50"></i>
+      <p class="text-sm">Nenhum carregador encontrado com esses filtros.</p>
+    </div>
+
+    <!-- ===================== TABELA (desktop) ===================== -->
+    <div id="tabela-wrap" class="force-hidden hidden md:block rounded-2xl border border-panel2 bg-panel overflow-hidden mb-8">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-panel2 text-left text-[11px] uppercase tracking-wide text-inkmuted">
+            <th class="p-3 text-center w-12">Comparar</th>
+            <th class="p-3">Carregador</th>
+            <th class="p-3 text-right">Potência</th>
+            <th class="p-3">Fases</th>
+            <th class="p-3">Recursos</th>
+            <th class="p-3 text-right">Preço</th>
+            <th class="p-3 text-right">Garantia</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- ===================== CARDS (mobile) ===================== -->
+    <div id="cards-wrap" class="force-hidden md:hidden space-y-3 mb-8"></div>
+
+    <!-- ===================== FOOTER ===================== -->
+    <footer class="text-center text-[11px] text-inkmuted/70 py-6 border-t border-panel2">
+      <div class="flex items-center justify-center gap-2 mb-2">
+        <a href="index.html" class="hover:text-ink transition-colors">Comparar veículos</a>
+        <span class="opacity-30">·</span>
+        <a href="https://comparaevs.vercel.app/sobre.html" class="hover:text-ink transition-colors">Sobre nós</a>
+        <span class="opacity-30">·</span>
+        <a href="https://comparaevs.vercel.app/contato.html" class="hover:text-ink transition-colors">Contato</a>
+        <span class="opacity-30">·</span>
+        <a href="https://comparaevs.vercel.app/loja.html" class="hover:text-ink transition-colors">Loja</a>
+      </div>
+      Preços e especificações são estimativas e podem variar por região e instalador. Consulte sempre o fabricante.
+    </footer>
+  </div>
+
+  <!-- ===================== BARRA FLUTUANTE DE COMPARAÇÃO ===================== -->
+  <div id="compare-bar" class="fixed left-1/2 -translate-x-1/2 bottom-5 z-40 hidden">
+    <div class="flex items-center gap-4 bg-panel2 border border-panel3 rounded-full pl-5 pr-2 py-2 shadow-2xl shadow-black/50">
+      <span class="text-sm"><span id="compare-count" class="font-data text-volt font-bold">0</span> selecionado(s)</span>
+      <button onclick="abrirComparacao()" class="px-4 py-2 rounded-full bg-volt text-void text-sm font-medium hover:bg-voltdim transition-colors">
+        Comparar
+      </button>
+      <button onclick="limparComparacao()" class="w-9 h-9 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel3 transition-colors" title="Limpar seleção">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL DE COMPARAÇÃO ===================== -->
+  <div id="compare-modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/70" onclick="fecharComparacao()"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+      <div class="bg-panel border border-panel2 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-4xl max-h-[88vh] overflow-y-auto">
+        <div class="flex items-center justify-between p-5 border-b border-panel2 sticky top-0 bg-panel">
+          <h2 class="font-display font-semibold text-lg">Comparação</h2>
+          <div class="flex items-center gap-2">
+            <button onclick="compartilharComparacao()" id="btn-compartilhar"
+              class="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-panel3 text-inkmuted hover:text-volt hover:border-volt/50 text-xs font-medium transition-colors">
+              <i class="fa-solid fa-link"></i>
+              <span id="btn-compartilhar-label">Compartilhar</span>
+            </button>
+            <button onclick="fecharComparacao()" class="w-9 h-9 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel2 transition-colors">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>
+        <div id="compare-content" class="p-5 sm:p-6"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== MODAL DE ORÇAMENTO (INSTALAÇÃO WALLBOX) ===================== -->
+  <div id="orcamento-modal" class="fixed inset-0 z-[60] hidden">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="fecharOrcamentoModal()"></div>
+    <div class="absolute inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center p-0 sm:p-6">
+      <div class="bg-panel border border-panel2 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md overflow-hidden">
+        <div class="flex items-start justify-between p-5 border-b border-panel2">
+          <div>
+            <h2 class="font-display font-semibold text-base">Orçamento de instalação</h2>
+            <p class="text-[11px] text-inkmuted mt-0.5">Um instalador parceiro entra em contato com você.</p>
+          </div>
+          <button onclick="fecharOrcamentoModal()" class="w-8 h-8 rounded-full flex items-center justify-center text-inkmuted hover:text-ink hover:bg-panel2 transition-colors shrink-0">
+            <i class="fa-solid fa-xmark text-sm"></i>
+          </button>
+        </div>
+        <form id="orcamento-form" onsubmit="enviarOrcamento(event)" class="p-5 space-y-4">
+          <input id="orcamento-carregador-id" type="hidden">
+          <p id="orcamento-carregador-label" class="text-xs text-inkmuted"></p>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">Nome</label>
+            <input id="orcamento-nome" type="text" required class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-volt/60 transition-colors">
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">WhatsApp / Telefone</label>
+            <input id="orcamento-telefone" type="tel" required class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-volt/60 transition-colors">
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">CEP</label>
+            <input id="orcamento-cep" type="text" required class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-volt/60 transition-colors">
+          </div>
+          <div>
+            <label class="block text-xs text-inkmuted mb-1.5">Tipo de imóvel</label>
+            <select id="orcamento-imovel" required class="w-full bg-panel2 border border-panel3 rounded-lg px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-volt/60 transition-colors">
+              <option value="">Selecione</option>
+              <option value="Casa">Casa</option>
+              <option value="Apartamento/Condomínio">Apartamento/Condomínio</option>
+              <option value="Comercial">Comercial</option>
+            </select>
+          </div>
+          <button type="submit" id="orcamento-submit-btn" class="w-full px-4 py-3 rounded-lg bg-volt text-void text-sm font-medium hover:bg-voltdim transition-colors disabled:opacity-60">
+            Solicitar orçamento
+          </button>
+          <p class="text-[11px] text-inkmuted/70 text-center leading-relaxed">Seus dados serão compartilhados com um instalador parceiro homologado pra contato.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TOAST ===================== -->
+  <div id="toast" class="toast fixed left-1/2 -translate-x-1/2 bottom-24 z-50 opacity-0 pointer-events-none">
+    <div class="bg-panel3 border border-panel3 text-ink text-sm px-4 py-2.5 rounded-lg shadow-xl"></div>
+  </div>
+
+  <script>
+    // ================== CONFIGURAÇÃO ==================
+    // Banco saiu do Supabase pro Neon em 13/09/2026 — ver ../manifesto/comparaevs.txt
+    let todosCarregadores = [];
+    let filtrados = [];
+    const selecionados = new Set();
+    const MAX_COMPARACAO = 3;
+
+    // ================== INIT ==================
+    async function initSupabase() {
+      trackEvento('pageview_carregadores');
+      await carregarCarregadores();
+    }
+
+    // ================== TRACKING DE EVENTOS ==================
+    function trackEvento(tipo_evento, opcoes) {
+      opcoes = opcoes || {};
+      try {
+        fetch('/api/eventos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tipo_evento,
+            veiculo_id: null,
+            patrocinador_id: null,
+            detalhe: opcoes.detalhe || null,
+            pagina: window.location.pathname
+          }),
+          keepalive: true
+        }).catch(function (e) { console.warn('track falhou:', e); });
+      } catch (e) {
+        console.warn('track falhou:', e);
+      }
+    }
+
+    async function postJSON(url, body) {
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if (!res.ok) {
+          const payload = await res.json().catch(() => ({}));
+          return { error: new Error(payload.error || ('HTTP ' + res.status)) };
+        }
+        return { error: null };
+      } catch (e) {
+        return { error: e };
+      }
+    }
+
+    // ================== CARREGAR DADOS ==================
+    async function carregarCarregadores() {
+      let data = [];
+      let error = null;
+      try {
+        const res = await fetch('/api/carregadores');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        data = await res.json();
+      } catch (e) {
+        error = e;
+      }
+
+      document.getElementById('skeleton').classList.add('hidden');
+
+      if (error) {
+        console.error(error);
+        mostrarToast('Erro ao carregar dados. Veja o console.');
+        return;
+      }
+
+      todosCarregadores = data || [];
+      preencherFiltroMarcas();
+      lerComparacaoURL();
+      aplicarFiltros();
+    }
+
+    function preencherFiltroMarcas() {
+      const marcas = [...new Set(todosCarregadores.map(c => c.marca).filter(Boolean))].sort();
+      const select = document.getElementById('filter-marca');
+      select.innerHTML = '<option value="">Todas as marcas</option>' +
+        marcas.map(m => `<option value="${m}">${m}</option>`).join('');
+    }
+
+    // ================== FILTROS ==================
+    function aplicarFiltros() {
+      const busca = document.getElementById('filter-busca').value.trim().toLowerCase();
+      const marca = document.getElementById('filter-marca').value;
+      const fases = document.getElementById('filter-fases').value;
+      const potenciaMin = Number(document.getElementById('filter-potencia').value) || 0;
+      const precoTeto = document.getElementById('filter-preco').value ? Number(document.getElementById('filter-preco').value) : null;
+      const somenteApp = document.getElementById('filter-app').checked;
+
+      filtrados = todosCarregadores.filter(c => {
+        if (busca && !`${c.marca} ${c.nome} ${c.modelo}`.toLowerCase().includes(busca)) return false;
+        if (marca && c.marca !== marca) return false;
+        if (fases && c.fases !== fases) return false;
+        if (Number(c.potencia_kw || 0) < potenciaMin) return false;
+        if (precoTeto !== null && Number(c.preco_min || 0) > precoTeto) return false;
+        if (somenteApp && !c.tem_app) return false;
+        return true;
+      });
+
+      renderResultados();
+    }
+
+    function limparFiltros() {
+      document.getElementById('filter-busca').value = '';
+      document.getElementById('filter-marca').value = '';
+      document.getElementById('filter-fases').value = '';
+      document.getElementById('filter-potencia').value = 0;
+      document.getElementById('filter-preco').value = '';
+      document.getElementById('filter-app').checked = false;
+      aplicarFiltros();
+    }
+
+    document.getElementById('filter-busca').addEventListener('input', aplicarFiltros);
+    document.getElementById('filter-marca').addEventListener('change', aplicarFiltros);
+    document.getElementById('filter-fases').addEventListener('change', aplicarFiltros);
+    document.getElementById('filter-potencia').addEventListener('input', aplicarFiltros);
+    document.getElementById('filter-preco').addEventListener('input', aplicarFiltros);
+
+    // ================== FORMATAÇÃO ==================
+    function fmtPrecoFaixa(min, max) {
+      const f = v => v == null ? null : Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+      const fmin = f(min), fmax = f(max);
+      if (fmin && fmax && min !== max) return `${fmin} – ${fmax}`;
+      if (fmin) return `a partir de ${fmin}`;
+      return '—';
+    }
+
+    function fmtKw(v) {
+      return v == null ? '—' : `${Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} kW`;
+    }
+
+    function badgesRecursos(c) {
+      const itens = [
+        { ok: c.tem_app, label: 'App', icon: 'fa-mobile-screen' },
+        { ok: c.tem_wifi, label: 'Wi-Fi', icon: 'fa-wifi' },
+        { ok: c.tem_rfid, label: 'RFID', icon: 'fa-id-card' },
+        { ok: c.tem_cabo, label: 'Cabo', icon: 'fa-plug' }
+      ];
+      return itens.filter(i => i.ok).map(i =>
+        `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-volt/30 bg-[#1a2b0e] text-volt text-[10px] font-medium"><i class="fa-solid ${i.icon} text-[9px]"></i> ${i.label}</span>`
+      ).join(' ') || '<span class="text-inkmuted text-[11px]">—</span>';
+    }
+
+    // ================== RENDER RESULTADOS ==================
+    function renderResultados() {
+      const contagem = document.getElementById('contagem');
+      const tabelaWrap = document.getElementById('tabela-wrap');
+      const cardsWrap = document.getElementById('cards-wrap');
+      const emptyState = document.getElementById('empty-state');
+
+      if (!filtrados.length) {
+        tabelaWrap.classList.add('force-hidden');
+        cardsWrap.classList.add('force-hidden');
+        contagem.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      contagem.classList.remove('hidden');
+      contagem.textContent = `${filtrados.length} carregador(es) encontrado(s)`;
+
+      tabelaWrap.classList.remove('force-hidden');
+      document.getElementById('tbody').innerHTML = filtrados.map((c, i) => linhaTabela(c, i)).join('');
+
+      cardsWrap.classList.remove('force-hidden');
+      cardsWrap.innerHTML = filtrados.map((c, i) => cardMobile(c, i)).join('');
+    }
+
+    function linhaTabela(c, i) {
+      const selecionado = selecionados.has(c.id);
+      return `
+        <tr class="hover:bg-panel/60 transition-colors reveal border-b border-panel2/60 last:border-0" style="animation-delay:${Math.min(i, 8) * 25}ms">
+          <td class="p-3 text-center">
+            <button onclick="toggleSelecionado('${c.id}')"
+              class="w-6 h-6 rounded-md border flex items-center justify-center transition-colors
+                ${selecionado ? 'bg-volt border-volt text-void' : 'border-panel3 text-transparent hover:border-inkmuted'}">
+              <i class="fa-solid fa-check text-[10px]"></i>
+            </button>
+          </td>
+          <td class="p-3">
+            <p class="font-medium">
+              ${c.marca} ${c.modelo || c.nome}
+              ${c.site_oficial ? `<a href="${c.site_oficial}" target="_blank" rel="noopener" onclick="trackEvento('cta_site_carregador', {detalhe: '${c.id}'})" class="inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded border border-panel3 text-inkmuted hover:text-volt hover:border-volt/50 text-[10px] transition-colors" title="Ver site oficial"><i class="fa-solid fa-globe"></i> site</a>` : ''}
+              <button onclick="trackEvento('cta_orcamento_carregador', {detalhe: '${c.id}'}); abrirOrcamentoModal('${c.id}')" class="inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded border border-volt/40 text-volt hover:bg-volt hover:text-void text-[10px] transition-colors" title="Solicitar orçamento de instalação">
+                <i class="fa-solid fa-screwdriver-wrench"></i> orçamento
+              </button>
+            </p>
+            <p class="text-[11px] text-inkmuted mt-0.5">${c.descricao || ''}</p>
+          </td>
+          <td class="p-3 text-right font-data font-semibold text-volt">${fmtKw(c.potencia_kw)}</td>
+          <td class="p-3">
+            <span class="inline-block px-2 py-0.5 bg-panel2 text-inkmuted text-[11px] uppercase tracking-wide rounded-full">${c.fases || '—'}</span>
+          </td>
+          <td class="p-3"><div class="flex flex-wrap gap-1">${badgesRecursos(c)}</div></td>
+          <td class="p-3 text-right font-data">${fmtPrecoFaixa(c.preco_min, c.preco_max)}</td>
+          <td class="p-3 text-right font-data text-inkmuted">${c.garantia_meses ? `${c.garantia_meses} meses` : '—'}</td>
+        </tr>
+      `;
+    }
+
+    function cardMobile(c, i) {
+      const selecionado = selecionados.has(c.id);
+      return `
+        <div class="rounded-xl border border-panel2 bg-panel p-4 reveal" style="animation-delay:${Math.min(i, 8) * 25}ms">
+          <div class="flex items-start justify-between gap-3 mb-3">
+            <div>
+              <p class="font-medium leading-tight">
+                ${c.marca} ${c.modelo || c.nome}
+                ${c.site_oficial ? `<a href="${c.site_oficial}" target="_blank" rel="noopener" onclick="trackEvento('cta_site_carregador', {detalhe: '${c.id}'})" class="inline-flex items-center gap-1 ml-2 px-1.5 py-0.5 rounded border border-panel3 text-inkmuted hover:text-volt hover:border-volt/50 text-[10px] transition-colors" title="Ver site oficial"><i class="fa-solid fa-globe"></i> site</a>` : ''}
+              </p>
+              <span class="inline-block mt-1 px-2 py-0.5 bg-panel2 text-inkmuted text-[11px] uppercase tracking-wide rounded-full">${c.fases || '—'}</span>
+            </div>
+            <button onclick="toggleSelecionado('${c.id}')"
+              class="w-8 h-8 rounded-lg border flex items-center justify-center transition-colors shrink-0
+                ${selecionado ? 'bg-volt border-volt text-void' : 'border-panel3 text-inkmuted'}">
+              <i class="fa-solid fa-check text-xs"></i>
+            </button>
+          </div>
+
+          <div class="flex items-baseline gap-1.5 mb-2">
+            <span class="font-data font-bold text-2xl text-volt">${fmtKw(c.potencia_kw)}</span>
+          </div>
+
+          <div class="flex flex-wrap gap-1.5 mb-3">${badgesRecursos(c)}</div>
+
+          <div class="grid grid-cols-2 gap-3 mb-3 text-sm">
+            <div>
+              <p class="text-[11px] text-inkmuted">Preço</p>
+              <p class="font-data">${fmtPrecoFaixa(c.preco_min, c.preco_max)}</p>
+            </div>
+            <div>
+              <p class="text-[11px] text-inkmuted">Garantia</p>
+              <p class="font-data">${c.garantia_meses ? `${c.garantia_meses} meses` : '—'}</p>
+            </div>
+          </div>
+
+          <button onclick="trackEvento('cta_orcamento_carregador', {detalhe: '${c.id}'}); abrirOrcamentoModal('${c.id}')" class="w-full mt-1 px-3 py-2.5 rounded-lg border border-volt/40 text-volt hover:bg-volt hover:text-void text-xs font-medium transition-colors flex items-center justify-center gap-1.5">
+            <i class="fa-solid fa-screwdriver-wrench"></i> Solicitar orçamento de instalação
+          </button>
+        </div>
+      `;
+    }
+
+    // ================== COMPARAÇÃO ==================
+    function toggleSelecionado(id) {
+      if (selecionados.has(id)) {
+        selecionados.delete(id);
+      } else {
+        if (selecionados.size >= MAX_COMPARACAO) {
+          mostrarToast(`Selecione no máximo ${MAX_COMPARACAO} carregadores para comparar.`);
+          return;
+        }
+        selecionados.add(id);
+      }
+      renderResultados();
+      atualizarBarraComparacao();
+    }
+
+    function limparComparacao() {
+      selecionados.clear();
+      renderResultados();
+      atualizarBarraComparacao();
+    }
+
+    function atualizarBarraComparacao() {
+      const bar = document.getElementById('compare-bar');
+      document.getElementById('compare-count').textContent = selecionados.size;
+      bar.classList.toggle('hidden', selecionados.size === 0);
+    }
+
+    const CORES_FICHA = [
+      { borda: '#C8FF4D', fundo: '#1A2B0E' }, // volt (marca)
+      { borda: '#5EC8F2', fundo: '#0E222B' }, // azul elétrico
+      { borda: '#C792EA', fundo: '#241A2B' }  // violeta
+    ];
+
+    function linhasFichaTecnica(c) {
+      return [
+        { icon: 'fa-tag', label: 'Marca', valor: c.marca || '—' },
+        { icon: 'fa-microchip', label: 'Modelo', valor: c.modelo || c.nome || '—' },
+        { icon: 'fa-bolt', label: 'Potência', valor: fmtKw(c.potencia_kw) },
+        { icon: 'fa-plug-circle-bolt', label: 'Amperagem', valor: c.amperagem ? `${c.amperagem} A` : '—' },
+        { icon: 'fa-plug', label: 'Voltagem', valor: c.voltagem || '—' },
+        { icon: 'fa-diagram-project', label: 'Fases', valor: c.fases || '—' },
+        { icon: 'fa-sack-dollar', label: 'Preço', valor: fmtPrecoFaixa(c.preco_min, c.preco_max) },
+        { icon: 'fa-mobile-screen', label: 'App', valor: c.tem_app ? 'Sim' : 'Não' },
+        { icon: 'fa-wifi', label: 'Wi-Fi', valor: c.tem_wifi ? 'Sim' : 'Não' },
+        { icon: 'fa-id-card', label: 'RFID', valor: c.tem_rfid ? 'Sim' : 'Não' },
+        { icon: 'fa-cable-car', label: 'Cabo incluso', valor: c.tem_cabo ? 'Sim' : 'Não' },
+        { icon: 'fa-shield-halved', label: 'Garantia', valor: c.garantia_meses ? `${c.garantia_meses} meses` : '—' },
+        { icon: 'fa-droplet', label: 'Eficiência / IP', valor: c.eficiencia || '—' },
+        { icon: 'fa-weight-hanging', label: 'Peso', valor: c.peso_kg ? `${c.peso_kg} kg` : '—' },
+        { icon: 'fa-ruler-combined', label: 'Dimensões', valor: c.dimensoes || '—' }
+      ];
+    }
+
+    function fichaTecnicaHTML(c, idx) {
+      const cor = CORES_FICHA[idx % CORES_FICHA.length];
+      const linhasHtml = linhasFichaTecnica(c).map((l, i) => `
+        <div class="flex items-center gap-2.5 px-3 py-2 text-sm ${i % 2 === 0 ? 'bg-panel2/30' : ''}">
+          <i class="fa-solid ${l.icon} w-4 text-center text-[12px]" style="color:${cor.borda}"></i>
+          <span class="text-inkmuted flex-1">${l.label}</span>
+          <span class="font-medium text-right">${l.valor}</span>
+        </div>
+      `).join('');
+
+      return `
+        <div class="rounded-2xl overflow-hidden border-2" style="border-color:${cor.borda}">
+          <div class="px-4 py-3 text-center" style="background:${cor.fundo}">
+            <p class="font-display font-bold text-base tracking-wide" style="color:${cor.borda}">${(c.marca || '').toUpperCase()}</p>
+            <p class="text-inkmuted text-xs">${c.modelo || c.nome || ''}</p>
+          </div>
+          <div class="divide-y divide-panel3/40">${linhasHtml}</div>
+          <div class="p-3 bg-panel space-y-2">
+            ${c.site_oficial ? `<a href="${c.site_oficial}" target="_blank" rel="noopener" class="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors" style="background:${cor.borda};color:#0B0D10">
+              <i class="fa-solid fa-globe"></i> Ver site oficial
+            </a>` : ''}
+            <button onclick="trackEvento('cta_orcamento_carregador', {detalhe: '${c.id}'}); fecharComparacao(); abrirOrcamentoModal('${c.id}')" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-panel3 text-inkmuted hover:text-ink text-xs font-medium transition-colors">
+              <i class="fa-solid fa-screwdriver-wrench"></i> Solicitar orçamento
+            </button>
+            <button onclick="toggleSelecionado('${c.id}'); abrirComparacao();" class="w-full text-center text-[11px] text-inkmuted hover:text-ink transition-colors">
+              <i class="fa-solid fa-trash-can mr-1"></i> remover da comparação
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function compartilharComparacao() {
+      if (!selecionados.size) return;
+      trackEvento('cta_compartilhar_comparacao_carregadores', { detalhe: [...selecionados].join(',') });
+      const ids = [...selecionados].join(',');
+      const url = new URL(window.location.href);
+      url.searchParams.set('comparar', ids);
+      navigator.clipboard.writeText(url.toString()).then(() => {
+        const label = document.getElementById('btn-compartilhar-label');
+        const btn = document.getElementById('btn-compartilhar');
+        label.textContent = 'Link copiado!';
+        btn.classList.add('text-volt', 'border-volt/50');
+        btn.classList.remove('text-inkmuted', 'border-panel3');
+        setTimeout(() => {
+          label.textContent = 'Compartilhar';
+          btn.classList.remove('text-volt', 'border-volt/50');
+          btn.classList.add('text-inkmuted', 'border-panel3');
+        }, 2500);
+      }).catch(() => {
+        mostrarToast('Não foi possível copiar. Tente manualmente.');
+      });
+    }
+
+    function lerComparacaoURL() {
+      const params = new URLSearchParams(window.location.search);
+      const comparar = params.get('comparar');
+      if (!comparar) return;
+      const ids = comparar.split(',').filter(Boolean);
+      if (!ids.length) return;
+      const validos = ids.filter(id => todosCarregadores.some(c => c.id === id));
+      validos.forEach(id => selecionados.add(id));
+      atualizarBarraComparacao();
+      if (selecionados.size) setTimeout(abrirComparacao, 50);
+    }
+
+    function abrirComparacao() {
+      if (!selecionados.size) return;
+      trackEvento('cta_comparar_carregadores', { detalhe: [...selecionados].join(',') });
+      const carregadores = todosCarregadores.filter(c => selecionados.has(c.id));
+      const colunas = carregadores.map((c, idx) => fichaTecnicaHTML(c, idx)).join('');
+
+      document.getElementById('compare-content').innerHTML = `
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-${carregadores.length}">${colunas}</div>
+      `;
+      document.getElementById('compare-modal').classList.remove('hidden');
+    }
+
+    function fecharComparacao() {
+      document.getElementById('compare-modal').classList.add('hidden');
+    }
+
+    // ================== ORÇAMENTO: INSTALAÇÃO DE WALLBOX ==================
+    function abrirOrcamentoModal(carregadorId) {
+      document.getElementById('orcamento-form').reset();
+      document.getElementById('orcamento-carregador-id').value = carregadorId || '';
+      const c = carregadorId ? todosCarregadores.find(x => x.id === carregadorId) : null;
+      document.getElementById('orcamento-carregador-label').textContent = c ? `Orçamento para: ${c.marca} ${c.modelo || c.nome}` : '';
+      document.getElementById('orcamento-modal').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function fecharOrcamentoModal() {
+      document.getElementById('orcamento-modal').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    async function enviarOrcamento(event) {
+      event.preventDefault();
+      const btn = document.getElementById('orcamento-submit-btn');
+      const carregadorId = document.getElementById('orcamento-carregador-id').value || null;
+      const c = carregadorId ? todosCarregadores.find(x => x.id === carregadorId) : null;
+
+      const nome = document.getElementById('orcamento-nome').value.trim();
+      const telefone = document.getElementById('orcamento-telefone').value.trim();
+      const cep = document.getElementById('orcamento-cep').value.trim();
+      const tipoImovel = document.getElementById('orcamento-imovel').value;
+
+      if (!nome || !telefone || !cep || !tipoImovel) {
+        mostrarToast('Preencha todos os campos pra continuar.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+
+      const { error } = await postJSON('/api/leads-instalacao', {
+        nome,
+        telefone,
+        cep,
+        tipo_imovel: tipoImovel,
+        origem: c ? `carregadores:${c.marca}-${c.modelo || c.nome}` : 'carregadores'
+      });
+
+      btn.disabled = false;
+      btn.textContent = 'Solicitar orçamento';
+
+      if (error) {
+        console.error(error);
+        mostrarToast('Erro ao enviar. Tenta novamente em alguns instantes.');
+        return;
+      }
+
+      fecharOrcamentoModal();
+      trackEvento('lead_orcamento_wallbox', { detalhe: carregadorId || null });
+      mostrarToast('Recebemos seu pedido! Um instalador parceiro vai te contatar em breve.');
+    }
+
+    // ================== TOAST ==================
+    function mostrarToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.querySelector('div').textContent = msg;
+      toast.classList.remove('opacity-0');
+      toast.classList.add('opacity-100');
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0');
+      }, 2600);
+    }
+
+    // Iniciar
+    window.onload = function() { initSupabase(); };
+  </script>
+</body>
+</html>
