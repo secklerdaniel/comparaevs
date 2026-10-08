@@ -2,7 +2,7 @@
 
 Site: https://www.comparaevs.com.br — comparador de carros elétricos do Brasil, com dados do INMETRO. Ganha com patrocinadores e leads.
 
-Quem montou o site **não vai acompanhar a passagem**. A forma mais simples de assumir é usar o **Claude Code**, um assistente de programação que lê o código e conduz vocês passo a passo. Vocês não precisam saber programar.
+A Seckler Digital está entregando o site e a passagem é feita por vocês, sem depender de ninguém. A forma mais simples é usar o **Claude Code**, um assistente de programação que lê o código e conduz vocês passo a passo. Vocês não precisam saber programar.
 
 ## O que vocês fazem
 
@@ -22,8 +22,8 @@ https://github.com/secklerdaniel/comparaevs
 
 ```
 Vamos assumir o site ComparaEVs (https://www.comparaevs.com.br), que até agora
-estava nas contas da Seckler Digital. Quem montou o site NÃO vai ajudar na
-passagem. Você vai me conduzir do começo ao fim. Eu não sei programar: fale em
+estava nas contas da Seckler Digital e está sendo passado para mim. Você vai me
+conduzir do começo ao fim. Eu não sei programar: fale em
 português, em linguagem simples, UM passo por vez, e diga como eu sei que o
 passo deu certo antes de ir para o próximo.
 
