@@ -16,7 +16,7 @@ Comparador de carros elétricos do Brasil (https://www.comparaevs.com.br). Mostr
 | **OpenAI** | Busca com inteligência artificial (opcional) | platform.openai.com |
 | **Registro.br** | Dono do endereço comparaevs.com.br | registro.br |
 
-Hoje tudo isso está na conta de quem criou o site. O objetivo é **passar tudo para contas de vocês**.
+Hoje tudo isso está na conta da **Seckler Digital**. O objetivo é **passar tudo para contas de vocês**.
 
 ---
 
@@ -32,7 +32,7 @@ Criem contas nas peças acima. Use um **e-mail da empresa**, e não pessoal, par
 
 ## PASSO 2 — Receber o código
 
-Peça a quem sai para **transferir o repositório** para o seu GitHub (Settings > Danger Zone > Transfer ownership). O repositório é `comparaevs`.
+Peça à Seckler Digital para **transferir o repositório** para o seu GitHub (Settings > Danger Zone > Transfer ownership). O repositório é `comparaevs`.
 
 ✅ Deu certo quando `https://github.com/SUA-CONTA/comparaevs` abre e tem o arquivo `index.html`.
 
@@ -68,9 +68,9 @@ A cópia dos dados já está neste repositório: o arquivo **`dados-dump.sql`** 
 
 ## PASSO 5 — Trocar o dono do domínio (comparaevs.com.br)
 
-Quem vende o endereço é o Registro.br, e o domínio está hoje na conta de quem criou o site. A troca se chama **troca de titularidade** e **não tira o site do ar**.
+Quem vende o endereço é o Registro.br, e o domínio está hoje na conta da Seckler Digital. A troca se chama **troca de titularidade** e **não tira o site do ar**.
 
-1. Quem está saindo abre a página do domínio `comparaevs.com.br` no Registro.br, procura a opção de alterar/transferir a titularidade e informa o **CPF/CNPJ ou o ID do Registro.br** do novo dono.
+1. A Seckler Digital abre a página do domínio `comparaevs.com.br` no Registro.br, procura a opção de alterar/transferir a titularidade e informa o **CPF/CNPJ ou o ID do Registro.br** do novo dono.
 2. O novo dono entra na conta dele, acha a solicitação e **confirma**. Se pedirem documento, envie.
 3. **Não mexam no DNS durante a troca.**
 4. Quando a troca terminar, o novo dono entra no Registro.br e confere o **DNS** do domínio. Ele deve apontar para a Vercel de vocês:
@@ -82,12 +82,12 @@ Quem vende o endereço é o Registro.br, e o domínio está hoje na conta de que
 
 ## PASSO 6 — Busca com IA (opcional)
 
-Só precisa da `OPENAI_API_KEY` do passo 4. A OpenAI cobra por uso na conta de quem criou a chave.
+Só precisa da `OPENAI_API_KEY` do passo 4. A OpenAI cobra por uso na conta de quem criou a chave (hoje, a Seckler Digital).
 
 ## PASSO 7 — Trocar as senhas e encerrar o acesso antigo
 
 Quando tudo estiver funcionando na conta de vocês:
-- Quem saiu **apaga o projeto antigo** da Vercel e do Neon e revoga as chaves (OpenAI e outras).
+- A Seckler Digital **apaga o projeto antigo** da Vercel e do Neon e revoga as chaves (OpenAI e outras).
 - Vocês confirmam que `ADMIN_KEY` e `OPENAI_API_KEY` são **novas** e só de vocês.
 
 ---
