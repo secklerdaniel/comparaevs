@@ -1,56 +1,120 @@
-# ComparaEVs — como continuar o site
+# ComparaEVs — guia de passagem (leia isto primeiro)
 
-Site: https://www.comparaevs.com.br · Código: HTML estático + funções em `api/` (Node) + banco Postgres no Neon. Hospedagem na Vercel.
+Este guia é para quem vai **assumir o site sozinho**, sem ajuda de quem montou. Cada passo diz o que fazer e como saber que deu certo. Faça na ordem.
 
-## 1. Só mexer em páginas e textos (não precisa de chave nenhuma)
+## O que é o site
 
-1. Clonar: `git clone https://github.com/secklerdaniel/comparaevs`
-2. Criar uma branch: `git checkout -b minha-mudanca`
-3. Editar os `.html` (`index.html`, `sobre.html`, `veiculo.html`...) e dar push da branch.
-4. A Vercel publica um endereço de **preview** para conferir sem afetar o site.
-5. Estando bom, abrir um Pull Request para a `main`. **Juntar na `main` publica em produção** (`comparaevs.com.br`).
+Comparador de carros elétricos do Brasil (https://www.comparaevs.com.br). Mostra autonomia, consumo e preço lado a lado, com dados oficiais do INMETRO. Ganha dinheiro com **patrocinadores** e **leads** (propostas de concessionárias e orçamentos de wallbox). Não vende carro.
 
-As chaves de produção ficam guardadas na Vercel; o deploy já as usa sozinho.
+## As peças (cada uma precisa de uma conta de vocês)
 
-## 2. Rodar no computador com a API (só se for mexer em `api/`)
+| Peça | Para que serve | Onde |
+|---|---|---|
+| **GitHub** | Guarda o código | github.com |
+| **Vercel** | Coloca o site no ar | vercel.com |
+| **Neon** | Banco de dados (carros, patrocinadores, leads) | neon.tech |
+| **OpenAI** | Busca com inteligência artificial (opcional) | platform.openai.com |
+| **Dify** | Assistente de chat no canto da tela (opcional) | dify.ai |
+| **Registro.br** | Dono do endereço comparaevs.com.br | registro.br |
 
-Use um banco **de vocês**, nunca o de produção.
+Hoje tudo isso está na conta de quem criou o site. O objetivo é **passar tudo para contas de vocês**.
 
-1. Criar um banco gratuito em https://neon.tech.
-2. Criar um arquivo `.env.local` (não vai para o git) com:
+---
 
-```
-NEON_DATABASE_URL=<url de conexão do Neon de vocês>
-ADMIN_KEY=<uma senha qualquer inventada por vocês>
-OPENAI_API_KEY=<só se for testar a busca com IA>
-```
+## PASSO 1 — Criar as contas
 
-3. Criar as tabelas: `node --env-file=.env.local scripts/build-neon-schema.mjs`
-4. Instalar e rodar: `npm install` e depois `node --env-file=.env.local scripts/dev-server.mjs`
+Criem contas nas peças acima. Use um **e-mail da empresa**, e não pessoal, para o dono não mudar se alguém sair.
 
-O banco novo nasce vazio. Os dados dos veículos vêm do PBEV/INMETRO (planilha `_pbev_novos.csv` e os SQL `_pbev_*.sql` mostram o formato de carga).
+- GitHub, Vercel, Neon: gratuitos para começar.
+- **Vercel:** o plano gratuito (Hobby) **não permite uso comercial**, e este site vive de publicidade. Prevejam o plano Pro.
+- Registro.br: precisa de **CPF ou CNPJ brasileiro**. Se for empresa, use o CNPJ da empresa.
 
-## 3. Variáveis de ambiente
+✅ Deu certo quando você consegue entrar em todas.
 
-| Variável | Para quê |
+## PASSO 2 — Receber o código
+
+Peça a quem sai para **transferir o repositório** para o seu GitHub (Settings > Danger Zone > Transfer ownership). O repositório é `comparaevs`.
+
+✅ Deu certo quando `https://github.com/SUA-CONTA/comparaevs` abre e tem o arquivo `index.html`.
+
+## PASSO 3 — Receber o banco de dados
+
+Peça a quem sai o **arquivo de cópia do banco** (dump). Nele estão veículos, patrocinadores, leads e cliques.
+
+1. No Neon, crie um projeto novo.
+2. Copie a **URL de conexão** (começa com `postgresql://`). Guarde, é uma senha.
+3. Restaure a cópia seguindo as instruções do Neon ("Import data"). Se não houver cópia, rode `node --env-file=.env.local scripts/build-neon-schema.mjs` para criar as tabelas vazias e recarregue os carros com os arquivos `_pbev_*.sql` desta pasta.
+
+✅ Deu certo quando a tabela `pbe_veiculos_eletricos` aparece no Neon com cerca de 180 linhas.
+
+> Leads e e-mails de pessoas são dados pessoais. Tratem com cuidado e só usem para o fim para o qual foram dados (LGPD).
+
+## PASSO 4 — Colocar o site no ar na Vercel de vocês
+
+1. Na Vercel: **Add New > Project** e escolha o repositório `comparaevs`.
+2. Antes de publicar, abra **Environment Variables** e cadastre:
+
+| Nome | Valor |
 |---|---|
-| `NEON_DATABASE_URL` | Conexão com o banco (veículos, patrocinadores, leads, cliques). |
-| `ADMIN_KEY` | Senha do painel `admin-7x9k.html`. A API de escrita exige o header `x-admin-key`. |
-| `OPENAI_API_KEY` | Busca com IA (`api/_busca-ia.js`). Sem ela, o resto do site funciona. |
+| `NEON_DATABASE_URL` | a URL do passo 3 |
+| `ADMIN_KEY` | uma senha longa inventada por vocês (é a senha do painel admin) |
+| `OPENAI_API_KEY` | chave da OpenAI de vocês (pode deixar de fora; só a busca com IA para de funcionar) |
 
-Em produção elas ficam em Vercel > Settings > Environment Variables.
+3. Clique em **Deploy**.
 
-## 4. Passagem de acesso (quem está assumindo)
+✅ Deu certo quando o endereço `.vercel.app` mostra a lista de carros. Teste: filtrar, comparar 2 carros, abrir a ficha de um modelo.
 
-- [ ] Ter acesso de colaborador ao repositório no GitHub.
-- [ ] Ser convidado no time da Vercel (deploys e variáveis).
-- [ ] Ser convidado no projeto Neon (dados de produção).
-- [ ] **Trocar a `ADMIN_KEY` e a `OPENAI_API_KEY` de produção por chaves novas**, na Vercel, e fazer um redeploy. As antigas pertencem a quem saiu e devem deixar de valer.
-- [ ] Conferir o domínio `comparaevs.com.br` (DNS e titularidade).
+**Importante:** a partir daqui, **cada vez que alguém publicar na branch `main` do GitHub, o site é atualizado** em produção.
 
-## 5. Cuidados
+## PASSO 5 — Trocar o dono do domínio (comparaevs.com.br)
 
-- Nunca commitar `.env.local` (já está no `.gitignore`).
-- Rótulo editorial: o dado técnico (autonomia, consumo, classificação) vem do PBEV e **não muda por causa de patrocínio**. Patrocinado é sempre rotulado. Ver `sobre.html`.
-- Este banco guarda só veículos **elétricos**. Combustão ou híbrido na mesma tabela exige ajustar a API e os filtros (autonomia nula aparece como "0 km").
-- Mais contexto do produto em `INSTRUCOES-AGENTE-IA.md` (assistente de IA) e `mapa.html` (pipeline interno de monetização).
+Quem vende o endereço é o Registro.br, e o domínio está hoje na conta de quem criou o site. A troca se chama **troca de titularidade** e **não tira o site do ar**.
+
+1. Quem está saindo abre a página do domínio `comparaevs.com.br` no Registro.br, procura a opção de alterar/transferir a titularidade e informa o **CPF/CNPJ ou o ID do Registro.br** do novo dono.
+2. O novo dono entra na conta dele, acha a solicitação e **confirma**. Se pedirem documento, envie.
+3. **Não mexam no DNS durante a troca.**
+4. Quando a troca terminar, o novo dono entra no Registro.br e confere o **DNS** do domínio. Ele deve apontar para a Vercel de vocês:
+   - Na Vercel: **Settings > Domains > Add** e digite `comparaevs.com.br` e `www.comparaevs.com.br`. A Vercel mostra exatamente quais registros colocar.
+   - No Registro.br: coloque esses registros no DNS.
+5. **Ligue a renovação automática** no Registro.br. Se o domínio vencer, o site sai do ar.
+
+✅ Deu certo quando `https://www.comparaevs.com.br` abre pelo servidor da Vercel de vocês.
+
+## PASSO 6 — Assistente de chat e busca com IA (opcional)
+
+- **Assistente (Dify):** o texto que ele segue está em `INSTRUCOES-AGENTE-IA.md`. Criem um app novo no Dify, colem esse texto e troquem o código de embed no `index.html` (procure por `udify.app`).
+- **Busca com IA:** só precisa da `OPENAI_API_KEY` do passo 4. A OpenAI cobra por uso na conta de quem criou a chave.
+
+## PASSO 7 — Trocar as senhas e encerrar o acesso antigo
+
+Quando tudo estiver funcionando na conta de vocês:
+- Quem saiu **apaga o projeto antigo** da Vercel e do Neon e revoga as chaves (OpenAI e outras).
+- Vocês confirmam que `ADMIN_KEY` e `OPENAI_API_KEY` são **novas** e só de vocês.
+
+---
+
+## Dia a dia
+
+**Mudar um texto ou página** (`index.html`, `sobre.html`, `veiculo.html`...):
+1. Editar o arquivo.
+2. Criar uma branch e dar push (a Vercel gera um endereço de **teste**).
+3. Se estiver bom, juntar na `main`. Isso publica no site de verdade.
+
+**Painel de administração:** `/admin-7x9k.html`. Pede a `ADMIN_KEY`. Ali se cadastram patrocinadores e se vê cliques e atividade.
+
+**Atualizar a tabela de carros (PBEV/INMETRO):** o INMETRO publica a tabela nova por ano. Os arquivos `_pbev_*.sql` e `_pbev_novos.csv` mostram o formato usado na última carga.
+
+**Rodar no computador** (só para quem programa): crie um `.env.local` com as três variáveis do passo 4 (usando um banco **de teste**, nunca o de produção), depois `npm install` e `node --env-file=.env.local scripts/dev-server.mjs`.
+
+## Regras do site (não quebrem)
+
+- Autonomia, consumo e classificação vêm do INMETRO e **não mudam por causa de patrocínio**. Patrocinado sempre aparece rotulado (veja `sobre.html`).
+- O banco hoje tem **só carros elétricos**. Colocar combustão ou híbrido na mesma tabela exige ajustar a API e os filtros, porque esses carros não têm autonomia e apareceriam como "0 km".
+- Nunca coloquem `.env.local` ou senhas no GitHub. O `.gitignore` já protege, mas atenção.
+
+## Se algo quebrar
+
+1. **Site fora do ar:** olhem na Vercel a aba **Deployments** e abram o último. O erro aparece no log.
+2. **Carros não aparecem:** confira a `NEON_DATABASE_URL` na Vercel e se o Neon não está pausado.
+3. **Painel admin diz "Não autorizado":** a `ADMIN_KEY` digitada é diferente da cadastrada na Vercel.
+4. **Domínio não abre:** confira o DNS no Registro.br e se a renovação está em dia.
