@@ -32,12 +32,11 @@ Criem contas nas peças acima. Use um **e-mail da empresa**, e não pessoal, par
 
 ## PASSO 2 — Fazer o fork do código
 
-O código fica no GitHub da Seckler Digital: `secklerdaniel/comparaevs` (repositório **privado**). Vocês fazem um **fork**, que é uma cópia completa para a conta de vocês.
+O código está no GitHub da Seckler Digital, em um repositório **público**: https://github.com/secklerdaniel/comparaevs. Vocês fazem um **fork**, que é uma cópia completa para a conta de vocês. Não precisa pedir permissão a ninguém.
 
-1. Mandem o nome de usuário do GitHub de vocês para a Seckler Digital, que os adiciona como colaboradores (Settings > Collaborators). Sem esse convite, o repositório privado nem aparece para vocês.
-2. Aceitem o convite (chega por e-mail).
-3. Abram o repositório e cliquem em **Fork** (canto superior direito). Escolham a conta ou a organização de vocês.
-4. A cópia fica em `https://github.com/SUA-CONTA/comparaevs`. **Daqui em diante trabalhem sempre nela.** O original da Seckler Digital deixa de ser usado.
+1. Entrem no GitHub com a conta (ou organização) de vocês.
+2. Abram o endereço acima e cliquem em **Fork** (canto superior direito).
+3. A cópia fica em `https://github.com/SUA-CONTA/comparaevs`. **Daqui em diante trabalhem sempre nela.** O original da Seckler Digital deixa de ser usado.
 
 ✅ Deu certo quando o endereço da sua cópia abre e tem o arquivo `index.html`.
 
