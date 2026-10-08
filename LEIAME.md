@@ -30,11 +30,16 @@ Criem contas nas peças acima. Use um **e-mail da empresa**, e não pessoal, par
 
 ✅ Deu certo quando você consegue entrar em todas.
 
-## PASSO 2 — Receber o código
+## PASSO 2 — Fazer o fork do código
 
-Peça à Seckler Digital para **transferir o repositório** para o seu GitHub (Settings > Danger Zone > Transfer ownership). O repositório é `comparaevs`.
+O código fica no GitHub da Seckler Digital: `secklerdaniel/comparaevs` (repositório **privado**). Vocês fazem um **fork**, que é uma cópia completa para a conta de vocês.
 
-✅ Deu certo quando `https://github.com/SUA-CONTA/comparaevs` abre e tem o arquivo `index.html`.
+1. Mandem o nome de usuário do GitHub de vocês para a Seckler Digital, que os adiciona como colaboradores (Settings > Collaborators). Sem esse convite, o repositório privado nem aparece para vocês.
+2. Aceitem o convite (chega por e-mail).
+3. Abram o repositório e cliquem em **Fork** (canto superior direito). Escolham a conta ou a organização de vocês.
+4. A cópia fica em `https://github.com/SUA-CONTA/comparaevs`. **Daqui em diante trabalhem sempre nela.** O original da Seckler Digital deixa de ser usado.
+
+✅ Deu certo quando o endereço da sua cópia abre e tem o arquivo `index.html`.
 
 ## PASSO 3 — Receber o banco de dados
 
@@ -51,7 +56,7 @@ A cópia dos dados já está neste repositório: o arquivo **`dados-dump.sql`** 
 
 ## PASSO 4 — Colocar o site no ar na Vercel de vocês
 
-1. Na Vercel: **Add New > Project** e escolha o repositório `comparaevs`.
+1. Na Vercel: **Add New > Project** e escolha o repositório `comparaevs` **do seu fork**.
 2. Antes de publicar, abra **Environment Variables** e cadastre:
 
 | Nome | Valor |
