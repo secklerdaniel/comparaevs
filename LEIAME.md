@@ -39,11 +39,12 @@ Peça a quem sai para **transferir o repositório** para o seu GitHub (Settings 
 
 ## PASSO 3 — Receber o banco de dados
 
-Peça a quem sai o **arquivo de cópia do banco** (dump). Nele estão veículos, patrocinadores, leads e cliques.
+A cópia dos dados já está neste repositório: o arquivo **`dados-dump.sql`** (veículos, patrocinadores, leads, cliques etc.).
 
 1. No Neon, crie um projeto novo.
 2. Copie a **URL de conexão** (começa com `postgresql://`). Guarde, é uma senha.
-3. Restaure a cópia seguindo as instruções do Neon ("Import data"). Se não houver cópia, rode `node --env-file=.env.local scripts/build-neon-schema.mjs` para criar as tabelas vazias e recarregue os carros com os arquivos `_pbev_*.sql` desta pasta.
+3. Crie as tabelas vazias: `node --env-file=.env.local scripts/build-neon-schema.mjs` (com `NEON_DATABASE_URL` no `.env.local`).
+4. No Neon, abra o **SQL Editor**, cole o conteúdo de `dados-dump.sql` e execute. Se o arquivo for grande demais para colar, use `psql "SUA_URL" -f dados-dump.sql`.
 
 ✅ Deu certo quando a tabela `pbe_veiculos_eletricos` aparece no Neon com cerca de 180 linhas.
 
