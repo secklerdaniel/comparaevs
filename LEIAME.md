@@ -14,7 +14,6 @@ Comparador de carros elétricos do Brasil (https://www.comparaevs.com.br). Mostr
 | **Vercel** | Coloca o site no ar | vercel.com |
 | **Neon** | Banco de dados (carros, patrocinadores, leads) | neon.tech |
 | **OpenAI** | Busca com inteligência artificial (opcional) | platform.openai.com |
-| **Dify** | Assistente de chat no canto da tela (opcional) | dify.ai |
 | **Registro.br** | Dono do endereço comparaevs.com.br | registro.br |
 
 Hoje tudo isso está na conta de quem criou o site. O objetivo é **passar tudo para contas de vocês**.
@@ -81,10 +80,9 @@ Quem vende o endereço é o Registro.br, e o domínio está hoje na conta de que
 
 ✅ Deu certo quando `https://www.comparaevs.com.br` abre pelo servidor da Vercel de vocês.
 
-## PASSO 6 — Assistente de chat e busca com IA (opcional)
+## PASSO 6 — Busca com IA (opcional)
 
-- **Assistente (Dify):** o texto que ele segue está em `INSTRUCOES-AGENTE-IA.md`. Criem um app novo no Dify, colem esse texto e troquem o código de embed no `index.html` (procure por `udify.app`).
-- **Busca com IA:** só precisa da `OPENAI_API_KEY` do passo 4. A OpenAI cobra por uso na conta de quem criou a chave.
+Só precisa da `OPENAI_API_KEY` do passo 4. A OpenAI cobra por uso na conta de quem criou a chave.
 
 ## PASSO 7 — Trocar as senhas e encerrar o acesso antigo
 

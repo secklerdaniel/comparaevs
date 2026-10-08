@@ -976,10 +976,6 @@
 .faixa-carrossel[data-tema="escuro"] .faixa:hover{ filter:brightness(1.25); }
 .faixa:focus-visible{ outline:2px solid currentColor; outline-offset:-3px; }
 
-/* Site com bolha de chat flutuante no canto inferior direito (Dify e afins):
-   a pilula tem de sair de baixo dela, senao o clique da faixa nao existe. */
-.faixa-carrossel[data-chat="direita"] .faixa{ padding-right:88px; }
-
 /* CELULAR — o layout de uma linha so nao cabe aqui: com o icone e o botao
    disputando espaco, sobrava tudo menos o motivo de clicar. Entao tres linhas,
    sem icone: nome, frase e o botao esticado, facil de acertar com o polegar.
@@ -998,12 +994,10 @@
              display:-webkit-box; -webkit-box-orient:vertical;
              -webkit-line-clamp:2; overflow:hidden; }
   .faixa-carrossel[data-tema] .faixa-pilula{ align-self:stretch; justify-content:center; margin-top:2px; }
-  .faixa-carrossel[data-chat="direita"] .faixa-pilula{ margin-right:56px; }
 }
 @media (min-width:641px){
   .faixa-carrossel{ min-height:64px; }
   .faixa{ padding:0 72px; gap:14px; }
-  .faixa-carrossel[data-chat="direita"] .faixa{ padding-right:96px; }
 }
 
 /* Quem pediu menos movimento recebe UMA faixa parada — o JS nem liga o timer.
