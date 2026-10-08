@@ -1,123 +1,98 @@
-# ComparaEVs — guia de passagem (leia isto primeiro)
+# ComparaEVs — como assumir o site (com o Claude Code)
 
-Este guia é para quem vai **assumir o site sozinho**, sem ajuda de quem montou. Cada passo diz o que fazer e como saber que deu certo. Faça na ordem.
+Site: https://www.comparaevs.com.br — comparador de carros elétricos do Brasil, com dados do INMETRO. Ganha com patrocinadores e leads.
 
-## O que é o site
+Quem montou o site **não vai acompanhar a passagem**. A forma mais simples de assumir é usar o **Claude Code**, um assistente de programação que lê o código e conduz vocês passo a passo. Vocês não precisam saber programar.
 
-Comparador de carros elétricos do Brasil (https://www.comparaevs.com.br). Mostra autonomia, consumo e preço lado a lado, com dados oficiais do INMETRO. Ganha dinheiro com **patrocinadores** e **leads** (propostas de concessionárias e orçamentos de wallbox). Não vende carro.
+## O que vocês fazem
 
-## As peças (cada uma precisa de uma conta de vocês)
+**1. Contratar o Claude Code.** Entrem em https://claude.com/product/claude-code, criem uma conta e assinem um plano pago (Pro ou Max). Instalem o aplicativo Claude (versão para computador) e abram a aba **Code**.
 
-| Peça | Para que serve | Onde |
-|---|---|---|
-| **GitHub** | Guarda o código | github.com |
-| **Vercel** | Coloca o site no ar | vercel.com |
-| **Neon** | Banco de dados (carros, patrocinadores, leads) | neon.tech |
-| **OpenAI** | Busca com inteligência artificial (opcional) | platform.openai.com |
-| **Registro.br** | Dono do endereço comparaevs.com.br | registro.br |
+**2. Abrir este repositório.** O endereço é:
 
-Hoje tudo isso está na conta da **Seckler Digital**. O objetivo é **passar tudo para contas de vocês**.
+https://github.com/secklerdaniel/comparaevs
+
+É público, então não precisa de permissão. No Claude Code, escolham uma pasta vazia do computador. O texto abaixo já pede para ele clonar o repositório.
+
+**3. Colar o texto abaixo** na conversa do Claude Code, do jeito que está, e ir respondendo o que ele perguntar.
 
 ---
 
-## PASSO 1 — Criar as contas
+## Texto para colar no Claude Code
 
-Criem contas nas peças acima. Use um **e-mail da empresa**, e não pessoal, para o dono não mudar se alguém sair.
+```
+Vamos assumir o site ComparaEVs (https://www.comparaevs.com.br), que até agora
+estava nas contas da Seckler Digital. Quem montou o site NÃO vai ajudar na
+passagem. Você vai me conduzir do começo ao fim. Eu não sei programar: fale em
+português, em linguagem simples, UM passo por vez, e diga como eu sei que o
+passo deu certo antes de ir para o próximo.
 
-- GitHub, Vercel, Neon: gratuitos para começar.
-- **Vercel:** o plano gratuito (Hobby) **não permite uso comercial**, e este site vive de publicidade. Prevejam o plano Pro.
-- Registro.br: precisa de **CPF ou CNPJ brasileiro**. Se for empresa, use o CNPJ da empresa.
+Repositório (público): https://github.com/secklerdaniel/comparaevs
 
-✅ Deu certo quando você consegue entrar em todas.
+O que fazer:
 
-## PASSO 2 — Fazer o fork do código
+1. Clone o repositório numa pasta aqui do computador e leia o LEIAME.md, o
+   package.json, a pasta api/ e scripts/. Me explique em poucas linhas o que o
+   site é e quais são as peças (hospedagem, banco, domínio, IA).
 
-O código está no GitHub da Seckler Digital, em um repositório **público**: https://github.com/secklerdaniel/comparaevs. Vocês fazem um **fork**, que é uma cópia completa para a conta de vocês. Não precisa pedir permissão a ninguém.
+2. Me ajude a criar as MINHAS contas, uma de cada vez (você não cria contas por
+   mim; me diga onde clicar):
+   - GitHub (para eu fazer o meu fork do repositório e trabalhar nele);
+   - Vercel (hospedagem). Aviso: o plano gratuito não permite uso comercial e o
+     site vive de publicidade, então me explique o plano Pro;
+   - Neon (banco de dados Postgres);
+   - OpenAI (só para a busca com IA, opcional);
+   - Registro.br (dono do endereço comparaevs.com.br), com CPF ou CNPJ.
 
-1. Entrem no GitHub com a conta (ou organização) de vocês.
-2. Abram o endereço acima e cliquem em **Fork** (canto superior direito).
-3. A cópia fica em `https://github.com/SUA-CONTA/comparaevs`. **Daqui em diante trabalhem sempre nela.** O original da Seckler Digital deixa de ser usado.
+3. Faça o fork do repositório para a minha conta do GitHub e passe a trabalhar
+   nele (não no original).
 
-✅ Deu certo quando o endereço da sua cópia abre e tem o arquivo `index.html`.
+4. Banco de dados: crie comigo um projeto novo no Neon e pegue a URL de conexão.
+   Crie as tabelas com scripts/build-neon-schema.mjs e carregue os dados com o
+   arquivo dados-dump.sql (ele contém veículos, patrocinadores, leads e cliques;
+   são dados da Seckler Digital). Confira no final as contagens: cerca de 180
+   linhas em pbe_veiculos_eletricos.
 
-## PASSO 3 — Receber o banco de dados
+5. Vercel: ligue o meu fork do GitHub a um projeto novo e cadastre as variáveis
+   de ambiente:
+   - NEON_DATABASE_URL = a URL do passo 4
+   - ADMIN_KEY = uma senha longa que você gera para mim (é a senha do
+     /admin-7x9k.html; me mostre uma vez para eu guardar)
+   - OPENAI_API_KEY = a minha chave, se eu quiser a busca com IA
+   Faça o deploy e me ajude a testar no endereço .vercel.app: lista de carros,
+   filtros, comparar dois modelos e abrir a ficha de um modelo.
 
-A cópia dos dados já está neste repositório: o arquivo **`dados-dump.sql`** (veículos, patrocinadores, leads, cliques etc.).
+6. Domínio comparaevs.com.br: a Seckler Digital precisa transferir a TITULARIDADE
+   para mim no Registro.br (troca de titularidade, que não tira o site do ar).
+   Me explique o que pedir a ela e o que eu faço na minha conta quando chegar o
+   pedido. Só depois da troca, me ajude a configurar o domínio na Vercel e o DNS
+   no Registro.br. Lembre-me de ligar a renovação automática.
 
-1. No Neon, crie um projeto novo.
-2. Copie a **URL de conexão** (começa com `postgresql://`). Guarde, é uma senha.
-3. Crie as tabelas vazias: `node --env-file=.env.local scripts/build-neon-schema.mjs` (com `NEON_DATABASE_URL` no `.env.local`).
-4. No Neon, abra o **SQL Editor**, cole o conteúdo de `dados-dump.sql` e execute. Se o arquivo for grande demais para colar, use `psql "SUA_URL" -f dados-dump.sql`.
+7. Painel admin: me ensine a entrar em /admin-7x9k.html com a ADMIN_KEY e a
+   cadastrar um patrocinador.
 
-✅ Deu certo quando a tabela `pbe_veiculos_eletricos` aparece no Neon com cerca de 180 linhas.
+8. Fechamento: me liste o que ainda está ligado às contas da Seckler Digital
+   (projeto antigo na Vercel, banco antigo, chaves) para eu pedir que sejam
+   desligados DEPOIS de tudo funcionar na minha conta.
 
-> Leads e e-mails de pessoas são dados pessoais. Tratem com cuidado e só usem para o fim para o qual foram dados (LGPD).
-
-## PASSO 4 — Colocar o site no ar na Vercel de vocês
-
-1. Na Vercel: **Add New > Project** e escolha o repositório `comparaevs` **do seu fork**.
-2. Antes de publicar, abra **Environment Variables** e cadastre:
-
-| Nome | Valor |
-|---|---|
-| `NEON_DATABASE_URL` | a URL do passo 3 |
-| `ADMIN_KEY` | uma senha longa inventada por vocês (é a senha do painel admin) |
-| `OPENAI_API_KEY` | chave da OpenAI de vocês (pode deixar de fora; só a busca com IA para de funcionar) |
-
-3. Clique em **Deploy**.
-
-✅ Deu certo quando o endereço `.vercel.app` mostra a lista de carros. Teste: filtrar, comparar 2 carros, abrir a ficha de um modelo.
-
-**Importante:** a partir daqui, **cada vez que alguém publicar na branch `main` do GitHub, o site é atualizado** em produção.
-
-## PASSO 5 — Trocar o dono do domínio (comparaevs.com.br)
-
-Quem vende o endereço é o Registro.br, e o domínio está hoje na conta da Seckler Digital. A troca se chama **troca de titularidade** e **não tira o site do ar**.
-
-1. A Seckler Digital abre a página do domínio `comparaevs.com.br` no Registro.br, procura a opção de alterar/transferir a titularidade e informa o **CPF/CNPJ ou o ID do Registro.br** do novo dono.
-2. O novo dono entra na conta dele, acha a solicitação e **confirma**. Se pedirem documento, envie.
-3. **Não mexam no DNS durante a troca.**
-4. Quando a troca terminar, o novo dono entra no Registro.br e confere o **DNS** do domínio. Ele deve apontar para a Vercel de vocês:
-   - Na Vercel: **Settings > Domains > Add** e digite `comparaevs.com.br` e `www.comparaevs.com.br`. A Vercel mostra exatamente quais registros colocar.
-   - No Registro.br: coloque esses registros no DNS.
-5. **Ligue a renovação automática** no Registro.br. Se o domínio vencer, o site sai do ar.
-
-✅ Deu certo quando `https://www.comparaevs.com.br` abre pelo servidor da Vercel de vocês.
-
-## PASSO 6 — Busca com IA (opcional)
-
-Só precisa da `OPENAI_API_KEY` do passo 4. A OpenAI cobra por uso na conta de quem criou a chave (hoje, a Seckler Digital).
-
-## PASSO 7 — Trocar as senhas e encerrar o acesso antigo
-
-Quando tudo estiver funcionando na conta de vocês:
-- A Seckler Digital **apaga o projeto antigo** da Vercel e do Neon e revoga as chaves (OpenAI e outras).
-- Vocês confirmam que `ADMIN_KEY` e `OPENAI_API_KEY` são **novas** e só de vocês.
+Regras para você seguir:
+- Nunca coloque senhas, chaves ou o arquivo .env.local no GitHub.
+- Antes de qualquer ação que apague, publique ou mude o domínio, me explique e
+  espere eu dizer sim.
+- Não mude o site (textos, layout, dados) sem eu pedir. A tarefa agora é só a
+  passagem.
+- Regra editorial do site: autonomia, consumo e classificação vêm do INMETRO e
+  não mudam por causa de patrocínio; patrocinado sempre aparece rotulado.
+- O banco só tem carros ELÉTRICOS. Não adicione combustão ou híbrido sem me
+  avisar: eles não têm autonomia e apareceriam como "0 km" nos filtros.
+- Se algo der erro, leia a mensagem de erro, me explique o que significa e
+  proponha a correção antes de aplicar.
+```
 
 ---
 
-## Dia a dia
+## Depois da passagem
 
-**Mudar um texto ou página** (`index.html`, `sobre.html`, `veiculo.html`...):
-1. Editar o arquivo.
-2. Criar uma branch e dar push (a Vercel gera um endereço de **teste**).
-3. Se estiver bom, juntar na `main`. Isso publica no site de verdade.
+Para qualquer mudança no site, abram o Claude Code na pasta do projeto e peçam em português o que querem (ex.: "troque o texto do banner", "cadastre um patrocinador"). Cada vez que algo é publicado na `main` do GitHub, a Vercel atualiza o site.
 
-**Painel de administração:** `/admin-7x9k.html`. Pede a `ADMIN_KEY`. Ali se cadastram patrocinadores e se vê cliques e atividade.
-
-**Atualizar a tabela de carros (PBEV/INMETRO):** o INMETRO publica a tabela nova por ano. Os arquivos `_pbev_*.sql` e `_pbev_novos.csv` mostram o formato usado na última carga.
-
-**Rodar no computador** (só para quem programa): crie um `.env.local` com as três variáveis do passo 4 (usando um banco **de teste**, nunca o de produção), depois `npm install` e `node --env-file=.env.local scripts/dev-server.mjs`.
-
-## Regras do site (não quebrem)
-
-- Autonomia, consumo e classificação vêm do INMETRO e **não mudam por causa de patrocínio**. Patrocinado sempre aparece rotulado (veja `sobre.html`).
-- O banco hoje tem **só carros elétricos**. Colocar combustão ou híbrido na mesma tabela exige ajustar a API e os filtros, porque esses carros não têm autonomia e apareceriam como "0 km".
-- Nunca coloquem `.env.local` ou senhas no GitHub. O `.gitignore` já protege, mas atenção.
-
-## Se algo quebrar
-
-1. **Site fora do ar:** olhem na Vercel a aba **Deployments** e abram o último. O erro aparece no log.
-2. **Carros não aparecem:** confira a `NEON_DATABASE_URL` na Vercel e se o Neon não está pausado.
-3. **Painel admin diz "Não autorizado":** a `ADMIN_KEY` digitada é diferente da cadastrada na Vercel.
-4. **Domínio não abre:** confira o DNS no Registro.br e se a renovação está em dia.
+Se o site sair do ar: Vercel > Deployments > último deploy > ver o log. Peçam ao Claude Code para ler o erro e explicar.
